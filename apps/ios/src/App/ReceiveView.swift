@@ -16,3 +16,8 @@ struct ReceiveView: View {
 #Preview {
     ReceiveView()
 }
+
+//show wallet address
+//show qr
+//copy button
+//share? 
