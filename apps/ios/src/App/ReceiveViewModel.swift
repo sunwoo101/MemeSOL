@@ -9,3 +9,11 @@
 //handle copy
 //prepare  qr
 //communicate w service 
+
+class ReceiveViewModel: ObservableObject {
+    @Published var address: String
+    
+    init() {
+        self.address = WalletService().getWalletAddress().address
+    }    
+}

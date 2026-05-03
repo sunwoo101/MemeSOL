@@ -5,4 +5,7 @@
 //  Created by Gurpreet on 3/5/2026.
 //
 
-var address: String
+struct WalletAddress {
+    var address: String
+}
+

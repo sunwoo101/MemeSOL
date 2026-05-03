@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct ReceiveView: View {
+    @StateObject var viewModel = ReceiveViewModel()
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Text(viewModel.address)
     }
 }
 
@@ -20,4 +22,4 @@ struct ReceiveView: View {
 //show wallet address
 //show qr
 //copy button
-//share? 
+//share?

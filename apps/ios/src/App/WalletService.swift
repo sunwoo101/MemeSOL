@@ -10,5 +10,4 @@ class WalletService {
     func getWalletAddress() -> WalletAddress {
         return WalletAddress(address: "8x9231...1391")
     }
-    
 }
