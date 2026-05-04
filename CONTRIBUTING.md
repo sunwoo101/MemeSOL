@@ -14,6 +14,7 @@ Guidelines for contributing to this project. Please follow these to keep our wor
 - Create a separate PR for each individual feature. Don't group multiple features into one PR.
 - Keep PRs focused and reasonably small. If a branch is growing too big, split it up.
 - Each PR requires **at least 2 reviews** before merging.
+- Delete the feature branch after the feature is merged to `main`.
 
 ### PR Title Format
 
