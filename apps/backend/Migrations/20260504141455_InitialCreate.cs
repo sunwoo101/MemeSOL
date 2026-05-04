@@ -37,15 +37,14 @@ namespace backend.Migrations
                     Supply = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     Decimals = table.Column<byte>(type: "smallint", nullable: false),
                     CreatedByUserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedById = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tokens_Users_CreatedById",
-                        column: x => x.CreatedById,
+                        name: "FK_Tokens_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -77,9 +76,9 @@ namespace backend.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tokens_CreatedById",
+                name: "IX_Tokens_CreatedByUserId",
                 table: "Tokens",
-                column: "CreatedById");
+                column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tokens_MintAddress",

@@ -21,5 +21,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Token>()
             .HasIndex(t => t.MintAddress)
             .IsUnique();
+
+        modelBuilder.Entity<Token>()
+            .HasOne(t => t.CreatedBy)
+            .WithMany()
+            .HasForeignKey(t => t.CreatedByUserId);
     }
 }
