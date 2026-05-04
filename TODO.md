@@ -1,0 +1,35 @@
+# Memecoin Wallet App — Todo
+
+## Backend
+- [ ] Set up database models (User, Token)
+- [ ] Run initial EF Core migration
+- [ ] `POST /auth/apple` — verify Apple identity token, return JWT + public wallet address
+- [ ] `POST /tokens` — create SPL token on Solana devnet
+- [ ] `GET /tokens` — list all tokens on the platform
+- [ ] `GET /tokens/{mintAddress}` — get token details
+- [ ] `GET /wallet/tokens` — list tokens in user's wallet
+- [ ] `POST /wallet/tokens/{mintAddress}` — add a token to user's wallet
+- [ ] `DELETE /wallet/tokens/{mintAddress}` — remove a token from user's wallet
+- [ ] `GET /wallet/balances` — get user's balance for all wallet tokens
+- [ ] `POST /tokens/{mintAddress}/send` — transfer tokens to another address
+- [ ] `GET /wallet/{mintAddress}/transactions` — transaction history for a specific token
+- [ ] Fund backend devnet wallet with airdropped SOL
+
+## iOS
+- [ ] Apple Sign In flow (`ASAuthorizationAppleIDProvider`)
+- [ ] JWT storage in Keychain
+- [ ] API client (networking layer using `URLSession`)
+- [ ] Portfolio screen — list holdings with live prices
+- [ ] Gains/losses display (today's change)
+- [ ] Create token screen — name, symbol, supply
+- [ ] Token detail screen — balance, transactions
+- [ ] Send screen — recipient address + amount
+- [ ] Receive screen — display public wallet address + QR code
+
+## Infrastructure
+- [ ] Confirm devnet vs mainnet decision
+- [ ] Add `.env` to `.gitignore` if not already
+
+## Design
+- [ ] Agree on UI style/theme as a team
+- [ ] Design main screens (portfolio, create token, token detail, send, receive)
