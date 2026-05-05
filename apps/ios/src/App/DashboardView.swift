@@ -12,7 +12,7 @@ struct Token: Identifiable {
     let color: Color
 }
 
-struct HomeView: View {
+struct DashboardView: View {
     @State var totalBalance: Double = 12345.67
     @State var totalGainLoss: Double = 234.56
     @State var totalGainLossPercent: Double = -1.94
@@ -184,5 +184,5 @@ private struct TokenRow: View {
 }
 
 #Preview {
-    HomeView()
+    DashboardView()
 }
