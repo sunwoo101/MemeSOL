@@ -49,5 +49,7 @@ jobs:
           fingerprint: ${{ secrets.VPS_FINGERPRINT }}
           script: |
             cd /var/www/ios-assignment-3
+            git fetch origin
+            git checkout main
             git pull origin main
             docker compose -f docker-compose.prod.yml --env-file apps/backend/.env up --build -d
