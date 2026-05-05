@@ -15,11 +15,15 @@ private let authBase = "/auth"
 extension APIClient {
     func register(email: String, password: String) async throws -> AuthResponse {
         struct Body: Encodable { let email: String; let password: String }
-        return try await post("\(authBase)/register", body: Body(email: email, password: password))
+        let response: AuthResponse = try await post("\(authBase)/register", body: Body(email: email, password: password))
+        accessToken = response.accessToken
+        return response
     }
 
     func login(email: String, password: String) async throws -> AuthResponse {
         struct Body: Encodable { let email: String; let password: String }
-        return try await post("\(authBase)/login", body: Body(email: email, password: password))
+        let response: AuthResponse = try await post("\(authBase)/login", body: Body(email: email, password: password))
+        accessToken = response.accessToken
+        return response
     }
 }

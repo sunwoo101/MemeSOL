@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 // MARK: - ApiTestingView
 
@@ -11,6 +12,7 @@ struct ApiTestingView: View {
                     .bold()
 
                 AuthSectionView()
+                TokensSectionView()
             }
             .padding()
         }
@@ -86,6 +88,93 @@ private struct AuthSectionView: View {
                 errorText = ""
             } catch {
                 authResponse = nil
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - TokensSectionView
+
+private struct TokensSectionView: View {
+    @State private var name = ""
+    @State private var symbol = ""
+    @State private var supply = ""
+    @State private var selectedPhotoItem: PhotosPickerItem? = nil
+    @State private var selectedImageData: Data? = nil
+    @State private var isLoading = false
+    @State private var tokenResponse: TokenResponse? = nil
+    @State private var testedEndpoint = ""
+    @State private var errorText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Tokens")
+                .font(.title2)
+                .bold()
+
+            VStack(spacing: 12) {
+                TextField("Name", text: $name)
+                TextField("Symbol", text: $symbol)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.characters)
+                TextField("Supply", text: $supply)
+                    .keyboardType(.numberPad)
+            }
+            .textFieldStyle(.roundedBorder)
+
+            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                Label(selectedImageData == nil ? "Select Image" : "Image Selected", systemImage: "photo")
+            }
+            .onChange(of: selectedPhotoItem) { _, newItem in
+                Task {
+                    if let data = try? await newItem?.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        selectedImageData = uiImage.jpegData(compressionQuality: 0.8)
+                    }
+                }
+            }
+
+            Button("Create Token") { submit() }
+                .buttonStyle(.borderedProminent)
+                .disabled(isLoading || name.isEmpty || symbol.isEmpty || supply.isEmpty || selectedImageData == nil)
+
+            if isLoading {
+                ProgressView()
+            }
+
+            if let response = tokenResponse {
+                ResponseCard(endpoint: testedEndpoint) {
+                    ResponseRow(label: "Mint Address", value: response.mintAddress)
+                    ResponseRow(label: "Name", value: response.name)
+                    ResponseRow(label: "Symbol", value: response.symbol)
+                    ResponseRow(label: "Supply", value: String(response.supply))
+                    ResponseRow(label: "Decimals", value: String(response.decimals))
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        guard let imageData = selectedImageData, let supplyValue = UInt64(supply) else { return }
+
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                testedEndpoint = "POST /api/tokens"
+                tokenResponse = try await APIClient.shared.createToken(
+                    name: name,
+                    symbol: symbol,
+                    supply: supplyValue,
+                    imageData: imageData
+                )
+                errorText = ""
+            } catch {
+                tokenResponse = nil
                 errorText = error.localizedDescription
             }
         }
