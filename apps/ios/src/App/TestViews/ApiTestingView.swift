@@ -563,7 +563,7 @@ private struct SendTokenSectionView: View {
     @State private var errorText = ""
 
     private var isValid: Bool {
-        let amt = Double(amount)
+        let amt = Decimal(string: amount)
         return !mintAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
             !recipientAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
             amt != nil && amt! > 0
@@ -607,7 +607,7 @@ private struct SendTokenSectionView: View {
     private func submit() {
         let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         let recipient = recipientAddress.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let amt = Double(amount), amt > 0 else { return }
+        guard let amt = Decimal(string: amount), amt > 0 else { return }
         submittedMint = mint
         response = nil
         isLoading = true
