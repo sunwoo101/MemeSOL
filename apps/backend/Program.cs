@@ -65,23 +65,27 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+app.MapScalarApiReference(options =>
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference(options =>
-    {
-        options.WithTitle("CryptoApp API")
-               .WithTheme(ScalarTheme.DeepSpace)
-               .WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Axios);
-    });
-}
+    options.WithTitle("CryptoApp API")
+           .WithTheme(ScalarTheme.DeepSpace)
+           .WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Axios);
+});
 
 app.UseExceptionHandler();
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

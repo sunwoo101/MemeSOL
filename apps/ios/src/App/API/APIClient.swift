@@ -57,7 +57,11 @@ final class APIClient {
     let decoder = JSONDecoder()
 
     private init() {
+        #if DEBUG
         baseURL = URL(string: "http://localhost:5000/api")!
+        #else
+        baseURL = URL(string: "http://46.250.242.147/api")!
+        #endif
         session = .shared
         accessToken = KeychainHelper.load(forKey: "accessToken")
         refreshToken = KeychainHelper.load(forKey: "refreshToken")
