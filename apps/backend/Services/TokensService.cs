@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.Models;
 using Backend.Models.DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
@@ -50,6 +51,7 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
             token.MintAddress = mintAddress;
             token.Decimals = decimals;
             token.Status = TokenStatus.Completed;
+            db.UserTokens.Add(new UserToken { UserId = userId, TokenId = token.Id });
         }
         catch
         {
@@ -70,5 +72,43 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
             Decimals = token.Decimals,
             CreatedAt = token.CreatedAt,
         };
+    }
+
+    public async Task<List<TokenResponse>> GetAllTokensAsync()
+    {
+        return await db.Tokens
+            .Where(t => t.Status == TokenStatus.Completed)
+            .OrderByDescending(t => t.CreatedAt)
+            .Select(t => new TokenResponse
+            {
+                Id = t.Id,
+                MintAddress = t.MintAddress!,
+                Name = t.Name,
+                Symbol = t.Symbol,
+                Supply = t.Supply,
+                Decimals = t.Decimals,
+                CreatedAt = t.CreatedAt,
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<TokenResponse>> GetWalletTokensAsync(Guid userId)
+    {
+        return await db.UserTokens
+            .Where(ut => ut.UserId == userId)
+            .Select(ut => ut.Token)
+            .Where(t => t.Status == TokenStatus.Completed)
+            .OrderByDescending(t => t.CreatedAt)
+            .Select(t => new TokenResponse
+            {
+                Id = t.Id,
+                MintAddress = t.MintAddress!,
+                Name = t.Name,
+                Symbol = t.Symbol,
+                Supply = t.Supply,
+                Decimals = t.Decimals,
+                CreatedAt = t.CreatedAt,
+            })
+            .ToListAsync();
     }
 }
