@@ -235,6 +235,7 @@ private struct ListAllTokensSectionView: View {
                 errorText = ""
             } catch {
                 tokens = []
+                hasLoaded = false
                 errorText = error.localizedDescription
             }
         }
@@ -292,6 +293,7 @@ private struct ListWalletTokensSectionView: View {
                 errorText = ""
             } catch {
                 tokens = []
+                hasLoaded = false
                 errorText = error.localizedDescription
             }
         }
