@@ -14,17 +14,16 @@ struct DashboardView: View {
     @State var totalGainLossPercent: Double = -1.94
     
     @State var tokens: [Token] = [
-        Token(name: "Ethereum", symbol: "ETH",  pricePerToken: "$3,241.50",  balance: "$4,862.25",  percentChange: "+2.4%",  positive: true,  iconUrl: "diamond.fill",           color: .blue),
-        Token(name: "Bitcoin",  symbol: "BTC",  pricePerToken: "$98,430.00", balance: "$2,952.90",  percentChange: "+1.1%",  positive: true,  iconUrl: "bitcoinsign.circle.fill", color: .orange),
-        Token(name: "Solana",   symbol: "SOL",  pricePerToken: "$142.30",    balance: "$1,423.00",  percentChange: "-3.8%",  positive: false, iconUrl: "s.circle.fill",           color: .purple),
-        Token(name: "USD Coin", symbol: "USDC", pricePerToken: "$1.00",      balance: "$2,100.00",  percentChange: "0.0%",   positive: true,  iconUrl: "dollarsign.circle.fill",   color: .blue),
-        Token(name: "Chainlink",symbol: "LINK", pricePerToken: "$13.75",     balance: "$1,007.52",  percentChange: "-1.2%",  positive: false, iconUrl: "link.circle.fill",         color: .cyan),
+        Token(name: "Ethereum", symbol: "ETH",  pricePerToken: "A$3,241.50",  balance: "A$4,862.25",  percentChange: "+2.4%",  positive: true,  iconUrl: "https://assets.coingecko.com/coins/images/279/large/ethereum.png", color: .blue),
+        Token(name: "Bitcoin",  symbol: "BTC",  pricePerToken: "$A98,430.00", balance: "A$2,952.90",  percentChange: "+1.1%",  positive: true,  iconUrl: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png", color: .orange),
+        Token(name: "Solana",   symbol: "SOL",  pricePerToken: "A$142.30",    balance: "A$1,423.00",  percentChange: "-3.8%",  positive: false, iconUrl: "https://assets.coingecko.com/coins/images/4128/large/solana.png", color: .purple),
+        Token(name: "Chainlink",symbol: "LINK", pricePerToken: "A$13.75",     balance: "A$1,007.52",  percentChange: "-1.2%",  positive: false, iconUrl: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png", color: .cyan),
     ]
     
     private var formattedBalance: String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
+        formatter.currencyCode = "AUD"
         return formatter.string(from: NSNumber(value: totalBalance)) ?? "$0.00"
     }
     
@@ -79,14 +78,19 @@ struct DashboardView: View {
             
             VStack(spacing: AppLayout.tokenListSpacing) {
                 ForEach(Array(tokens.enumerated()), id: \.element.id) { index, token in
-                    TokenRow(
-                        name: token.name, symbol: token.symbol,
-                        price: token.pricePerToken,
-                        balance: token.balance,
-                        change: token.percentChange,
-                        positive: token.positive,
-                        iconUrl: token.iconUrl, color: token.color
-                    )
+                    Button {
+                        print("Tapped on token \(token.name)")
+                    } label: {
+                        TokenRow(
+                            name: token.name, symbol: token.symbol,
+                            price: token.pricePerToken,
+                            balance: token.balance,
+                            change: token.percentChange,
+                            positive: token.positive,
+                            iconUrl: token.iconUrl, color: token.color
+                        )
+                    }
+                    .buttonStyle(.plain)
                     if index < tokens.count - 1 {
                         Divider()
                             .background(Color.gray.opacity(AppLayout.dividerOpacity))
@@ -108,53 +112,6 @@ struct DashboardView: View {
                     .foregroundColor(.gray)
             }
         }
-    }
-}
-
-private struct TokenRow: View {
-    let name: String
-    let symbol: String
-    let price: String
-    let balance: String
-    let change: String
-    let positive: Bool
-    let iconUrl: String
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: AppLayout.tokenRowIconSpacing) {
-            Image(systemName: "circle.fill")
-                .resizable()
-                .scaledToFit()
-                .frame(width: AppLayout.tokenIconSize, height: AppLayout.tokenIconSize)
-                .foregroundColor(color)
-            
-            VStack(alignment: .leading, spacing: AppLayout.tokenTextStackSpacing) {
-                Text(name)
-                    .font(.subheadline.bold())
-                    .foregroundColor(.white)
-                Text(symbol)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: AppLayout.tokenTextStackSpacing) {
-                Text(balance)
-                    .font(.subheadline.bold())
-                    .foregroundColor(.white)
-                HStack(spacing: AppLayout.tokenPriceStackSpacing) {
-                    Text(price)
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text(change)
-                        .font(.caption)
-                        .foregroundColor(positive ? .green : .red)
-                }
-            }
-        }
-        .padding(.vertical, AppLayout.tokenRowVerticalPadding)
     }
 }
 
