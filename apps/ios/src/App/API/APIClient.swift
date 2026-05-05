@@ -87,6 +87,26 @@ final class APIClient {
         return try await send(request)
     }
 
+    func post(_ path: String) async throws {
+        guard let url = URL(string: baseURL.absoluteString + path) else {
+            throw APIError.invalidResponse
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        setBearerToken(&request)
+        try await sendVoid(request)
+    }
+
+    func delete(_ path: String) async throws {
+        guard let url = URL(string: baseURL.absoluteString + path) else {
+            throw APIError.invalidResponse
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        setBearerToken(&request)
+        try await sendVoid(request)
+    }
+
     func multipart<R: Decodable>(_ path: String, fields: [String: String], imageData: Data, imageMimeType: String) async throws -> R {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse
@@ -133,8 +153,28 @@ final class APIClient {
     }
 
     func send<R: Decodable>(_ request: URLRequest, retryOnUnauthorized: Bool = true) async throws -> R {
-        let (data, response) = try await session.data(for: request)
+        let (data, statusCode) = try await execute(request, retryOnUnauthorized: retryOnUnauthorized)
+        guard (200...299).contains(statusCode) else {
+            let msg = (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
+            throw APIError.serverError(msg)
+        }
+        do {
+            return try decoder.decode(R.self, from: data)
+        } catch {
+            throw APIError.decodingFailed
+        }
+    }
 
+    func sendVoid(_ request: URLRequest, retryOnUnauthorized: Bool = true) async throws {
+        let (data, statusCode) = try await execute(request, retryOnUnauthorized: retryOnUnauthorized)
+        guard (200...299).contains(statusCode) else {
+            let msg = (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
+            throw APIError.serverError(msg)
+        }
+    }
+
+    private func execute(_ request: URLRequest, retryOnUnauthorized: Bool) async throws -> (Data, Int) {
+        let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
@@ -153,19 +193,10 @@ final class APIClient {
             }
             var retried = request
             retried.setValue("Bearer \(refreshed.accessToken)", forHTTPHeaderField: "Authorization")
-            return try await send(retried, retryOnUnauthorized: false)
+            return try await execute(retried, retryOnUnauthorized: false)
         }
 
-        guard (200...299).contains(http.statusCode) else {
-            let msg = (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
-            throw APIError.serverError(msg)
-        }
-
-        do {
-            return try decoder.decode(R.self, from: data)
-        } catch {
-            throw APIError.decodingFailed
-        }
+        return (data, http.statusCode)
     }
 
     private func performRefresh(_ refreshToken: String) async throws -> AuthResponse {
