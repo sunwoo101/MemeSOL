@@ -15,10 +15,10 @@ public class SolanaService(IConfiguration config)
     private const byte TokenDecimals = 9;
 
     /// <summary>
-    /// Creates a new SPL token mint on Solana devnet and mints the initial supply
-    /// to the server wallet's token account.
+    /// Creates a new SPL token mint on Solana devnet.
+    /// Supply is tracked in the database; tokens are minted to users on distribution.
     /// </summary>
-    /// <param name="supply">The initial token supply to mint.</param>
+    /// <param name="supply">The intended token supply (stored in DB, not yet minted on-chain).</param>
     /// <returns>The mint address and decimals of the created token.</returns>
     public async Task<(string MintAddress, byte Decimals)> CreateTokenAsync(ulong supply)
     {
@@ -30,10 +30,8 @@ public class SolanaService(IConfiguration config)
         var wallet = new Wallet(new Mnemonic(mnemonicString));
         var payer = wallet.GetAccount(0);
         var mint = new Account();
-        var tokenAccount = new Account();
 
         var mintRent = (await client.GetMinimumBalanceForRentExemptionAsync(TokenProgram.MintAccountDataSize)).Result;
-        var tokenAccountRent = (await client.GetMinimumBalanceForRentExemptionAsync(TokenProgram.TokenAccountDataSize)).Result;
         var blockhash = (await client.GetLatestBlockHashAsync()).Result.Value.Blockhash;
 
         var tx = new TransactionBuilder()
@@ -44,14 +42,7 @@ public class SolanaService(IConfiguration config)
                 TokenProgram.MintAccountDataSize, TokenProgram.ProgramIdKey))
             .AddInstruction(TokenProgram.InitializeMint(
                 mint.PublicKey, TokenDecimals, payer.PublicKey, payer.PublicKey))
-            .AddInstruction(SystemProgram.CreateAccount(
-                payer.PublicKey, tokenAccount.PublicKey, tokenAccountRent,
-                TokenProgram.TokenAccountDataSize, TokenProgram.ProgramIdKey))
-            .AddInstruction(TokenProgram.InitializeAccount(
-                tokenAccount.PublicKey, mint.PublicKey, payer.PublicKey))
-            .AddInstruction(TokenProgram.MintTo(
-                mint.PublicKey, tokenAccount.PublicKey, supply, payer.PublicKey))
-            .Build([payer, mint, tokenAccount]);
+            .Build(new List<Account> { payer, mint });
 
         var result = await client.SendTransactionAsync(tx);
         if (!result.WasRequestSuccessfullyHandled)
