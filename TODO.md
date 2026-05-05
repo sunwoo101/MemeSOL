@@ -6,9 +6,9 @@
 - [x] `POST /auth/register` — create wallet and return JWT, refresh token + public wallet address
 - [x] `POST /auth/login` — validate login and return JWT, refresh token + public wallet address
 - [x] `POST /tokens` — create SPL token on Solana devnet
-- [ ] `GET /tokens` — list all tokens on the platform
+- [x] `GET /tokens` — list all tokens on the platform
 - [ ] `GET /tokens/{mintAddress}` — get token details
-- [ ] `GET /wallet/tokens` — list tokens in user's wallet
+- [x] `GET /wallet/tokens` — list tokens in user's wallet
 - [ ] `POST /wallet/tokens/{mintAddress}` — add a token to user's wallet
 - [ ] `DELETE /wallet/tokens/{mintAddress}` — remove a token from user's wallet
 - [ ] `GET /wallet/balances` — get user's balance for all wallet tokens
