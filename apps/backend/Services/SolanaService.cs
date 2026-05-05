@@ -94,7 +94,9 @@ public class SolanaService(IConfiguration config)
             .SetFeePayer(feePayer.PublicKey);
 
         var recipientAtaInfo = await client.GetAccountInfoAsync(recipientAta);
-        if (!recipientAtaInfo.WasRequestSuccessfullyHandled || recipientAtaInfo.Result?.Value is null)
+        if (!recipientAtaInfo.WasRequestSuccessfullyHandled)
+            throw new InvalidOperationException("Failed to check recipient token account.");
+        if (recipientAtaInfo.Result?.Value is null)
             txBuilder.AddInstruction(AssociatedTokenAccountProgram.CreateAssociatedTokenAccount(
                 feePayer.PublicKey, recipientPubKey, mintPubKey));
 
@@ -116,30 +118,24 @@ public class SolanaService(IConfiguration config)
     public async Task<List<(string Signature, DateTime Timestamp, bool Success)>> GetTokenTransactionsAsync(
         string walletPublicKey, string mintAddress, int limit = 20)
     {
-        try
-        {
-            var client = ClientFactory.GetClient(Cluster.DevNet);
-            var ata = AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(
-                new PublicKey(walletPublicKey),
-                new PublicKey(mintAddress)
-            );
+        var client = ClientFactory.GetClient(Cluster.DevNet);
+        var ata = AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(
+            new PublicKey(walletPublicKey),
+            new PublicKey(mintAddress)
+        );
 
-            var response = await client.GetSignaturesForAddressAsync(ata, (ulong)limit);
-            if (!response.WasRequestSuccessfullyHandled || response.Result is null)
-                return [];
+        var response = await client.GetSignaturesForAddressAsync(ata, (ulong)limit);
+        if (!response.WasRequestSuccessfullyHandled || response.Result is null)
+            throw new InvalidOperationException(
+                $"Failed to fetch transactions for wallet {walletPublicKey}, mint {mintAddress}: {response.RawRpcResponse}");
 
-            return response.Result.Select(s => (
-                Signature: s.Signature,
-                Timestamp: s.BlockTime.HasValue
-                    ? DateTimeOffset.FromUnixTimeSeconds((long)s.BlockTime.Value).UtcDateTime
-                    : DateTime.UtcNow,
-                Success: s.Error is null
-            )).ToList();
-        }
-        catch
-        {
-            return [];
-        }
+        return response.Result.Select(s => (
+            Signature: s.Signature,
+            Timestamp: s.BlockTime.HasValue
+                ? DateTimeOffset.FromUnixTimeSeconds((long)s.BlockTime.Value).UtcDateTime
+                : DateTime.UtcNow,
+            Success: s.Error is null
+        )).ToList();
     }
 
     /// <summary>

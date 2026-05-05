@@ -67,7 +67,16 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             .FirstOrDefaultAsync()
             ?? throw new KeyNotFoundException("Token not found.");
 
-        var rawAmount = (ulong)(request.Amount * (decimal)Math.Pow(10, token.Decimals));
+        if (request.Amount <= 0)
+            throw new InvalidOperationException("Amount must be greater than zero.");
+
+        var scaledAmount = request.Amount * (decimal)Math.Pow(10, token.Decimals);
+        if (scaledAmount != Math.Floor(scaledAmount))
+            throw new InvalidOperationException($"Amount exceeds the precision of this token ({token.Decimals} decimal places).");
+        if (scaledAmount > ulong.MaxValue)
+            throw new InvalidOperationException("Amount is too large.");
+
+        var rawAmount = (ulong)scaledAmount;
 
         var signature = await solanaService.SendTokenAsync(
             user.WalletPublicKey, user.WalletPrivateKey,
