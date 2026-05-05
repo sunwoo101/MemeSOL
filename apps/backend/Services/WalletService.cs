@@ -104,11 +104,26 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             tokens.Select(t => solanaService.GetTokenBalanceAsync(user.WalletPublicKey, t.MintAddress!))
         );
 
-        var totalValue = tokens
-            .Select((t, i) => ComputeNewPrice(t.Price, t.PriceOpenDay, t.PriceUpdatedAt).Price * balances[i])
-            .Sum();
+        var totalValue = 0m;
+        var openDayValue = 0m;
 
-        return new WalletBalancesResponse { TotalValue = Math.Round(totalValue, 2) };
+        for (var i = 0; i < tokens.Count; i++)
+        {
+            var t = tokens[i];
+            var (price, openDay, _, _) = ComputeNewPrice(t.Price, t.PriceOpenDay, t.PriceUpdatedAt);
+            totalValue += price * balances[i];
+            openDayValue += openDay * balances[i];
+        }
+
+        var gainLoss = totalValue - openDayValue;
+        var gainLossPercent = openDayValue > 0 ? gainLoss / openDayValue * 100 : 0;
+
+        return new WalletBalancesResponse
+        {
+            TotalValue = Math.Round(totalValue, 2),
+            GainLoss = Math.Round(gainLoss, 2),
+            GainLossPercent = Math.Round(gainLossPercent, 2),
+        };
     }
 
     private static (decimal Price, decimal PriceOpenDay, DateTime PriceUpdatedAt, bool Changed) ComputeNewPrice(
