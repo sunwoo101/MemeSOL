@@ -81,6 +81,7 @@ private struct AuthSectionView: View {
 
     @MainActor
     private func submit(action: AuthAction) {
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -170,6 +171,7 @@ private struct TokensSectionView: View {
     private func submit() {
         guard let imageData = selectedImageData, let supplyValue = UInt64(supply) else { return }
 
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -232,13 +234,13 @@ private struct ListAllTokensSectionView: View {
 
     @MainActor
     private func submit() {
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
             do {
                 tokens = try await APIClient.shared.listAllTokens()
                 hasLoaded = true
-                errorText = ""
             } catch {
                 tokens = []
                 hasLoaded = false
@@ -290,6 +292,7 @@ private struct ListWalletTokensSectionView: View {
 
     @MainActor
     private func submit() {
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -349,6 +352,7 @@ private struct AddWalletTokenSectionView: View {
         let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         submittedMintAddress = mint
         success = false
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -407,6 +411,7 @@ private struct RemoveWalletTokenSectionView: View {
         let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         submittedMintAddress = mint
         success = false
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -455,6 +460,7 @@ private struct WalletBalanceSectionView: View {
 
     @MainActor
     private func submit() {
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -610,6 +616,7 @@ private struct SendTokenSectionView: View {
         guard let amt = Decimal(string: amount), amt > 0 else { return }
         submittedMint = mint
         response = nil
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -665,6 +672,7 @@ private struct AllTransactionsSectionView: View {
     @MainActor
     private func submit() {
         hasLoaded = false
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -730,6 +738,7 @@ private struct TransactionHistorySectionView: View {
         let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         submittedMint = mint
         hasLoaded = false
+        errorText = ""
         isLoading = true
         Task {
             defer { isLoading = false }
