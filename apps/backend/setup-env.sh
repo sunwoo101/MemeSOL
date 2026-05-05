@@ -37,6 +37,11 @@ if [ -f "$ENV_FILE" ]; then
     done < "$ENV_FILE"
 fi
 
+if [[ -z "$POSTGRES_PASSWORD" || -z "$JWT_SECRET" ]]; then
+    echo "❌ POSTGRES_PASSWORD or JWT_SECRET is empty. Delete $ENV_FILE and re-run to regenerate."
+    exit 1
+fi
+
 echo "Syncing with .NET User Secrets..."
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=127.0.0.1;Port=5432;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD"
 dotnet user-secrets set "Jwt:Secret" "$JWT_SECRET"
