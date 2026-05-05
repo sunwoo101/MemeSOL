@@ -1,13 +1,20 @@
 using Backend.Data;
+using Backend.Services;
+using Backend.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("Apple", c => c.Timeout = TimeSpan.FromSeconds(10));
+builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -27,6 +34,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

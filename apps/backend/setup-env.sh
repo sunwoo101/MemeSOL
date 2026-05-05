@@ -1,6 +1,11 @@
 #!/bin/bash
 
 ENV_FILE=".env"
+POSTGRES_USER="postgres"
+POSTGRES_DB="ios_db"
+JWT_ISSUER="backend"
+JWT_AUDIENCE="ios-app"
+APPLE_BUNDLE_ID="ios.Assignment3"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo "Creating $ENV_FILE with freshly generated secrets..."
@@ -8,9 +13,13 @@ if [ ! -f "$ENV_FILE" ]; then
     JWT_SECRET=$(openssl rand -base64 48 | tr -d '+/=' | cut -c1-64)
 
     cat <<EOF > $ENV_FILE
-POSTGRES_USER=postgres
+POSTGRES_USER=$POSTGRES_USER
 POSTGRES_PASSWORD=$DB_PASSWORD
-POSTGRES_DB=ios_db
+POSTGRES_DB=$POSTGRES_DB
+JWT_SECRET=$JWT_SECRET
+JWT_ISSUER=$JWT_ISSUER
+JWT_AUDIENCE=$JWT_AUDIENCE
+APPLE_BUNDLE_ID=$APPLE_BUNDLE_ID
 EOF
     echo "✅ Secrets generated and saved to $ENV_FILE"
 else
@@ -28,10 +37,16 @@ if [ -f "$ENV_FILE" ]; then
     done < "$ENV_FILE"
 fi
 
+if [[ -z "$POSTGRES_PASSWORD" || -z "$JWT_SECRET" ]]; then
+    echo "❌ POSTGRES_PASSWORD or JWT_SECRET is empty. Delete $ENV_FILE and re-run to regenerate."
+    exit 1
+fi
+
 echo "Syncing with .NET User Secrets..."
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=127.0.0.1;Port=5432;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD"
-dotnet user-secrets set "Jwt:Key" "$JWT_KEY"
+dotnet user-secrets set "Jwt:Secret" "$JWT_SECRET"
 dotnet user-secrets set "Jwt:Issuer" "$JWT_ISSUER"
 dotnet user-secrets set "Jwt:Audience" "$JWT_AUDIENCE"
+dotnet user-secrets set "Apple:BundleId" "$APPLE_BUNDLE_ID"
 
 echo "🚀 Environment is ready for iOS Assignment!"
