@@ -12,13 +12,23 @@ struct TokenResponse: Decodable {
     let createdAt: String
 }
 
+struct TokenListResponse: Decodable {
+    let id: String
+    let mintAddress: String
+    let name: String
+    let symbol: String
+    let imgUrl: String
+    let price: Double
+    let gainsPercent: Double
+}
+
 // MARK: - TokensController
 
 private let tokensBase = "/tokens"
 
 extension APIClient {
     // List all tokens that were created using this app by any user.
-    func listAllTokens() async throws -> [TokenResponse] {
+    func listAllTokens() async throws -> [TokenListResponse] {
         guard accessToken != nil else {
             throw APIError.serverError("You must be logged in to list tokens.")
         }
