@@ -30,28 +30,28 @@ struct DashboardView: View {
     }
 
     var body: some View {
-        VStack(spacing: AppLayout.transactionSectionSpacing) {
+        VStack(spacing: TransactionLayout.sectionSpacing) {
             if activeTab == 0 {
                 ScrollView(.vertical, showsIndicators: false) {
-                    VStack(spacing: AppLayout.sectionSpacing) {
+                    VStack(spacing: SharedLayout.sectionSpacing) {
                         totalBalanceView
                         actionButtonsRow
                         tokensSection
                     }
-                    .padding(.horizontal, AppLayout.horizontalPadding)
-                    .padding(.top, AppLayout.horizontalPadding)
-                    .padding(.bottom, AppLayout.horizontalPadding)
+                    .padding(.horizontal, SharedLayout.horizontalPadding)
+                    .padding(.top, SharedLayout.horizontalPadding)
+                    .padding(.bottom, SharedLayout.horizontalPadding)
                 }
                 .background(AppColors.blackColor)
             } else {
-                //AllTransactionsHistory
+                AllTransactionsView(tokens: tokens)
             }
 
             HStack {
                 Button { activeTab = 0 } label: {
-                    VStack(spacing: AppLayout.tabBarItemSpacing) {
+                    VStack(spacing: TabBarLayout.itemSpacing) {
                         Image(systemName: "house.fill")
-                            .font(.system(size: AppLayout.tabBarIconSize))
+                            .font(.system(size: TabBarLayout.iconSize))
                         Text("Dashboard")
                             .font(.caption2)
                     }
@@ -60,9 +60,9 @@ struct DashboardView: View {
                 }
 
                 Button { activeTab = 1 } label: {
-                    VStack(spacing: AppLayout.tabBarItemSpacing) {
+                    VStack(spacing: TabBarLayout.itemSpacing) {
                         Image(systemName: "list.bullet")
-                            .font(.system(size: AppLayout.tabBarIconSize))
+                            .font(.system(size: TabBarLayout.iconSize))
                         Text("Transactions")
                             .font(.caption2)
                     }
@@ -70,8 +70,8 @@ struct DashboardView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.vertical, AppLayout.tabBarVerticalPadding)
-            .padding(.bottom, AppLayout.tabBarBottomPadding)
+            .padding(.vertical, TabBarLayout.verticalPadding)
+            .padding(.bottom, TabBarLayout.bottomPadding)
             .background(AppColors.charcoalColor)
         }
         .background(AppColors.blackColor.ignoresSafeArea())
@@ -81,41 +81,41 @@ struct DashboardView: View {
     }
 
     private var totalBalanceView: some View {
-        VStack(alignment: .center, spacing: AppLayout.balanceStackSpacing) {
+        VStack(alignment: .center, spacing: BalanceLayout.stackSpacing) {
             Text("Total Balance")
-                .font(.system(size: AppLayout.labelFontSize, weight: .medium))
+                .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
                 .foregroundColor(AppColors.goldColor)
             Text(formattedBalance)
-                .font(.system(size: AppLayout.balanceFontSize, weight: .bold))
+                .font(.system(size: BalanceLayout.fontSize, weight: .bold))
                 .foregroundColor(.white)
 
             let isGain = totalGainLoss >= 0
             let sign = isGain ? "+" : "-"
             let gainLossColor: Color = isGain ? .green : .red
             Label {
-                Text("\(sign)$\(String(format: AppLayout.currencyFormat, abs(totalGainLoss))) (\(sign)\(String(format: AppLayout.currencyFormat, abs(totalGainLossPercent)))%)")
-                    .font(.system(size: AppLayout.gainLossFontSize, weight: .medium))
+                Text("\(sign)$\(String(format: BalanceLayout.currencyFormat, abs(totalGainLoss))) (\(sign)\(String(format: BalanceLayout.currencyFormat, abs(totalGainLossPercent)))%)")
+                    .font(.system(size: GainLossLayout.fontSize, weight: .medium))
                     .foregroundColor(gainLossColor)
             } icon: {
                 Image(systemName: isGain ? "arrow.up.right" : "arrow.down.right")
-                    .font(.system(size: AppLayout.gainLossIconSize, weight: .bold))
+                    .font(.system(size: GainLossLayout.iconSize, weight: .bold))
                     .foregroundColor(gainLossColor)
             }
         }
     }
 
     private var actionButtonsRow: some View {
-        HStack(spacing: AppLayout.actionButtonRowSpacing) {
+        HStack(spacing: ActionButtonLayout.rowSpacing) {
             ActionButton(icon: "arrow.right",     label: "Send")
             ActionButton(icon: "arrow.down.left", label: "Receive")
         }
     }
 
     private var tokensSection: some View {
-        VStack(alignment: .leading, spacing: AppLayout.tokenRowSpacing) {
+        VStack(alignment: .leading, spacing: TokenLayout.rowSpacing) {
             sectionHeader("Tokens")
 
-            VStack(spacing: AppLayout.tokenListSpacing) {
+            VStack(spacing: TokenLayout.listSpacing) {
                 ForEach(Array(tokens.enumerated()), id: \.element.id) { index, token in
                     Button {
                         selectedToken = token
@@ -133,8 +133,8 @@ struct DashboardView: View {
 
                     if index < tokens.count - 1 {
                         Divider()
-                            .background(Color.gray.opacity(AppLayout.dividerOpacity))
-                            .padding(.leading, AppLayout.dividerLeadingPadding)
+                            .background(Color.gray.opacity(SharedLayout.dividerOpacity))
+                            .padding(.leading, SharedLayout.dividerLeadingPadding)
                     }
                 }
             }
@@ -143,7 +143,7 @@ struct DashboardView: View {
 
     private func sectionHeader(_ title: String) -> some View {
         Button {} label: {
-            HStack(spacing: AppLayout.sectionHeaderSpacing) {
+            HStack(spacing: SharedLayout.sectionHeaderSpacing) {
                 Text(title)
                     .font(.headline.bold())
                     .foregroundColor(.white)

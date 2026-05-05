@@ -15,9 +15,9 @@ struct TokenRow: View {
     let positive: Bool
     let iconUrl: String
     let color: Color
-    
+
     var body: some View {
-        HStack(spacing: AppLayout.tokenRowIconSpacing) {
+        HStack(spacing: TokenLayout.rowIconSpacing) {
             AsyncImage(url: URL(string: iconUrl)) { phase in
                 switch phase {
                 case .success(let image):
@@ -31,9 +31,9 @@ struct TokenRow: View {
                         .foregroundColor(color)
                 }
             }
-            .frame(width: AppLayout.tokenIconSize, height: AppLayout.tokenIconSize)
-            
-            VStack(alignment: .leading, spacing: AppLayout.tokenTextStackSpacing) {
+            .frame(width: TokenLayout.iconSize, height: TokenLayout.iconSize)
+
+            VStack(alignment: .leading, spacing: TokenLayout.textStackSpacing) {
                 Text(name)
                     .font(.subheadline.bold())
                     .foregroundColor(.white)
@@ -41,14 +41,14 @@ struct TokenRow: View {
                     .font(.caption)
                     .foregroundColor(.gray)
             }
-            
+
             Spacer()
-            
-            VStack(alignment: .trailing, spacing: AppLayout.tokenTextStackSpacing) {
+
+            VStack(alignment: .trailing, spacing: TokenLayout.textStackSpacing) {
                 Text(balance)
                     .font(.subheadline.bold())
                     .foregroundColor(.white)
-                HStack(spacing: AppLayout.tokenPriceStackSpacing) {
+                HStack(spacing: TokenLayout.priceStackSpacing) {
                     Text(price)
                         .font(.caption)
                         .foregroundColor(.gray)
@@ -58,6 +58,6 @@ struct TokenRow: View {
                 }
             }
         }
-        .padding(.vertical, AppLayout.tokenRowVerticalPadding)
+        .padding(.vertical, TokenLayout.rowVerticalPadding)
     }
 }

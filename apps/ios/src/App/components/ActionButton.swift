@@ -13,18 +13,18 @@ struct ActionButton: View {
     
     var body: some View {
         Button {} label: {
-            VStack(spacing: AppLayout.actionButtonContentSpacing) {
+            VStack(spacing: ActionButtonLayout.contentSpacing) {
                 Image(systemName: icon)
-                    .font(.system(size: AppLayout.actionButtonIconSize))
+                    .font(.system(size: ActionButtonLayout.iconSize))
                     .foregroundColor(.white)
                 Text(label)
                     .font(.caption)
                     .foregroundColor(.white)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, AppLayout.actionButtonVerticalPadding)
+            .padding(.vertical, ActionButtonLayout.verticalPadding)
             .background(AppColors.charcoalColor)
-            .cornerRadius(AppLayout.cornerRadius)
+            .cornerRadius(SharedLayout.cornerRadius)
         }
     }
 }

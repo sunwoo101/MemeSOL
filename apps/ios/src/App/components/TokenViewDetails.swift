@@ -22,11 +22,11 @@ struct TokenViewDetails: View {
                                 .foregroundColor(.white)
                                 .font(.body.weight(.semibold))
                         }
-                        .padding(.top, AppLayout.tokenDetailTopPadding)
-                        .padding(.leading, AppLayout.horizontalPadding)
+                        .padding(.top, TokenLayout.detailTopPadding)
+                        .padding(.leading, SharedLayout.horizontalPadding)
                     }
 
-                VStack(spacing: AppLayout.sectionSpacing) {
+                VStack(spacing: SharedLayout.sectionSpacing) {
                     AsyncImage(url: URL(string: token.iconUrl)) { phase in
                         switch phase {
                         case .success(let image):
@@ -38,9 +38,9 @@ struct TokenViewDetails: View {
                                 .foregroundColor(token.color)
                         }
                     }
-                    .frame(width: AppLayout.tokenDetailIconSize, height: AppLayout.tokenDetailIconSize)
+                    .frame(width: TokenLayout.detailIconSize, height: TokenLayout.detailIconSize)
 
-                    VStack(spacing: AppLayout.tokenTextStackSpacing) {
+                    VStack(spacing: TokenLayout.textStackSpacing) {
                         Text(token.name)
                             .font(.title.bold())
                             .foregroundColor(.white)
@@ -49,16 +49,16 @@ struct TokenViewDetails: View {
                             .foregroundColor(.gray)
                     }
 
-                    VStack(spacing: AppLayout.tokenTextStackSpacing) {
+                    VStack(spacing: TokenLayout.textStackSpacing) {
                         Text(token.pricePerToken)
-                            .font(.system(size: AppLayout.tokenDetailPriceFontSize, weight: .bold))
+                            .font(.system(size: TokenLayout.detailPriceFontSize, weight: .bold))
                             .foregroundColor(.white)
                         Text(token.percentChange)
                             .font(.headline)
                             .foregroundColor(token.positive ? .green : .red)
                     }
 
-                    VStack(spacing: AppLayout.tokenBalanceSpacing) {
+                    VStack(spacing: TokenLayout.balanceSpacing) {
                         Text("Your Balance")
                             .font(.caption)
                             .foregroundColor(.gray)
@@ -75,16 +75,16 @@ struct TokenViewDetails: View {
                         Text("View Transactions")
                             .font(.headline)
                             .foregroundColor(.black)
-                            .frame(width: AppLayout.onboardingButtonWidth)
-                            .frame(height: AppLayout.onboardingButtonHeight)
+                            .frame(width: OnboardingLayout.buttonWidth)
+                            .frame(height: OnboardingLayout.buttonHeight)
                             .background(AppColors.goldColor)
-                            .cornerRadius(AppLayout.cornerRadius)
+                            .cornerRadius(SharedLayout.cornerRadius)
                     }
 
-                    Spacer()
+                    
                 }
-                .padding(.top, AppLayout.tokenDetailTopPadding)
-                .padding(.horizontal, AppLayout.horizontalPadding)
+                .padding(.top, TokenLayout.detailTopPadding)
+                .padding(.horizontal, SharedLayout.horizontalPadding)
             }
         }
     }

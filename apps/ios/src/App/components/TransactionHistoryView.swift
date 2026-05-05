@@ -22,7 +22,7 @@ struct TransactionListView: View {
     ]
 
     var body: some View {
-        VStack(spacing: AppLayout.transactionSectionSpacing) {
+        VStack(spacing: TransactionLayout.sectionSpacing) {
             HStack {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
@@ -34,11 +34,11 @@ struct TransactionListView: View {
                     .font(.title3.bold())
                     .foregroundColor(AppColors.goldColor)
                 Spacer()
-                Color.clear.frame(width: AppLayout.transactionNavBarSpacerWidth, height: AppLayout.transactionNavBarSpacerHeight)
+                Color.clear.frame(width: TransactionLayout.navBarSpacerWidth, height: TransactionLayout.navBarSpacerHeight)
             }
-            .padding(.horizontal, AppLayout.horizontalPadding)
-            .padding(.top, AppLayout.transactionTitleTopPadding)
-            .padding(.bottom, AppLayout.transactionNavBarBottomPadding)
+            .padding(.horizontal, SharedLayout.horizontalPadding)
+            .padding(.top, TransactionLayout.titleTopPadding)
+            .padding(.bottom, TransactionLayout.navBarBottomPadding)
             .background(AppColors.blackColor)
 
             AsyncImage(url: URL(string: token.iconUrl)) { image in
@@ -47,39 +47,39 @@ struct TransactionListView: View {
                     .scaledToFit()
             } placeholder: {
                 Circle()
-                    .fill(token.color.opacity(AppLayout.transactionIconPlaceholderOpacity))
+                    .fill(token.color.opacity(TransactionLayout.iconPlaceholderOpacity))
             }
-            .frame(width: AppLayout.tokenDetailIconSize, height: AppLayout.tokenDetailIconSize)
+            .frame(width: TokenLayout.detailIconSize, height: TokenLayout.detailIconSize)
             .clipShape(Circle())
             .frame(maxWidth: .infinity)
-            .padding(.vertical, AppLayout.sectionSpacing)
+            .padding(.vertical, SharedLayout.sectionSpacing)
             .background(AppColors.blackColor)
 
-            HStack(spacing: AppLayout.transactionActionButtonSpacing) {
+            HStack(spacing: TransactionLayout.actionButtonSpacing) {
                 TransactionActionButton(icon: "paperplane.fill",        label: "Send")    { showingSend    = true }
                 TransactionActionButton(icon: "arrow.down.circle.fill", label: "Receive") { showingReceive = true }
             }
             .frame(maxWidth: .infinity)
-            .padding(.bottom, AppLayout.sectionSpacing)
+            .padding(.bottom, SharedLayout.sectionSpacing)
             .background(AppColors.blackColor)
 
             ScrollView {
-                VStack(alignment: .leading, spacing: AppLayout.transactionListSpacing) {
+                VStack(alignment: .leading, spacing: TransactionLayout.listSpacing) {
                     Text("May 5, 2026")
                         .font(.subheadline)
                         .foregroundColor(.gray)
-                        .padding(.horizontal, AppLayout.horizontalPadding)
-                        .padding(.vertical, AppLayout.transactionDateVerticalPadding)
+                        .padding(.horizontal, SharedLayout.horizontalPadding)
+                        .padding(.vertical, TransactionLayout.dateVerticalPadding)
 
                     ForEach(transactions) { tx in
                         TransactionRow(transaction: tx)
                         Divider()
-                            .background(Color.gray.opacity(AppLayout.dividerOpacity))
-                            .padding(.horizontal, AppLayout.horizontalPadding)
+                            .background(Color.gray.opacity(SharedLayout.dividerOpacity))
+                            .padding(.horizontal, SharedLayout.horizontalPadding)
                     }
                 }
-                .padding(.top, AppLayout.transactionListTopPadding)
-                .padding(.bottom, AppLayout.transactionListBottomPadding)
+                .padding(.top, TransactionLayout.listTopPadding)
+                .padding(.bottom, TransactionLayout.listBottomPadding)
             }
             .background(AppColors.blackColor)
         }
@@ -102,26 +102,26 @@ private struct TransactionRow: View {
     let transaction: MockTransaction
 
     var body: some View {
-        HStack(spacing: AppLayout.transactionRowSpacing) {
+        HStack(spacing: TransactionLayout.rowSpacing) {
             transactionIcon
             transactionLabel
             Spacer()
             transactionAmount
         }
-        .padding(.horizontal, AppLayout.horizontalPadding)
-        .padding(.vertical, AppLayout.transactionRowVerticalPadding)
+        .padding(.horizontal, SharedLayout.horizontalPadding)
+        .padding(.vertical, TransactionLayout.rowVerticalPadding)
     }
 
     private var transactionIcon: some View {
         Image(systemName: transaction.isSent ? "paperplane.fill" : "arrow.down.circle.fill")
             .foregroundColor(transaction.isSent ? .gray : .green)
-            .frame(width: AppLayout.transactionIconSize, height: AppLayout.transactionIconSize)
+            .frame(width: TransactionLayout.iconSize, height: TransactionLayout.iconSize)
             .background(AppColors.charcoalColor)
             .clipShape(Circle())
     }
 
     private var transactionLabel: some View {
-        VStack(alignment: .leading, spacing: AppLayout.transactionTextSpacing) {
+        VStack(alignment: .leading, spacing: TransactionLayout.textSpacing) {
             Text(transaction.type)
                 .font(.subheadline)
                 .foregroundColor(.white)
@@ -132,7 +132,7 @@ private struct TransactionRow: View {
     }
 
     private var transactionAmount: some View {
-        VStack(alignment: .trailing, spacing: AppLayout.transactionTextSpacing) {
+        VStack(alignment: .trailing, spacing: TransactionLayout.textSpacing) {
             Text(transaction.amount)
                 .font(.subheadline)
                 .foregroundColor(.white)
@@ -150,11 +150,11 @@ private struct TransactionActionButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: AppLayout.actionButtonContentSpacing) {
+            VStack(spacing: ActionButtonLayout.contentSpacing) {
                 Image(systemName: icon)
-                    .font(.system(size: AppLayout.actionButtonIconSize))
+                    .font(.system(size: ActionButtonLayout.iconSize))
                     .foregroundColor(.white)
-                    .frame(width: AppLayout.transactionActionButtonSize, height: AppLayout.transactionActionButtonSize)
+                    .frame(width: TransactionLayout.actionButtonSize, height: TransactionLayout.actionButtonSize)
                     .background(AppColors.charcoalColor)
                     .clipShape(Circle())
                 Text(label)
