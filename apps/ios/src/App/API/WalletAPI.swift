@@ -2,6 +2,16 @@ import Foundation
 
 // MARK: - Models
 
+struct TransactionHistoryResponse: Decodable {
+    let signature: String
+    let timestamp: String
+    let success: Bool
+    let mintAddress: String
+    let tokenName: String
+    let tokenSymbol: String
+    let imgUrl: String
+}
+
 struct WalletBalancesResponse: Decodable {
     let totalValue: Double
     let gainLoss: Double
@@ -46,6 +56,22 @@ extension APIClient {
             throw APIError.serverError("You must be logged in to manage your wallet.")
         }
         try await delete("\(walletBase)/tokens/\(mintAddress)")
+    }
+
+    // Returns transactions across all tokens in the user's wallet, sorted by timestamp.
+    func getAllTransactions() async throws -> [TransactionHistoryResponse] {
+        guard accessToken != nil else {
+            throw APIError.serverError("You must be logged in to view transactions.")
+        }
+        return try await get("\(walletBase)/transactions")
+    }
+
+    // Returns the transaction history for the authenticated user's wallet and a specific token mint.
+    func getTransactions(mintAddress: String) async throws -> [TransactionHistoryResponse] {
+        guard accessToken != nil else {
+            throw APIError.serverError("You must be logged in to view transactions.")
+        }
+        return try await get("\(walletBase)/\(mintAddress)/transactions")
     }
 
     // Returns the total portfolio value of all tokens in the user's wallet.
