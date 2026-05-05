@@ -15,7 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasKey(ut => new { ut.UserId, ut.TokenId });
 
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.AppleUserId)
+            .HasIndex(u => u.Email)
             .IsUnique();
 
         modelBuilder.Entity<Token>()

@@ -13,13 +13,24 @@ namespace Backend.Controllers;
 public class AuthController(AuthService authService) : ControllerBase
 {
     /// <summary>
-    /// Endpoint for signing in with Apple.
+    /// Registers a new user with email and password.
     /// </summary>
-    /// <param name="request">The request containing the Apple identity token.</param>
-    [HttpPost("apple")]
-    public async Task<ActionResult<AuthResponse>> AppleSignIn([FromBody] AppleSignInRequest request)
+    /// <param name="request">The request containing the user's email and password.</param>
+    [HttpPost("register")]
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
-        var result = await authService.AppleSignInAsync(request.IdentityToken);
+        var result = await authService.RegisterAsync(request.Email, request.Password);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Authenticates an existing user with email and password.
+    /// </summary>
+    /// <param name="request">The request containing the user's email and password.</param>
+    [HttpPost("login")]
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+    {
+        var result = await authService.LoginAsync(request.Email, request.Password);
         return Ok(result);
     }
 }
