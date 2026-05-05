@@ -12,6 +12,14 @@ using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Validate required configuration at startup.
+string[] requiredKeys = ["ConnectionStrings:DefaultConnection", "Jwt:Secret", "Solana:ServerMnemonic"];
+foreach (var key in requiredKeys)
+{
+    if (string.IsNullOrEmpty(builder.Configuration[key]))
+        throw new InvalidOperationException($"Required configuration '{key}' is not set.");
+}
+
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
