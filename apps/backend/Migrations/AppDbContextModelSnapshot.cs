@@ -37,6 +37,14 @@ namespace backend.Migrations
                     b.Property<byte>("Decimals")
                         .HasColumnType("smallint");
 
+                    b.Property<string>("ImageContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("ImageData")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
                     b.Property<string>("MintAddress")
                         .IsRequired()
                         .HasColumnType("text");
