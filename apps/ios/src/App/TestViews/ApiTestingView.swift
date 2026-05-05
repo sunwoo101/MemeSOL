@@ -18,6 +18,9 @@ struct ApiTestingView: View {
                 AddWalletTokenSectionView()
                 RemoveWalletTokenSectionView()
                 WalletBalanceSectionView()
+                SendTokenSectionView()
+                AllTransactionsSectionView()
+                TransactionHistorySectionView()
             }
             .padding()
         }
@@ -545,6 +548,222 @@ private struct ResponseCard<Content: View>: View {
         .padding()
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// MARK: - SendTokenSectionView
+
+private struct SendTokenSectionView: View {
+    @State private var mintAddress = ""
+    @State private var recipientAddress = ""
+    @State private var amount = ""
+    @State private var isLoading = false
+    @State private var response: SendTokenResponse? = nil
+    @State private var errorText = ""
+
+    private var isValid: Bool {
+        !mintAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !recipientAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        Double(amount) != nil
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Send Tokens")
+                .font(.title2)
+                .bold()
+
+            VStack(spacing: 12) {
+                TextField("Mint Address", text: $mintAddress)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                TextField("Recipient Address", text: $recipientAddress)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                TextField("Amount", text: $amount)
+                    .keyboardType(.decimalPad)
+            }
+            .textFieldStyle(.roundedBorder)
+
+            Button("POST /tokens/{mintAddress}/send") { submit() }
+                .buttonStyle(.borderedProminent)
+                .disabled(isLoading || !isValid)
+
+            if isLoading { ProgressView() }
+
+            if let response {
+                ResponseCard(endpoint: "POST /api/tokens/\(mintAddress.trimmingCharacters(in: .whitespacesAndNewlines))/send") {
+                    CopyableResponseRow(label: "Signature", value: response.signature)
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        let recipient = recipientAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let amt = Double(amount) else { return }
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                response = try await APIClient.shared.sendToken(mintAddress: mint, recipientAddress: recipient, amount: amt)
+                errorText = ""
+            } catch {
+                response = nil
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - AllTransactionsSectionView
+
+private struct AllTransactionsSectionView: View {
+    @State private var isLoading = false
+    @State private var transactions: [TransactionHistoryResponse] = []
+    @State private var hasLoaded = false
+    @State private var errorText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("All Transactions")
+                .font(.title2)
+                .bold()
+
+            Button("GET /wallet/transactions") { submit() }
+                .buttonStyle(.bordered)
+                .disabled(isLoading)
+
+            if isLoading { ProgressView() }
+
+            if hasLoaded {
+                ResponseCard(endpoint: "GET /api/wallet/transactions") {
+                    if transactions.isEmpty {
+                        Text("No transactions")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(transactions, id: \.signature) { tx in
+                            TransactionRow(transaction: tx)
+                        }
+                    }
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        hasLoaded = false
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                transactions = try await APIClient.shared.getAllTransactions()
+                hasLoaded = true
+                errorText = ""
+            } catch {
+                transactions = []
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - TransactionHistorySectionView
+
+private struct TransactionHistorySectionView: View {
+    @State private var mintAddress = ""
+    @State private var isLoading = false
+    @State private var transactions: [TransactionHistoryResponse] = []
+    @State private var hasLoaded = false
+    @State private var errorText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Transaction History")
+                .font(.title2)
+                .bold()
+
+            TextField("Mint Address", text: $mintAddress)
+                .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+
+            Button("GET /wallet/{mintAddress}/transactions") { submit() }
+                .buttonStyle(.bordered)
+                .disabled(isLoading || mintAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+            if isLoading { ProgressView() }
+
+            if hasLoaded {
+                ResponseCard(endpoint: "GET /api/wallet/\(mintAddress.trimmingCharacters(in: .whitespacesAndNewlines))/transactions") {
+                    if transactions.isEmpty {
+                        Text("No transactions")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(transactions, id: \.signature) { tx in
+                            TransactionRow(transaction: tx)
+                        }
+                    }
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        hasLoaded = false
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                transactions = try await APIClient.shared.getTransactions(mintAddress: mint)
+                hasLoaded = true
+                errorText = ""
+            } catch {
+                transactions = []
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - TransactionRow
+
+private struct TransactionRow: View {
+    let transaction: TransactionHistoryResponse
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            TokenImage(url: transaction.imgUrl)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text("\(transaction.tokenName) (\(transaction.tokenSymbol))")
+                        .font(.footnote)
+                        .bold()
+                    Spacer()
+                    Text(transaction.success ? "Success" : "Failed")
+                        .font(.caption)
+                        .foregroundStyle(transaction.success ? .green : .red)
+                }
+                Text(transaction.timestamp)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                CopyableResponseRow(label: "Signature", value: transaction.signature)
+            }
+        }
+        .padding(.vertical, 4)
     }
 }
 

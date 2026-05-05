@@ -12,8 +12,8 @@
 - [x] `POST /wallet/tokens/{mintAddress}` — add a token to user's wallet
 - [x] `DELETE /wallet/tokens/{mintAddress}` — remove a token from user's wallet
 - [x] `GET /wallet/balance` — get user's total portfolio value
-- [ ] `POST /tokens/{mintAddress}/send` — transfer tokens to another address
-- [ ] `GET /wallet/{mintAddress}/transactions` — transaction history for a specific token
+- [x] `POST /tokens/{mintAddress}/send` — transfer tokens to another address
+- [x] `GET /wallet/{mintAddress}/transactions` — transaction history for a specific token
 - [x] Fund backend devnet wallet with airdropped SOL
 
 ## iOS
