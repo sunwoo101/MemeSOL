@@ -109,49 +109,6 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
         return results;
     }
 
-    public async Task<List<WalletTokenResponse>> GetWalletTokensAsync(Guid userId, string baseUrl)
-    {
-        var user = await db.Users.FindAsync(userId)
-            ?? throw new InvalidOperationException("User not found.");
-
-        var rows = await db.UserTokens
-            .Where(ut => ut.UserId == userId && ut.Token.Status == TokenStatus.Completed)
-            .OrderByDescending(ut => ut.Token.CreatedAt)
-            .Select(ut => new {
-                ut.Token.Id, ut.Token.MintAddress, ut.Token.Name, ut.Token.Symbol,
-                ut.Token.Price, ut.Token.PriceOpenDay, ut.Token.PriceUpdatedAt, ut.Token.CreatedAt
-            })
-            .ToListAsync();
-
-        var results = new List<WalletTokenResponse>(rows.Count);
-        var balanceTasks = rows.Select(r => solanaService.GetTokenBalanceAsync(user.WalletPublicKey, r.MintAddress!));
-        var balances = await Task.WhenAll(balanceTasks);
-
-        for (var i = 0; i < rows.Count; i++)
-        {
-            var row = rows[i];
-            var (price, openDay, updatedAt, changed) = ComputeNewPrice(row.Price, row.PriceOpenDay, row.PriceUpdatedAt);
-            if (changed)
-                await db.Tokens.Where(t => t.Id == row.Id).ExecuteUpdateAsync(s => s
-                    .SetProperty(t => t.Price, price)
-                    .SetProperty(t => t.PriceOpenDay, openDay)
-                    .SetProperty(t => t.PriceUpdatedAt, updatedAt));
-
-            results.Add(new WalletTokenResponse
-            {
-                Id = row.Id,
-                MintAddress = row.MintAddress!,
-                Name = row.Name,
-                Symbol = row.Symbol,
-                ImgUrl = $"{baseUrl}/tokens/{row.Id}/image",
-                Price = price,
-                Balance = balances[i],
-                GainsPercent = openDay > 0 ? Math.Round((price - openDay) / openDay * 100, 2) : 0,
-            });
-        }
-        return results;
-    }
-
     public async Task<(byte[] Data, string ContentType)?> GetTokenImageAsync(Guid tokenId)
     {
         var token = await db.Tokens

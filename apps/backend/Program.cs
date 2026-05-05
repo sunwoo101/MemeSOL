@@ -55,6 +55,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PasswordHasher<User>>();
 builder.Services.AddScoped<TokensService>();
+builder.Services.AddScoped<WalletService>();
 builder.Services.AddScoped<SolanaService>();
 
 builder.Services.AddControllers();
