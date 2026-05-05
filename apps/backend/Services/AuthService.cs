@@ -6,6 +6,7 @@ using System.Text;
 using Backend.Data;
 using Backend.Models;
 using Backend.Models.DTOs;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Backend.Utilities;
@@ -19,13 +20,18 @@ namespace Backend.Services;
 /// </summary>
 /// <param name="db">Injected database context.</param>
 /// <param name="config">Injected configuration for accessing secrets.</param>
-public class AuthService(AppDbContext db, IConfiguration config)
+/// <param name="passwordHasher">Injected password hasher.</param>
+public class AuthService(AppDbContext db, IConfiguration config, PasswordHasher<User> passwordHasher)
 {
+    private readonly PasswordHasher<User> _passwordHasher = passwordHasher;
+
     /// <summary>
     /// Registers a new user with email and password.
     /// </summary>
     public async Task<AuthResponse> RegisterAsync(string email, string password)
     {
+        email = email.ToLower().Trim();
+
         if (!new EmailAddressAttribute().IsValid(email))
             throw new InvalidOperationException("Invalid email address.");
 
@@ -51,14 +57,22 @@ public class AuthService(AppDbContext db, IConfiguration config)
         {
             Id = Guid.NewGuid(),
             Email = email,
-            PasswordHash = HashUtils.Hash(password),
             WalletPublicKey = wallet.PublicKey,
             WalletPrivateKey = wallet.PrivateKey,
             RefreshTokenHash = HashUtils.Hash(rawRefreshToken),
         };
+        user.PasswordHash = _passwordHasher.HashPassword(user, password);
 
         db.Users.Add(user);
-        await db.SaveChangesAsync();
+
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            throw new InvalidOperationException("Email already in use.");
+        }
 
         return new AuthResponse
         {
@@ -73,14 +87,21 @@ public class AuthService(AppDbContext db, IConfiguration config)
     /// </summary>
     public async Task<AuthResponse> LoginAsync(string email, string password)
     {
+        email = email.ToLower().Trim();
+
         var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email)
             ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
-        if (user.PasswordHash != HashUtils.Hash(password))
+        var verifyResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+        if (verifyResult == PasswordVerificationResult.Failed)
             throw new UnauthorizedAccessException("Invalid email or password.");
 
         var rawRefreshToken = GenerateRefreshToken();
         user.RefreshTokenHash = HashUtils.Hash(rawRefreshToken);
+
+        if (verifyResult == PasswordVerificationResult.SuccessRehashNeeded)
+            user.PasswordHash = _passwordHasher.HashPassword(user, password);
+
         await db.SaveChangesAsync();
 
         return new AuthResponse
