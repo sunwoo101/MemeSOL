@@ -1,28 +1,24 @@
+//
+//  Dashboard.swift
+//  Assignment3
+//
+//  Created by Daniel Liu on 05/5/2026.
+//
+
 import SwiftUI
 
-struct Token: Identifiable {
-    let id = UUID()
-    let name: String
-    let symbol: String
-    let pricePerToken: String
-    let balance: String
-    let percentChange: String
-    let positive: Bool
-    let icon: String
-    let color: Color
-}
-
 struct DashboardView: View {
+    
     @State var totalBalance: Double = 12345.67
     @State var totalGainLoss: Double = 234.56
     @State var totalGainLossPercent: Double = -1.94
     
     @State var tokens: [Token] = [
-        Token(name: "Ethereum", symbol: "ETH",  pricePerToken: "$3,241.50",  balance: "$4,862.25",  percentChange: "+2.4%",  positive: true,  icon: "diamond.fill",           color: .blue),
-        Token(name: "Bitcoin",  symbol: "BTC",  pricePerToken: "$98,430.00", balance: "$2,952.90",  percentChange: "+1.1%",  positive: true,  icon: "bitcoinsign.circle.fill", color: .orange),
-        Token(name: "Solana",   symbol: "SOL",  pricePerToken: "$142.30",    balance: "$1,423.00",  percentChange: "-3.8%",  positive: false, icon: "s.circle.fill",           color: .purple),
-        Token(name: "USD Coin", symbol: "USDC", pricePerToken: "$1.00",      balance: "$2,100.00",  percentChange: "0.0%",   positive: true,  icon: "dollarsign.circle.fill",   color: .blue),
-        Token(name: "Chainlink",symbol: "LINK", pricePerToken: "$13.75",     balance: "$1,007.52",  percentChange: "-1.2%",  positive: false, icon: "link.circle.fill",         color: .cyan),
+        Token(name: "Ethereum", symbol: "ETH",  pricePerToken: "$3,241.50",  balance: "$4,862.25",  percentChange: "+2.4%",  positive: true,  iconUrl: "diamond.fill",           color: .blue),
+        Token(name: "Bitcoin",  symbol: "BTC",  pricePerToken: "$98,430.00", balance: "$2,952.90",  percentChange: "+1.1%",  positive: true,  iconUrl: "bitcoinsign.circle.fill", color: .orange),
+        Token(name: "Solana",   symbol: "SOL",  pricePerToken: "$142.30",    balance: "$1,423.00",  percentChange: "-3.8%",  positive: false, iconUrl: "s.circle.fill",           color: .purple),
+        Token(name: "USD Coin", symbol: "USDC", pricePerToken: "$1.00",      balance: "$2,100.00",  percentChange: "0.0%",   positive: true,  iconUrl: "dollarsign.circle.fill",   color: .blue),
+        Token(name: "Chainlink",symbol: "LINK", pricePerToken: "$13.75",     balance: "$1,007.52",  percentChange: "-1.2%",  positive: false, iconUrl: "link.circle.fill",         color: .cyan),
     ]
     
     private var formattedBalance: String {
@@ -89,7 +85,7 @@ struct DashboardView: View {
                         balance: token.balance,
                         change: token.percentChange,
                         positive: token.positive,
-                        icon: token.icon, color: token.color
+                        iconUrl: token.iconUrl, color: token.color
                     )
                     if index < tokens.count - 1 {
                         Divider()
@@ -100,6 +96,7 @@ struct DashboardView: View {
             }
         }
     }
+    
     private func sectionHeader(_ title: String) -> some View {
         Button {} label: {
             HStack(spacing: AppLayout.sectionHeaderSpacing) {
@@ -114,28 +111,6 @@ struct DashboardView: View {
     }
 }
 
-private struct ActionButton: View {
-    let icon: String
-    let label: String
-
-    var body: some View {
-        Button {} label: {
-            VStack(spacing: AppLayout.actionButtonContentSpacing) {
-                Image(systemName: icon)
-                    .font(.system(size: AppLayout.actionButtonIconSize))
-                    .foregroundColor(.white)
-                Text(label)
-                    .font(.caption)
-                    .foregroundColor(.white)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, AppLayout.actionButtonVerticalPadding)
-            .background(AppColors.charcoalColor)
-            .cornerRadius(AppLayout.cornerRadius)
-        }
-    }
-}
-
 private struct TokenRow: View {
     let name: String
     let symbol: String
@@ -143,17 +118,17 @@ private struct TokenRow: View {
     let balance: String
     let change: String
     let positive: Bool
-    let icon: String
+    let iconUrl: String
     let color: Color
-
+    
     var body: some View {
         HStack(spacing: AppLayout.tokenRowIconSpacing) {
-            Image(systemName: icon)
+            Image(systemName: "circle.fill")
                 .resizable()
                 .scaledToFit()
                 .frame(width: AppLayout.tokenIconSize, height: AppLayout.tokenIconSize)
                 .foregroundColor(color)
-
+            
             VStack(alignment: .leading, spacing: AppLayout.tokenTextStackSpacing) {
                 Text(name)
                     .font(.subheadline.bold())
@@ -162,9 +137,9 @@ private struct TokenRow: View {
                     .font(.caption)
                     .foregroundColor(.gray)
             }
-
+            
             Spacer()
-
+            
             VStack(alignment: .trailing, spacing: AppLayout.tokenTextStackSpacing) {
                 Text(balance)
                     .font(.subheadline.bold())
