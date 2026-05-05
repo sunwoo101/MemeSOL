@@ -30,9 +30,14 @@ struct TransactionListView: View {
                         .font(.body.weight(.semibold))
                 }
                 Spacer()
-                Text("\(token.name) Transactions")
-                    .font(.title3.bold())
-                    .foregroundColor(AppColors.goldColor)
+                VStack(spacing: 2) {
+                    Text(token.name)
+                        .font(.headline.bold())
+                        .foregroundColor(.white)
+                    Text("Transactions")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                }
                 Spacer()
                 Color.clear.frame(width: TransactionLayout.navBarSpacerWidth, height: TransactionLayout.navBarSpacerHeight)
             }

@@ -67,7 +67,7 @@ struct TokenViewDetails: View {
                             .foregroundColor(.white)
                     }
 
-                    Spacer()
+                    Spacer().frame(maxHeight: 40)
 
                     NavigationLink {
                         TransactionListView(token: token, GoBackToDashboard: GoBackToDashboard)
@@ -81,7 +81,7 @@ struct TokenViewDetails: View {
                             .cornerRadius(SharedLayout.cornerRadius)
                     }
 
-                    
+                    Spacer()
                 }
                 .padding(.top, TokenLayout.detailTopPadding)
                 .padding(.horizontal, SharedLayout.horizontalPadding)
