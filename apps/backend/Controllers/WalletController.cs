@@ -41,6 +41,26 @@ public class WalletController(WalletService walletService) : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("transactions")]
+    public async Task<ActionResult<List<TransactionHistoryResponse>>> GetAllTransactions()
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        var baseUrl = $"{Request.Scheme}://{Request.Host}/api";
+        return Ok(await walletService.GetAllTransactionsAsync(userId.Value, baseUrl));
+    }
+
+    [HttpGet("{mintAddress}/transactions")]
+    public async Task<ActionResult<List<TransactionHistoryResponse>>> GetTransactions(string mintAddress)
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        var baseUrl = $"{Request.Scheme}://{Request.Host}/api";
+        return Ok(await walletService.GetTransactionsAsync(userId.Value, mintAddress, baseUrl));
+    }
+
     [HttpGet("balance")]
     public async Task<ActionResult<WalletBalancesResponse>> GetWalletBalance()
     {

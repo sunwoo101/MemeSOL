@@ -2,6 +2,10 @@ import Foundation
 
 // MARK: - Models
 
+struct SendTokenResponse: Decodable {
+    let signature: String
+}
+
 struct TokenResponse: Decodable {
     let id: String
     let mintAddress: String
@@ -33,6 +37,18 @@ extension APIClient {
             throw APIError.serverError("You must be logged in to list tokens.")
         }
         return try await get(tokensBase)
+    }
+
+    // Transfers tokens to a recipient address. Amount is the amount of the token (not $).
+    func sendToken(mintAddress: String, recipientAddress: String, amount: Decimal) async throws -> SendTokenResponse {
+        guard accessToken != nil else {
+            throw APIError.serverError("You must be logged in to send tokens.")
+        }
+        guard amount > 0 else {
+            throw APIError.serverError("Amount must be greater than zero.")
+        }
+        struct Body: Encodable { let recipientAddress: String; let amount: Decimal }
+        return try await post("\(tokensBase)/\(mintAddress)/send", body: Body(recipientAddress: recipientAddress, amount: amount))
     }
 
     // Creates a new token and adds it to the wallet.
