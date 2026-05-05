@@ -94,9 +94,7 @@ struct DashboardView: View {
                     .buttonStyle(.plain)
                     
                     .sheet(item: $selectedToken) { token in
-                        TokenViewDetails(token: token, GoBackToDashboard: {
-                            selectedToken = nil
-                        })
+                        TokenViewDetails(token: token)
                     }
                     
                     if index < tokens.count - 1 {
