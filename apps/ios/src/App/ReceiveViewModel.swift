@@ -14,7 +14,7 @@ import UIKit
 class ReceiveViewModel: ObservableObject {
     @Published var address: String
     @Published var qrImage: UIImage?
-    @Published var copyButtonText = "Copy Address"
+    @Published var copyButtonText = "Copy"
     
     let context = CIContext() //convert to image
     let filter = CIFilter.qrCodeGenerator() //generate QR code
@@ -39,7 +39,7 @@ class ReceiveViewModel: ObservableObject {
         copyButtonText = "Copied!"
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            self.copyButtonText = "Copy Address"
+            self.copyButtonText = "Copy"
         }
         
     }

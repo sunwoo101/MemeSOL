@@ -11,6 +11,6 @@
 
 class WalletService {
     func getWalletAddress() -> WalletAddress {
-        return WalletAddress(address: "9x9231...1391")
+        return WalletAddress(address: "9x9234893274873847107301728471893470837580378017548301740317408137540813137483271391")
     }
 }
