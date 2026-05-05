@@ -139,16 +139,20 @@ public class SolanaService(IConfiguration config)
             throw new InvalidOperationException(
                 $"Failed to fetch transactions for wallet {walletPublicKey}, mint {mintAddress}: {response.RawRpcResponse}");
 
-        var detailTasks = response.Result
-            .Select(s => client.GetTransactionAsync(s.Signature, Commitment.Confirmed))
-            .ToList();
+        var semaphore = new SemaphoreSlim(5);
+        var detailTasks = response.Result.Select(async s =>
+        {
+            await semaphore.WaitAsync();
+            try { return await client.GetTransactionAsync(s.Signature, Commitment.Confirmed); }
+            finally { semaphore.Release(); }
+        }).ToList();
         var details = await Task.WhenAll(detailTasks);
 
         return response.Result.Select((s, i) =>
         {
             var timestamp = s.BlockTime.HasValue
                 ? DateTimeOffset.FromUnixTimeSeconds((long)s.BlockTime.Value).UtcDateTime
-                : DateTime.UtcNow;
+                : DateTime.MinValue;
 
             decimal? amount = null;
             string? txType = null;

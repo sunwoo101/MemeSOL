@@ -170,7 +170,8 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
         var exists = await db.UserTokens.AnyAsync(ut => ut.UserId == userId && ut.TokenId == token.Id);
         if (!exists)
             db.UserTokens.Add(new UserToken { UserId = userId, TokenId = token.Id });
-        try { await db.SaveChangesAsync(); } catch (DbUpdateException) { }
+        try { await db.SaveChangesAsync(); }
+        catch (DbUpdateException ex) when ((ex.InnerException as Npgsql.PostgresException)?.SqlState == "23505") { }
 
         return new SendTokenResponse { Signature = signature };
     }
