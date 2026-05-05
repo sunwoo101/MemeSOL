@@ -69,6 +69,9 @@ public class SolanaService(IConfiguration config)
         string mintAddress, string recipientPublicKey,
         ulong rawAmount, byte decimals)
     {
+        if (rawAmount == 0)
+            throw new ArgumentException("Transfer amount must be greater than zero.", nameof(rawAmount));
+
         var client = ClientFactory.GetClient(Cluster.DevNet);
 
         var mnemonicString = config["Solana:ServerMnemonic"]
@@ -107,6 +110,8 @@ public class SolanaService(IConfiguration config)
         var result = await client.SendTransactionAsync(tx);
         if (!result.WasRequestSuccessfullyHandled)
             throw new InvalidOperationException($"Transfer failed: {result.Reason}");
+        if (string.IsNullOrEmpty(result.Result))
+            throw new InvalidOperationException("Transfer submitted but returned no signature.");
 
         await WaitForConfirmationAsync(client, result.Result);
         return result.Result;
@@ -118,6 +123,9 @@ public class SolanaService(IConfiguration config)
     public async Task<List<(string Signature, DateTime Timestamp, bool Success)>> GetTokenTransactionsAsync(
         string walletPublicKey, string mintAddress, int limit = 20)
     {
+        if (limit < 1 || limit > 1000)
+            throw new ArgumentOutOfRangeException(nameof(limit), "Limit must be between 1 and 1000.");
+
         var client = ClientFactory.GetClient(Cluster.DevNet);
         var ata = AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(
             new PublicKey(walletPublicKey),
