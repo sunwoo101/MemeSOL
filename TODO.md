@@ -19,16 +19,11 @@
 - [ ] Apple Sign In flow (`ASAuthorizationAppleIDProvider`)
 - [ ] JWT storage in Keychain
 - [ ] API client (networking layer using `URLSession`)
-- [ ] Portfolio screen — list holdings with live prices
-- [ ] Gains/losses display (today's change)
+- [ ] Portfolio screen — list holdings with live prices and overall balance with gains/losses for today
 - [ ] Create token screen — name, symbol, supply
 - [ ] Token detail screen — balance, transactions
 - [ ] Send screen — recipient address + amount
 - [ ] Receive screen — display public wallet address + QR code
-
-## Infrastructure
-- [ ] Confirm devnet vs mainnet decision
-- [ ] Add `.env` to `.gitignore` if not already
 
 ## Design
 - [ ] Agree on UI style/theme as a team
