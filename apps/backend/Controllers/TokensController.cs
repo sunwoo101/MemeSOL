@@ -13,7 +13,7 @@ namespace Backend.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class TokensController(TokensService tokensService) : ControllerBase
+public class TokensController(TokensService tokensService, WalletService walletService) : ControllerBase
 {
     [HttpGet("{id:guid}/image")]
     [AllowAnonymous]
@@ -29,6 +29,17 @@ public class TokensController(TokensService tokensService) : ControllerBase
     {
         var baseUrl = $"{Request.Scheme}://{Request.Host}/api";
         var result = await tokensService.GetAllTokensAsync(baseUrl);
+        return Ok(result);
+    }
+
+    [HttpPost("{mintAddress}/send")]
+    public async Task<ActionResult<SendTokenResponse>> SendToken(string mintAddress, [FromBody] SendTokenRequest request)
+    {
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userIdClaim is null || !Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        var result = await walletService.SendTokenAsync(userId, mintAddress, request);
         return Ok(result);
     }
 

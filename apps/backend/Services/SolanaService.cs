@@ -1,3 +1,4 @@
+using Backend.Models.DTOs;
 using Solnet.Programs;
 using Solnet.Rpc;
 using Solnet.Rpc.Builders;
@@ -56,6 +57,89 @@ public class SolanaService(IConfiguration config)
         await WaitForConfirmationAsync(client, result.Result);
 
         return (mint.PublicKey.Key, TokenDecimals);
+    }
+
+    /// <summary>
+    /// Transfers SPL tokens from the sender's ATA to the recipient's ATA.
+    /// The server wallet acts as fee payer; the sender wallet signs as transfer authority.
+    /// Creates the recipient's ATA if it does not already exist.
+    /// </summary>
+    public async Task<string> SendTokenAsync(
+        string senderPublicKey, string senderPrivateKey,
+        string mintAddress, string recipientPublicKey,
+        ulong rawAmount, byte decimals)
+    {
+        var client = ClientFactory.GetClient(Cluster.DevNet);
+
+        var mnemonicString = config["Solana:ServerMnemonic"]
+            ?? throw new InvalidOperationException("Solana:ServerMnemonic not configured.");
+        var serverWallet = new Wallet(new Mnemonic(mnemonicString));
+        var feePayer = serverWallet.GetAccount(0);
+
+        var senderPrivKey = new PrivateKey(senderPrivateKey);
+        var senderAccount = new Account(senderPrivKey.KeyBytes, new PublicKey(senderPublicKey).KeyBytes);
+
+        var mintPubKey = new PublicKey(mintAddress);
+        var recipientPubKey = new PublicKey(recipientPublicKey);
+
+        var senderAta = AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(senderAccount.PublicKey, mintPubKey);
+        var recipientAta = AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(recipientPubKey, mintPubKey);
+
+        var blockhashResponse = await client.GetLatestBlockHashAsync();
+        if (!blockhashResponse.WasRequestSuccessfullyHandled || blockhashResponse.Result?.Value is null)
+            throw new InvalidOperationException("Failed to fetch blockhash.");
+
+        var txBuilder = new TransactionBuilder()
+            .SetRecentBlockHash(blockhashResponse.Result.Value.Blockhash)
+            .SetFeePayer(feePayer.PublicKey);
+
+        var recipientAtaInfo = await client.GetAccountInfoAsync(recipientAta);
+        if (!recipientAtaInfo.WasRequestSuccessfullyHandled || recipientAtaInfo.Result?.Value is null)
+            txBuilder.AddInstruction(AssociatedTokenAccountProgram.CreateAssociatedTokenAccount(
+                feePayer.PublicKey, recipientPubKey, mintPubKey));
+
+        txBuilder.AddInstruction(TokenProgram.TransferChecked(
+            senderAta, recipientAta, rawAmount, decimals, senderAccount.PublicKey, mintPubKey));
+
+        var tx = txBuilder.Build(new List<Account> { feePayer, senderAccount });
+        var result = await client.SendTransactionAsync(tx);
+        if (!result.WasRequestSuccessfullyHandled)
+            throw new InvalidOperationException($"Transfer failed: {result.Reason}");
+
+        await WaitForConfirmationAsync(client, result.Result);
+        return result.Result;
+    }
+
+    /// <summary>
+    /// Returns the most recent raw transaction records for the given wallet's ATA for a token.
+    /// </summary>
+    public async Task<List<(string Signature, DateTime Timestamp, bool Success)>> GetTokenTransactionsAsync(
+        string walletPublicKey, string mintAddress, int limit = 20)
+    {
+        try
+        {
+            var client = ClientFactory.GetClient(Cluster.DevNet);
+            var ata = AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(
+                new PublicKey(walletPublicKey),
+                new PublicKey(mintAddress)
+            );
+
+            var response = await client.GetSignaturesForAddressAsync(ata, (ulong)limit);
+            if (!response.WasRequestSuccessfullyHandled || response.Result is null)
+                return [];
+
+            return response.Result.Select(s => (
+                Signature: s.Signature,
+                Timestamp: s.BlockTime.HasValue
+                    ? DateTimeOffset.FromUnixTimeSeconds((long)s.BlockTime.Value).UtcDateTime
+                    : DateTime.UtcNow,
+                Success: s.Error is null
+            )).ToList();
+        }
+        catch
+        {
+            return [];
+        }
     }
 
     /// <summary>

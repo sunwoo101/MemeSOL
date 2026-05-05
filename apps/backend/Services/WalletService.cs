@@ -56,6 +56,81 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
         return results;
     }
 
+    public async Task<SendTokenResponse> SendTokenAsync(Guid userId, string mintAddress, SendTokenRequest request)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new InvalidOperationException("User not found.");
+
+        var token = await db.Tokens
+            .Where(t => t.MintAddress == mintAddress && t.Status == TokenStatus.Completed)
+            .Select(t => new { t.Decimals })
+            .FirstOrDefaultAsync()
+            ?? throw new KeyNotFoundException("Token not found.");
+
+        var rawAmount = (ulong)(request.Amount * (decimal)Math.Pow(10, token.Decimals));
+
+        var signature = await solanaService.SendTokenAsync(
+            user.WalletPublicKey, user.WalletPrivateKey,
+            mintAddress, request.RecipientAddress,
+            rawAmount, token.Decimals);
+
+        return new SendTokenResponse { Signature = signature };
+    }
+
+    public async Task<List<TransactionHistoryResponse>> GetTransactionsAsync(Guid userId, string mintAddress, string baseUrl)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new InvalidOperationException("User not found.");
+
+        var token = await db.Tokens
+            .Where(t => t.MintAddress == mintAddress && t.Status == TokenStatus.Completed)
+            .Select(t => new { t.Id, t.Name, t.Symbol })
+            .FirstOrDefaultAsync()
+            ?? throw new KeyNotFoundException("Token not found.");
+
+        var raw = await solanaService.GetTokenTransactionsAsync(user.WalletPublicKey, mintAddress);
+
+        return raw.Select(r => new TransactionHistoryResponse
+        {
+            Signature = r.Signature,
+            Timestamp = r.Timestamp,
+            Success = r.Success,
+            MintAddress = mintAddress,
+            TokenName = token.Name,
+            TokenSymbol = token.Symbol,
+            ImgUrl = $"{baseUrl}/tokens/{token.Id}/image",
+        }).ToList();
+    }
+
+    public async Task<List<TransactionHistoryResponse>> GetAllTransactionsAsync(Guid userId, string baseUrl)
+    {
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new InvalidOperationException("User not found.");
+
+        var tokens = await db.UserTokens
+            .Where(ut => ut.UserId == userId && ut.Token.Status == TokenStatus.Completed)
+            .Select(ut => new { ut.Token.Id, ut.Token.MintAddress, ut.Token.Name, ut.Token.Symbol })
+            .ToListAsync();
+
+        var txLists = await Task.WhenAll(
+            tokens.Select(t => solanaService.GetTokenTransactionsAsync(user.WalletPublicKey, t.MintAddress!))
+        );
+
+        return tokens
+            .SelectMany((t, i) => txLists[i].Select(r => new TransactionHistoryResponse
+            {
+                Signature = r.Signature,
+                Timestamp = r.Timestamp,
+                Success = r.Success,
+                MintAddress = t.MintAddress!,
+                TokenName = t.Name,
+                TokenSymbol = t.Symbol,
+                ImgUrl = $"{baseUrl}/tokens/{t.Id}/image",
+            }))
+            .OrderByDescending(r => r.Timestamp)
+            .ToList();
+    }
+
     public async Task AddWalletTokenAsync(Guid userId, string mintAddress)
     {
         var token = await db.Tokens
