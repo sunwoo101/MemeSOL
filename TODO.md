@@ -3,7 +3,8 @@
 ## Backend
 - [x] Set up database models (User, Token)
 - [x] Run initial EF Core migration
-- [x] `POST /auth/apple` — verify Apple identity token, return JWT + public wallet address
+- [x] `POST /auth/register` — create wallet and return JWT, refresh token + public wallet address
+- [x] `POST /auth/login` — validate login and return JWT, refresh token + public wallet address
 - [ ] `POST /tokens` — create SPL token on Solana devnet
 - [ ] `GET /tokens` — list all tokens on the platform
 - [ ] `GET /tokens/{mintAddress}` — get token details
