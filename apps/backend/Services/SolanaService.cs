@@ -69,6 +69,8 @@ public class SolanaService(IConfiguration config)
             var statusResponse = await client.GetSignatureStatusesAsync(new List<string> { signature });
             var status = statusResponse.Result?.Value?[0];
             if (status is null) continue;
+            if (status.Error is not null)
+                throw new InvalidOperationException($"Transaction {signature} failed on-chain: {status.Error}");
             if (status.ConfirmationStatus is "confirmed" or "finalized") return;
         }
         throw new InvalidOperationException("Transaction was not confirmed in time.");
