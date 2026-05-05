@@ -5,7 +5,7 @@
 - [x] Run initial EF Core migration
 - [x] `POST /auth/register` — create wallet and return JWT, refresh token + public wallet address
 - [x] `POST /auth/login` — validate login and return JWT, refresh token + public wallet address
-- [ ] `POST /tokens` — create SPL token on Solana devnet
+- [x] `POST /tokens` — create SPL token on Solana devnet
 - [ ] `GET /tokens` — list all tokens on the platform
 - [ ] `GET /tokens/{mintAddress}` — get token details
 - [ ] `GET /wallet/tokens` — list tokens in user's wallet
@@ -14,7 +14,7 @@
 - [ ] `GET /wallet/balances` — get user's balance for all wallet tokens
 - [ ] `POST /tokens/{mintAddress}/send` — transfer tokens to another address
 - [ ] `GET /wallet/{mintAddress}/transactions` — transaction history for a specific token
-- [ ] Fund backend devnet wallet with airdropped SOL
+- [x] Fund backend devnet wallet with airdropped SOL
 
 ## iOS
 - [ ] Apple Sign In flow (`ASAuthorizationAppleIDProvider`)
