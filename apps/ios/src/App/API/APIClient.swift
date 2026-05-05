@@ -140,19 +140,20 @@ final class APIClient {
         }
 
         if http.statusCode == 401, retryOnUnauthorized, let rt = refreshToken {
+            let refreshed: AuthResponse
             do {
-                let refreshed = try await refreshCoordinator.refresh { [weak self] in
+                refreshed = try await refreshCoordinator.refresh { [weak self] in
                     guard let self else { throw APIError.invalidResponse }
                     return try await self.performRefresh(rt)
                 }
                 persistTokens(accessToken: refreshed.accessToken, refreshToken: refreshed.refreshToken)
-                var retried = request
-                retried.setValue("Bearer \(refreshed.accessToken)", forHTTPHeaderField: "Authorization")
-                return try await send(retried, retryOnUnauthorized: false)
             } catch {
                 clearTokens()
                 throw APIError.serverError("Session expired. Please log in again.")
             }
+            var retried = request
+            retried.setValue("Bearer \(refreshed.accessToken)", forHTTPHeaderField: "Authorization")
+            return try await send(retried, retryOnUnauthorized: false)
         }
 
         guard (200...299).contains(http.statusCode) else {
