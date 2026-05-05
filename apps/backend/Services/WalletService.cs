@@ -97,7 +97,7 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
 
         var tokens = await db.UserTokens
             .Where(ut => ut.UserId == userId && ut.Token.Status == TokenStatus.Completed)
-            .Select(ut => new { ut.Token.MintAddress, ut.Token.Price, ut.Token.PriceOpenDay, ut.Token.PriceUpdatedAt })
+            .Select(ut => new { ut.Token.Id, ut.Token.MintAddress, ut.Token.Price, ut.Token.PriceOpenDay, ut.Token.PriceUpdatedAt })
             .ToListAsync();
 
         var balances = await Task.WhenAll(
@@ -110,7 +110,12 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
         for (var i = 0; i < tokens.Count; i++)
         {
             var t = tokens[i];
-            var (price, openDay, _, _) = ComputeNewPrice(t.Price, t.PriceOpenDay, t.PriceUpdatedAt);
+            var (price, openDay, updatedAt, changed) = ComputeNewPrice(t.Price, t.PriceOpenDay, t.PriceUpdatedAt);
+            if (changed)
+                await db.Tokens.Where(x => x.Id == t.Id).ExecuteUpdateAsync(s => s
+                    .SetProperty(x => x.Price, price)
+                    .SetProperty(x => x.PriceOpenDay, openDay)
+                    .SetProperty(x => x.PriceUpdatedAt, updatedAt));
             totalValue += price * balances[i];
             openDayValue += openDay * balances[i];
         }
