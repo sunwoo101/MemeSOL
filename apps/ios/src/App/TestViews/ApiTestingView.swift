@@ -557,14 +557,16 @@ private struct SendTokenSectionView: View {
     @State private var mintAddress = ""
     @State private var recipientAddress = ""
     @State private var amount = ""
+    @State private var submittedMint = ""
     @State private var isLoading = false
     @State private var response: SendTokenResponse? = nil
     @State private var errorText = ""
 
     private var isValid: Bool {
-        !mintAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !recipientAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        Double(amount) != nil
+        let amt = Double(amount)
+        return !mintAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !recipientAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            amt != nil && amt! > 0
     }
 
     var body: some View {
@@ -592,7 +594,7 @@ private struct SendTokenSectionView: View {
             if isLoading { ProgressView() }
 
             if let response {
-                ResponseCard(endpoint: "POST /api/tokens/\(mintAddress.trimmingCharacters(in: .whitespacesAndNewlines))/send") {
+                ResponseCard(endpoint: "POST /api/tokens/\(submittedMint)/send") {
                     CopyableResponseRow(label: "Signature", value: response.signature)
                 }
             }
@@ -605,7 +607,9 @@ private struct SendTokenSectionView: View {
     private func submit() {
         let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
         let recipient = recipientAddress.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let amt = Double(amount) else { return }
+        guard let amt = Double(amount), amt > 0 else { return }
+        submittedMint = mint
+        response = nil
         isLoading = true
         Task {
             defer { isLoading = false }
@@ -680,6 +684,7 @@ private struct AllTransactionsSectionView: View {
 
 private struct TransactionHistorySectionView: View {
     @State private var mintAddress = ""
+    @State private var submittedMint = ""
     @State private var isLoading = false
     @State private var transactions: [TransactionHistoryResponse] = []
     @State private var hasLoaded = false
@@ -703,7 +708,7 @@ private struct TransactionHistorySectionView: View {
             if isLoading { ProgressView() }
 
             if hasLoaded {
-                ResponseCard(endpoint: "GET /api/wallet/\(mintAddress.trimmingCharacters(in: .whitespacesAndNewlines))/transactions") {
+                ResponseCard(endpoint: "GET /api/wallet/\(submittedMint)/transactions") {
                     if transactions.isEmpty {
                         Text("No transactions")
                             .font(.footnote)
@@ -723,6 +728,7 @@ private struct TransactionHistorySectionView: View {
     @MainActor
     private func submit() {
         let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        submittedMint = mint
         hasLoaded = false
         isLoading = true
         Task {

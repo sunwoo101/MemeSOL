@@ -39,7 +39,7 @@ extension APIClient {
         return try await get(tokensBase)
     }
 
-    // Transfers tokens to a recipient address.
+    // Transfers tokens to a recipient address. Amount is the amount of the token (not $).
     func sendToken(mintAddress: String, recipientAddress: String, amount: Double) async throws -> SendTokenResponse {
         guard accessToken != nil else {
             throw APIError.serverError("You must be logged in to send tokens.")
