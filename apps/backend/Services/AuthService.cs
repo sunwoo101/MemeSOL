@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -18,89 +19,76 @@ namespace Backend.Services;
 /// </summary>
 /// <param name="db">Injected database context.</param>
 /// <param name="config">Injected configuration for accessing secrets.</param>
-/// <param name="httpClientFactory">Injected HTTP client factory for fetching Apple's public keys.</param>
-public class AuthService(AppDbContext db, IConfiguration config, IHttpClientFactory httpClientFactory)
+public class AuthService(AppDbContext db, IConfiguration config)
 {
-    private const string AppleKeysUrl = "https://appleid.apple.com/auth/keys";
-
     /// <summary>
-    /// Handles Apple Sign-In flow.
+    /// Registers a new user with email and password.
     /// </summary>
-    /// <param name="identityToken">The JWT identity token received from the iOS app after Apple Sign-In.</param>
-    public async Task<AuthResponse> AppleSignInAsync(string identityToken)
+    public async Task<AuthResponse> RegisterAsync(string email, string password)
     {
-        var appleUserId = await ValidateAppleTokenAsync(identityToken);
+        if (!new EmailAddressAttribute().IsValid(email))
+            throw new InvalidOperationException("Invalid email address.");
 
-        var user = await db.Users.FirstOrDefaultAsync(u => u.AppleUserId == appleUserId);
+        if (password.Length < 8)
+            throw new InvalidOperationException("Password must be at least 8 characters.");
 
+        if (!password.Any(char.IsUpper))
+            throw new InvalidOperationException("Password must contain at least one uppercase letter.");
+
+        if (!password.Any(char.IsDigit))
+            throw new InvalidOperationException("Password must contain at least one digit.");
+
+        if (password.All(char.IsAsciiLetterOrDigit))
+            throw new InvalidOperationException("Password must contain at least one special character.");
+
+        if (await db.Users.AnyAsync(u => u.Email == email))
+            throw new InvalidOperationException("Email already in use.");
+
+        var wallet = GenerateSolanaWallet();
         var rawRefreshToken = GenerateRefreshToken();
 
-        if (user is null)
+        var user = new User
         {
-            var wallet = GenerateSolanaWallet();
-            user = new User
-            {
-                Id = Guid.NewGuid(),
-                AppleUserId = appleUserId,
-                WalletPublicKey = wallet.PublicKey,
-                WalletPrivateKey = wallet.PrivateKey,
-                RefreshTokenHash = HashUtils.Hash(rawRefreshToken),
-            };
-            db.Users.Add(user);
-        }
-        else
-        {
-            user.RefreshTokenHash = HashUtils.Hash(rawRefreshToken);
-        }
+            Id = Guid.NewGuid(),
+            Email = email,
+            PasswordHash = HashUtils.Hash(password),
+            WalletPublicKey = wallet.PublicKey,
+            WalletPrivateKey = wallet.PrivateKey,
+            RefreshTokenHash = HashUtils.Hash(rawRefreshToken),
+        };
 
+        db.Users.Add(user);
         await db.SaveChangesAsync();
 
         return new AuthResponse
         {
-            WalletPublicKey = user.WalletPublicKey,
             AccessToken = GenerateJwt(user),
+            WalletPublicKey = user.WalletPublicKey,
             RefreshToken = rawRefreshToken,
         };
     }
 
     /// <summary>
-    /// Validates the Apple identity token by fetching Apple's public keys and verifying the JWT signature and claims.
+    /// Authenticates an existing user with email and password.
     /// </summary>
-    /// <param name="identityToken">The JWT identity token from Apple Sign-In.</param>
-    private async Task<string> ValidateAppleTokenAsync(string identityToken)
+    public async Task<AuthResponse> LoginAsync(string email, string password)
     {
-        var client = httpClientFactory.CreateClient("Apple");
-        var jwks = await client.GetStringAsync(AppleKeysUrl);
-        var keySet = new JsonWebKeySet(jwks);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.Email == email)
+            ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
-        var bundleId = config["Apple:BundleId"]
-            ?? throw new InvalidOperationException("Apple:BundleId not configured");
+        if (user.PasswordHash != HashUtils.Hash(password))
+            throw new UnauthorizedAccessException("Invalid email or password.");
 
-        var validationParams = new TokenValidationParameters
+        var rawRefreshToken = GenerateRefreshToken();
+        user.RefreshTokenHash = HashUtils.Hash(rawRefreshToken);
+        await db.SaveChangesAsync();
+
+        return new AuthResponse
         {
-            ValidIssuer = "https://appleid.apple.com",
-            ValidAudience = bundleId,
-            IssuerSigningKeys = keySet.GetSigningKeys(),
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+            AccessToken = GenerateJwt(user),
+            WalletPublicKey = user.WalletPublicKey,
+            RefreshToken = rawRefreshToken,
         };
-
-        var handler = new JwtSecurityTokenHandler();
-
-        ClaimsPrincipal principal;
-        try
-        {
-            principal = handler.ValidateToken(identityToken, validationParams, out _);
-        }
-        catch (Exception ex) when (ex is SecurityTokenException or ArgumentException)
-        {
-            throw new UnauthorizedAccessException("Invalid Apple identity token.");
-        }
-
-        return principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? throw new UnauthorizedAccessException("Missing sub claim in Apple identity token.");
     }
 
     /// <summary>
@@ -151,5 +139,4 @@ public class AuthService(AppDbContext db, IConfiguration config, IHttpClientFact
         var bytes = RandomNumberGenerator.GetBytes(64);
         return Convert.ToBase64String(bytes);
     }
-
 }
