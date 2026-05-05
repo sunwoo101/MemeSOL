@@ -16,6 +16,7 @@ struct ApiTestingView: View {
                 ListAllTokensSectionView()
                 ListWalletTokensSectionView()
                 AddWalletTokenSectionView()
+                BuyTokenSectionView()
                 RemoveWalletTokenSectionView()
                 WalletBalanceSectionView()
                 SendTokenSectionView()
@@ -362,6 +363,74 @@ private struct AddWalletTokenSectionView: View {
                 errorText = ""
             } catch {
                 success = false
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - BuyTokenSectionView
+
+private struct BuyTokenSectionView: View {
+    @State private var mintAddress = ""
+    @State private var amount = ""
+    @State private var submittedMint = ""
+    @State private var isLoading = false
+    @State private var response: SendTokenResponse? = nil
+    @State private var errorText = ""
+
+    private var isValid: Bool {
+        let amt = Decimal(string: amount)
+        return !mintAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            amt != nil && amt! > 0
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Buy Token")
+                .font(.title2)
+                .bold()
+
+            VStack(spacing: 12) {
+                TextField("Mint Address", text: $mintAddress)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                TextField("Amount", text: $amount)
+                    .keyboardType(.decimalPad)
+            }
+            .textFieldStyle(.roundedBorder)
+
+            Button("POST /wallet/tokens/{mintAddress}/buy") { submit() }
+                .buttonStyle(.borderedProminent)
+                .disabled(isLoading || !isValid)
+
+            if isLoading { ProgressView() }
+
+            if let response {
+                ResponseCard(endpoint: "POST /api/wallet/tokens/\(submittedMint)/buy") {
+                    CopyableResponseRow(label: "Signature", value: response.signature)
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let amt = Decimal(string: amount), amt > 0 else { return }
+        submittedMint = mint
+        response = nil
+        errorText = ""
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                response = try await APIClient.shared.buyToken(mintAddress: mint, amount: amt)
+                errorText = ""
+            } catch {
+                response = nil
                 errorText = error.localizedDescription
             }
         }
@@ -771,6 +840,19 @@ private struct TransactionRow: View {
                     Text(transaction.success ? "Success" : "Failed")
                         .font(.caption)
                         .foregroundStyle(transaction.success ? .green : .red)
+                }
+                HStack(spacing: 8) {
+                    if let type = transaction.transactionType {
+                        Text(type.capitalized)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    if let amount = transaction.amount {
+                        let isReceived = transaction.transactionType == "received"
+                        Text("\(isReceived ? "+" : "-")\(String(format: "%.4f", amount)) \(transaction.tokenSymbol)")
+                            .font(.caption)
+                            .foregroundStyle(isReceived ? .green : .red)
+                    }
                 }
                 Text(transaction.timestamp)
                     .font(.caption2)

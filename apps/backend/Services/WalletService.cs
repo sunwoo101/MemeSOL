@@ -108,6 +108,8 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             TokenName = token.Name,
             TokenSymbol = token.Symbol,
             ImgUrl = $"{baseUrl}/tokens/{token.Id}/image",
+            Amount = r.Amount,
+            TransactionType = r.TransactionType,
         }).ToList();
     }
 
@@ -135,9 +137,42 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
                 TokenName = t.Name,
                 TokenSymbol = t.Symbol,
                 ImgUrl = $"{baseUrl}/tokens/{t.Id}/image",
+                Amount = r.Amount,
+                TransactionType = r.TransactionType,
             }))
             .OrderByDescending(r => r.Timestamp)
             .ToList();
+    }
+
+    public async Task<SendTokenResponse> BuyTokenAsync(Guid userId, string mintAddress, BuyTokenRequest request)
+    {
+        if (request.Amount <= 0)
+            throw new InvalidOperationException("Amount must be greater than zero.");
+
+        var scaledAmount = request.Amount * (decimal)Math.Pow(10, SolanaService.TokenDecimals);
+        if (scaledAmount != Math.Floor(scaledAmount))
+            throw new InvalidOperationException($"Amount exceeds the precision of this token ({SolanaService.TokenDecimals} decimal places).");
+        if (scaledAmount > ulong.MaxValue)
+            throw new InvalidOperationException("Amount is too large.");
+
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new InvalidOperationException("User not found.");
+
+        var token = await db.Tokens
+            .Where(t => t.MintAddress == mintAddress && t.Status == TokenStatus.Completed)
+            .Select(t => new { t.Id })
+            .FirstOrDefaultAsync()
+            ?? throw new KeyNotFoundException("Token not found.");
+
+        var signature = await solanaService.MintTokensAsync(user.WalletPublicKey, mintAddress, (ulong)scaledAmount);
+
+        // Ensure token is in wallet
+        var exists = await db.UserTokens.AnyAsync(ut => ut.UserId == userId && ut.TokenId == token.Id);
+        if (!exists)
+            db.UserTokens.Add(new UserToken { UserId = userId, TokenId = token.Id });
+        try { await db.SaveChangesAsync(); } catch (DbUpdateException) { }
+
+        return new SendTokenResponse { Signature = signature };
     }
 
     public async Task AddWalletTokenAsync(Guid userId, string mintAddress)

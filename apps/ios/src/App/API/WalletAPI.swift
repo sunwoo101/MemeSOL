@@ -10,6 +10,8 @@ struct TransactionHistoryResponse: Decodable {
     let tokenName: String
     let tokenSymbol: String
     let imgUrl: String
+    let amount: Double?
+    let transactionType: String?
 }
 
 struct WalletBalancesResponse: Decodable {
@@ -40,6 +42,18 @@ extension APIClient {
             throw APIError.serverError("You must be logged in to view your wallet.")
         }
         return try await get("\(walletBase)/tokens")
+    }
+
+    // Mints tokens to the user's wallet. Amount is in token units (not $).
+    func buyToken(mintAddress: String, amount: Decimal) async throws -> SendTokenResponse {
+        guard accessToken != nil else {
+            throw APIError.serverError("You must be logged in to buy tokens.")
+        }
+        guard amount > 0 else {
+            throw APIError.serverError("Amount must be greater than zero.")
+        }
+        struct Body: Encodable { let amount: Decimal }
+        return try await post("\(walletBase)/tokens/\(mintAddress)/buy", body: Body(amount: amount))
     }
 
     // Adds a token to the user's wallet by mint address.
