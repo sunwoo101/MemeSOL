@@ -69,6 +69,7 @@ private struct AuthSectionView: View {
 
     private enum AuthAction { case register, login }
 
+    @MainActor
     private func submit(action: AuthAction) {
         isLoading = true
         Task {
