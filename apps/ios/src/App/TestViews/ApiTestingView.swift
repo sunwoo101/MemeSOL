@@ -307,6 +307,7 @@ private struct ListWalletTokensSectionView: View {
 
 private struct AddWalletTokenSectionView: View {
     @State private var mintAddress = ""
+    @State private var submittedMintAddress = ""
     @State private var isLoading = false
     @State private var success = false
     @State private var errorText = ""
@@ -324,12 +325,12 @@ private struct AddWalletTokenSectionView: View {
 
             Button("POST /wallet/tokens/{mintAddress}") { submit() }
                 .buttonStyle(.borderedProminent)
-                .disabled(isLoading || mintAddress.isEmpty)
+                .disabled(isLoading || mintAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
             if isLoading { ProgressView() }
 
             if success {
-                ResponseCard(endpoint: "POST /api/wallet/tokens/\(mintAddress)") {
+                ResponseCard(endpoint: "POST /api/wallet/tokens/\(submittedMintAddress)") {
                     Text("Token added to wallet.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -342,11 +343,14 @@ private struct AddWalletTokenSectionView: View {
 
     @MainActor
     private func submit() {
+        let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        submittedMintAddress = mint
+        success = false
         isLoading = true
         Task {
             defer { isLoading = false }
             do {
-                try await APIClient.shared.addWalletToken(mintAddress: mintAddress)
+                try await APIClient.shared.addWalletToken(mintAddress: mint)
                 success = true
                 errorText = ""
             } catch {
@@ -361,6 +365,7 @@ private struct AddWalletTokenSectionView: View {
 
 private struct RemoveWalletTokenSectionView: View {
     @State private var mintAddress = ""
+    @State private var submittedMintAddress = ""
     @State private var isLoading = false
     @State private var success = false
     @State private var errorText = ""
@@ -378,12 +383,12 @@ private struct RemoveWalletTokenSectionView: View {
 
             Button("DELETE /wallet/tokens/{mintAddress}") { submit() }
                 .buttonStyle(.bordered)
-                .disabled(isLoading || mintAddress.isEmpty)
+                .disabled(isLoading || mintAddress.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
             if isLoading { ProgressView() }
 
             if success {
-                ResponseCard(endpoint: "DELETE /api/wallet/tokens/\(mintAddress)") {
+                ResponseCard(endpoint: "DELETE /api/wallet/tokens/\(submittedMintAddress)") {
                     Text("Token removed from wallet.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -396,11 +401,14 @@ private struct RemoveWalletTokenSectionView: View {
 
     @MainActor
     private func submit() {
+        let mint = mintAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        submittedMintAddress = mint
+        success = false
         isLoading = true
         Task {
             defer { isLoading = false }
             do {
-                try await APIClient.shared.removeWalletToken(mintAddress: mintAddress)
+                try await APIClient.shared.removeWalletToken(mintAddress: mint)
                 success = true
                 errorText = ""
             } catch {
@@ -546,13 +554,16 @@ private struct CopyableResponseRow: View {
     let label: String
     let value: String
     @State private var copied = false
+    @State private var copyResetTask: Task<Void, Never>?
 
     var body: some View {
         Button {
             UIPasteboard.general.string = value
             copied = true
-            Task {
+            copyResetTask?.cancel()
+            copyResetTask = Task {
                 try? await Task.sleep(for: .seconds(1.5))
+                guard !Task.isCancelled else { return }
                 copied = false
             }
         } label: {
