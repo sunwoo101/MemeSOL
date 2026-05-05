@@ -15,10 +15,20 @@ namespace Backend.Controllers;
 [Authorize]
 public class TokensController(TokensService tokensService) : ControllerBase
 {
-    [HttpGet]
-    public async Task<ActionResult<List<TokenResponse>>> GetAllTokens()
+    [HttpGet("{id:guid}/image")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetTokenImage(Guid id)
     {
-        var result = await tokensService.GetAllTokensAsync();
+        var image = await tokensService.GetTokenImageAsync(id);
+        if (image is null) return NotFound();
+        return File(image.Value.Data, image.Value.ContentType);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<TokenListResponse>>> GetAllTokens()
+    {
+        var baseUrl = $"{Request.Scheme}://{Request.Host}/api";
+        var result = await tokensService.GetAllTokensAsync(baseUrl);
         return Ok(result);
     }
 

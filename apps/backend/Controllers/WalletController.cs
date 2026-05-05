@@ -12,13 +12,14 @@ namespace Backend.Controllers;
 public class WalletController(TokensService tokensService) : ControllerBase
 {
     [HttpGet("tokens")]
-    public async Task<ActionResult<List<TokenResponse>>> GetWalletTokens()
+    public async Task<ActionResult<List<WalletTokenResponse>>> GetWalletTokens()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userIdClaim is null || !Guid.TryParse(userIdClaim, out var userId))
             return Unauthorized();
 
-        var result = await tokensService.GetWalletTokensAsync(userId);
+        var baseUrl = $"{Request.Scheme}://{Request.Host}/api";
+        var result = await tokensService.GetWalletTokensAsync(userId, baseUrl);
         return Ok(result);
     }
 }

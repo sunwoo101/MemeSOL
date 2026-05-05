@@ -18,5 +18,9 @@ public class Token
     public User CreatedBy { get; set; } = null!;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public decimal Price { get; set; }
+    public decimal PriceOpenDay { get; set; }
+    public DateTime? PriceUpdatedAt { get; set; }
+
     public ICollection<UserToken> UserTokens { get; set; } = [];
 }

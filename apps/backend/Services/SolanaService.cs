@@ -59,6 +59,34 @@ public class SolanaService(IConfiguration config)
     }
 
     /// <summary>
+    /// Returns the human-readable token balance for the given wallet and mint.
+    /// Returns 0 if the Associated Token Account doesn't exist yet.
+    /// </summary>
+    public async Task<decimal> GetTokenBalanceAsync(string walletPublicKey, string mintAddress)
+    {
+        try
+        {
+            var client = ClientFactory.GetClient(Cluster.DevNet);
+            var ata = AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(
+                new PublicKey(walletPublicKey),
+                new PublicKey(mintAddress)
+            );
+
+            var response = await client.GetTokenAccountBalanceAsync(ata);
+            if (!response.WasRequestSuccessfullyHandled || response.Result?.Value is null)
+                return 0m;
+
+            var raw = response.Result.Value.AmountUlong;
+            var decimals = response.Result.Value.Decimals;
+            return (decimal)raw / (decimal)Math.Pow(10, decimals);
+        }
+        catch
+        {
+            return 0m;
+        }
+    }
+
+    /// <summary>
     /// Polls until a transaction reaches confirmed status or throws if it times out.
     /// </summary>
     private static async Task WaitForConfirmationAsync(IRpcClient client, string signature, int maxAttempts = 30)
