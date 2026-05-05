@@ -137,7 +137,7 @@ private struct TokensSectionView: View {
 
             Button("Create Token") { submit() }
                 .buttonStyle(.borderedProminent)
-                .disabled(isLoading || name.isEmpty || symbol.isEmpty || supply.isEmpty || selectedImageData == nil)
+                .disabled(isLoading || name.isEmpty || symbol.isEmpty || UInt64(supply) == nil || selectedImageData == nil)
 
             if isLoading {
                 ProgressView()
