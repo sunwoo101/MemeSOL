@@ -7,6 +7,7 @@ using Backend.Models;
 using Backend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Backend.Utilities;
 using Solnet.Wallet;
 using Solnet.Wallet.Bip39;
 
@@ -32,6 +33,8 @@ public class AuthService(AppDbContext db, IConfiguration config, IHttpClientFact
 
         var user = await db.Users.FirstOrDefaultAsync(u => u.AppleUserId == appleUserId);
 
+        var rawRefreshToken = GenerateRefreshToken();
+
         if (user is null)
         {
             var wallet = GenerateSolanaWallet();
@@ -41,17 +44,22 @@ public class AuthService(AppDbContext db, IConfiguration config, IHttpClientFact
                 AppleUserId = appleUserId,
                 WalletPublicKey = wallet.PublicKey,
                 WalletPrivateKey = wallet.PrivateKey,
-                RefreshToken = GenerateRefreshToken(),
+                RefreshTokenHash = HashUtils.Hash(rawRefreshToken),
             };
             db.Users.Add(user);
-            await db.SaveChangesAsync();
         }
+        else
+        {
+            user.RefreshTokenHash = HashUtils.Hash(rawRefreshToken);
+        }
+
+        await db.SaveChangesAsync();
 
         return new AuthResponse
         {
             WalletPublicKey = user.WalletPublicKey,
             AccessToken = GenerateJwt(user),
-            RefreshToken = user.RefreshToken,
+            RefreshToken = rawRefreshToken,
         };
     }
 
@@ -61,7 +69,7 @@ public class AuthService(AppDbContext db, IConfiguration config, IHttpClientFact
     /// <param name="identityToken">The JWT identity token from Apple Sign-In.</param>
     private async Task<string> ValidateAppleTokenAsync(string identityToken)
     {
-        var client = httpClientFactory.CreateClient();
+        var client = httpClientFactory.CreateClient("Apple");
         var jwks = await client.GetStringAsync(AppleKeysUrl);
         var keySet = new JsonWebKeySet(jwks);
 
@@ -123,9 +131,7 @@ public class AuthService(AppDbContext db, IConfiguration config, IHttpClientFact
     }
 
     /// <summary>
-    /// Generates a secure random refresh token as a base64 string.
-    /// This token can be stored in the database and used to issue
-    /// new access tokens when the current one expires.
+    /// Generates a new Solana wallet using the Solnet library.
     /// </summary>
     private static (string PublicKey, string PrivateKey) GenerateSolanaWallet()
     {
@@ -137,10 +143,13 @@ public class AuthService(AppDbContext db, IConfiguration config, IHttpClientFact
 
     /// <summary>
     /// Generates a secure random refresh token as a base64 string.
+    /// This token can be stored in the database and used to issue
+    /// new access tokens when the current one expires.
     /// </summary>
     private static string GenerateRefreshToken()
     {
         var bytes = RandomNumberGenerator.GetBytes(64);
         return Convert.ToBase64String(bytes);
     }
+
 }
