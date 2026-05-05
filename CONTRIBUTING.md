@@ -18,14 +18,15 @@ Guidelines for contributing to this project. Please follow these to keep our wor
 
 ### PR Title Format
 
-Use the format: `type: [scope] short description`
+Use the format: `type: short description`
 
 - **type** — one of: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`
-- **scope** — `backend` or `frontend`
+
+Add a tag for the scope: `backend` or `frontend`
 
 Examples:
 
-- `feat: [backend] create account`
-- `feat: [frontend] onboarding screen`
-- `fix: [backend] login validation error`
-- `chore: [frontend] update dependencies`
+- `feat: create account`
+- `feat: onboarding screen`
+- `fix: login validation error`
+- `chore: update dependencies`
