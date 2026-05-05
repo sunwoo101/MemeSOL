@@ -22,16 +22,17 @@ struct ReceiveView: View {
                 .scaledToFit()
                 .frame(width: 200, height: 200)
         }
+        HStack {
+            Button {
+                viewModel.copyAddress()
+            } label: {
+                Label(viewModel.copyButtonText, systemImage: "doc.on.doc")
+            }
+        }
         
     }
-    
 }
 
 #Preview {
     ReceiveView()
 }
-
-//show wallet address
-//show qr
-//copy button
-//share?
