@@ -46,12 +46,14 @@ namespace backend.Migrations
                         .HasColumnType("bytea");
 
                     b.Property<string>("MintAddress")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Supply")
                         .HasColumnType("numeric(20,0)");

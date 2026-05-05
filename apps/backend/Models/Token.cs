@@ -6,11 +6,12 @@ namespace Backend.Models;
 public class Token
 {
     public Guid Id { get; set; }
-    public string MintAddress { get; set; } = string.Empty;
+    public string? MintAddress { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Symbol { get; set; } = string.Empty;
     public ulong Supply { get; set; }
     public byte Decimals { get; set; }
+    public TokenStatus Status { get; set; } = TokenStatus.Pending;
     public byte[] ImageData { get; set; } = [];
     public string ImageContentType { get; set; } = string.Empty;
     public Guid CreatedByUserId { get; set; }
