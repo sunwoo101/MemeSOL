@@ -1,8 +1,8 @@
 # Memecoin Wallet App — Todo
 
 ## Backend
-- [ ] Set up database models (User, Token)
-- [ ] Run initial EF Core migration
+- [x] Set up database models (User, Token)
+- [x] Run initial EF Core migration
 - [ ] `POST /auth/apple` — verify Apple identity token, return JWT + public wallet address
 - [ ] `POST /tokens` — create SPL token on Solana devnet
 - [ ] `GET /tokens` — list all tokens on the platform

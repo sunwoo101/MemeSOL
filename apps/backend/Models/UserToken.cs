@@ -1,7 +1,7 @@
 namespace Backend.Models;
 
 /// <summary>
-/// Represents <c>Token</c>s that <c>User</c>s have added to their wallet.
+/// Represents <c>Token</c>s on the Solana blockchain that <c>User</c>s have added to their wallet.
 /// </summary>
 public class UserToken
 {
