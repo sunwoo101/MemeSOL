@@ -20,21 +20,47 @@ private struct APIErrorBody: Decodable {
     let message: String
 }
 
+// MARK: - RefreshCoordinator
+
+private actor RefreshCoordinator {
+    private var task: Task<AuthResponse, Error>?
+
+    func refresh(using perform: @escaping () async throws -> AuthResponse) async throws -> AuthResponse {
+        if let existing = task {
+            return try await existing.value
+        }
+        let t = Task { try await perform() }
+        task = t
+        do {
+            let result = try await t.value
+            task = nil
+            return result
+        } catch {
+            task = nil
+            throw error
+        }
+    }
+}
+
 // MARK: - Client
 
 final class APIClient {
     static let shared = APIClient()
 
     var accessToken: String?
+    var refreshToken: String?
 
     private let baseURL: URL
     private let session: URLSession
+    private let refreshCoordinator = RefreshCoordinator()
     let encoder = JSONEncoder()
     let decoder = JSONDecoder()
 
     private init() {
         baseURL = URL(string: "http://localhost:5000/api")!
         session = .shared
+        accessToken = KeychainHelper.load(forKey: "accessToken")
+        refreshToken = KeychainHelper.load(forKey: "refreshToken")
     }
 
     func get<R: Decodable>(_ path: String) async throws -> R {
@@ -92,11 +118,42 @@ final class APIClient {
         }
     }
 
-    private func send<R: Decodable>(_ request: URLRequest) async throws -> R {
+    func persistTokens(accessToken: String, refreshToken: String) {
+        self.accessToken = accessToken
+        self.refreshToken = refreshToken
+        KeychainHelper.save(accessToken, forKey: "accessToken")
+        KeychainHelper.save(refreshToken, forKey: "refreshToken")
+    }
+
+    func clearTokens() {
+        accessToken = nil
+        refreshToken = nil
+        KeychainHelper.delete(forKey: "accessToken")
+        KeychainHelper.delete(forKey: "refreshToken")
+    }
+
+    func send<R: Decodable>(_ request: URLRequest, retryOnUnauthorized: Bool = true) async throws -> R {
         let (data, response) = try await session.data(for: request)
 
         guard let http = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
+        }
+
+        if http.statusCode == 401, retryOnUnauthorized, let rt = refreshToken {
+            let refreshed: AuthResponse
+            do {
+                refreshed = try await refreshCoordinator.refresh { [weak self] in
+                    guard let self else { throw APIError.invalidResponse }
+                    return try await self.performRefresh(rt)
+                }
+                persistTokens(accessToken: refreshed.accessToken, refreshToken: refreshed.refreshToken)
+            } catch {
+                clearTokens()
+                throw APIError.serverError("Session expired. Please log in again.")
+            }
+            var retried = request
+            retried.setValue("Bearer \(refreshed.accessToken)", forHTTPHeaderField: "Authorization")
+            return try await send(retried, retryOnUnauthorized: false)
         }
 
         guard (200...299).contains(http.statusCode) else {
@@ -109,6 +166,18 @@ final class APIClient {
         } catch {
             throw APIError.decodingFailed
         }
+    }
+
+    private func performRefresh(_ refreshToken: String) async throws -> AuthResponse {
+        struct Body: Encodable { let refreshToken: String }
+        guard let url = URL(string: baseURL.absoluteString + "/auth/refresh") else {
+            throw APIError.invalidResponse
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try encoder.encode(Body(refreshToken: refreshToken))
+        return try await send(request, retryOnUnauthorized: false)
     }
 }
 

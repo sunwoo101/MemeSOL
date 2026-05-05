@@ -188,7 +188,7 @@ private struct TokensSectionView: View {
 
 private struct ListAllTokensSectionView: View {
     @State private var isLoading = false
-    @State private var tokens: [TokenResponse] = []
+    @State private var tokens: [TokenListResponse] = []
     @State private var hasLoaded = false
     @State private var errorText = ""
 
@@ -246,7 +246,7 @@ private struct ListAllTokensSectionView: View {
 
 private struct ListWalletTokensSectionView: View {
     @State private var isLoading = false
-    @State private var tokens: [TokenResponse] = []
+    @State private var tokens: [WalletTokenResponse] = []
     @State private var hasLoaded = false
     @State private var errorText = ""
 
@@ -272,7 +272,7 @@ private struct ListWalletTokensSectionView: View {
                             .foregroundStyle(.secondary)
                     } else {
                         ForEach(tokens, id: \.id) { token in
-                            TokenListRow(token: token)
+                            WalletTokenListRow(token: token)
                         }
                     }
                 }
@@ -303,17 +303,62 @@ private struct ListWalletTokensSectionView: View {
 // MARK: - TokenListRow
 
 private struct TokenListRow: View {
-    let token: TokenResponse
+    let token: TokenListResponse
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("\(token.name) (\(token.symbol))")
-                .font(.footnote)
-                .bold()
-            ResponseRow(label: "Mint Address", value: token.mintAddress)
-            ResponseRow(label: "Supply", value: String(token.supply))
+        HStack(alignment: .top, spacing: 10) {
+            TokenImage(url: token.imgUrl)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(token.name) (\(token.symbol))")
+                    .font(.footnote)
+                    .bold()
+                ResponseRow(label: "Mint Address", value: token.mintAddress)
+                ResponseRow(label: "Price", value: String(format: "$%.4f", token.price))
+                ResponseRow(label: "Gains", value: String(format: "%.2f%%", token.gainsPercent))
+            }
         }
         .padding(.vertical, 4)
+    }
+}
+
+// MARK: - WalletTokenListRow
+
+private struct WalletTokenListRow: View {
+    let token: WalletTokenResponse
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            TokenImage(url: token.imgUrl)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("\(token.name) (\(token.symbol))")
+                    .font(.footnote)
+                    .bold()
+                ResponseRow(label: "Mint Address", value: token.mintAddress)
+                ResponseRow(label: "Price", value: String(format: "$%.4f", token.price))
+                ResponseRow(label: "Balance", value: String(format: "%.4f", token.balance))
+                ResponseRow(label: "Gains", value: String(format: "%.2f%%", token.gainsPercent))
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+// MARK: - TokenImage
+
+private struct TokenImage: View {
+    let url: String
+
+    var body: some View {
+        AsyncImage(url: URL(string: url)) { phase in
+            switch phase {
+            case .success(let image):
+                image.resizable().scaledToFill()
+            default:
+                Color.secondary.opacity(0.2)
+            }
+        }
+        .frame(width: 40, height: 40)
+        .clipShape(Circle())
     }
 }
 

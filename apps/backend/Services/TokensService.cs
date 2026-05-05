@@ -74,41 +74,114 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
         };
     }
 
-    public async Task<List<TokenResponse>> GetAllTokensAsync()
+    public async Task<List<TokenListResponse>> GetAllTokensAsync(string baseUrl)
     {
-        return await db.Tokens
+        var rows = await db.Tokens
             .Where(t => t.Status == TokenStatus.Completed)
             .OrderByDescending(t => t.CreatedAt)
-            .Select(t => new TokenResponse
-            {
-                Id = t.Id,
-                MintAddress = t.MintAddress!,
-                Name = t.Name,
-                Symbol = t.Symbol,
-                Supply = t.Supply,
-                Decimals = t.Decimals,
-                CreatedAt = t.CreatedAt,
+            .Select(t => new {
+                t.Id, t.MintAddress, t.Name, t.Symbol,
+                t.Price, t.PriceOpenDay, t.PriceUpdatedAt, t.CreatedAt
             })
             .ToListAsync();
+
+        var results = new List<TokenListResponse>(rows.Count);
+        foreach (var row in rows)
+        {
+            var (price, openDay, updatedAt, changed) = ComputeNewPrice(row.Price, row.PriceOpenDay, row.PriceUpdatedAt);
+            if (changed)
+                await db.Tokens.Where(t => t.Id == row.Id).ExecuteUpdateAsync(s => s
+                    .SetProperty(t => t.Price, price)
+                    .SetProperty(t => t.PriceOpenDay, openDay)
+                    .SetProperty(t => t.PriceUpdatedAt, updatedAt));
+
+            results.Add(new TokenListResponse
+            {
+                Id = row.Id,
+                MintAddress = row.MintAddress!,
+                Name = row.Name,
+                Symbol = row.Symbol,
+                ImgUrl = $"{baseUrl}/tokens/{row.Id}/image",
+                Price = price,
+                GainsPercent = openDay > 0 ? Math.Round((price - openDay) / openDay * 100, 2) : 0,
+            });
+        }
+        return results;
     }
 
-    public async Task<List<TokenResponse>> GetWalletTokensAsync(Guid userId)
+    public async Task<List<WalletTokenResponse>> GetWalletTokensAsync(Guid userId, string baseUrl)
     {
-        return await db.UserTokens
-            .Where(ut => ut.UserId == userId)
-            .Select(ut => ut.Token)
-            .Where(t => t.Status == TokenStatus.Completed)
-            .OrderByDescending(t => t.CreatedAt)
-            .Select(t => new TokenResponse
-            {
-                Id = t.Id,
-                MintAddress = t.MintAddress!,
-                Name = t.Name,
-                Symbol = t.Symbol,
-                Supply = t.Supply,
-                Decimals = t.Decimals,
-                CreatedAt = t.CreatedAt,
+        var user = await db.Users.FindAsync(userId)
+            ?? throw new InvalidOperationException("User not found.");
+
+        var rows = await db.UserTokens
+            .Where(ut => ut.UserId == userId && ut.Token.Status == TokenStatus.Completed)
+            .OrderByDescending(ut => ut.Token.CreatedAt)
+            .Select(ut => new {
+                ut.Token.Id, ut.Token.MintAddress, ut.Token.Name, ut.Token.Symbol,
+                ut.Token.Price, ut.Token.PriceOpenDay, ut.Token.PriceUpdatedAt, ut.Token.CreatedAt
             })
             .ToListAsync();
+
+        var results = new List<WalletTokenResponse>(rows.Count);
+        var balanceTasks = rows.Select(r => solanaService.GetTokenBalanceAsync(user.WalletPublicKey, r.MintAddress!));
+        var balances = await Task.WhenAll(balanceTasks);
+
+        for (var i = 0; i < rows.Count; i++)
+        {
+            var row = rows[i];
+            var (price, openDay, updatedAt, changed) = ComputeNewPrice(row.Price, row.PriceOpenDay, row.PriceUpdatedAt);
+            if (changed)
+                await db.Tokens.Where(t => t.Id == row.Id).ExecuteUpdateAsync(s => s
+                    .SetProperty(t => t.Price, price)
+                    .SetProperty(t => t.PriceOpenDay, openDay)
+                    .SetProperty(t => t.PriceUpdatedAt, updatedAt));
+
+            results.Add(new WalletTokenResponse
+            {
+                Id = row.Id,
+                MintAddress = row.MintAddress!,
+                Name = row.Name,
+                Symbol = row.Symbol,
+                ImgUrl = $"{baseUrl}/tokens/{row.Id}/image",
+                Price = price,
+                Balance = balances[i],
+                GainsPercent = openDay > 0 ? Math.Round((price - openDay) / openDay * 100, 2) : 0,
+            });
+        }
+        return results;
+    }
+
+    public async Task<(byte[] Data, string ContentType)?> GetTokenImageAsync(Guid tokenId)
+    {
+        var token = await db.Tokens
+            .Where(t => t.Id == tokenId)
+            .Select(t => new { t.ImageData, t.ImageContentType })
+            .FirstOrDefaultAsync();
+
+        return token is null ? null : (token.ImageData, token.ImageContentType);
+    }
+
+    private static (decimal Price, decimal PriceOpenDay, DateTime PriceUpdatedAt, bool Changed) ComputeNewPrice(
+        decimal price, decimal openDay, DateTime? lastUpdated)
+    {
+        var now = DateTime.UtcNow;
+
+        if (lastUpdated is null)
+        {
+            var initial = (decimal)(Random.Shared.NextDouble() * 190 + 10);
+            return (initial, initial, now, true);
+        }
+
+        var newOpenDay = lastUpdated.Value.Date < now.Date ? price : openDay;
+
+        if ((now - lastUpdated.Value).TotalHours >= 1)
+        {
+            var delta = (decimal)(Random.Shared.NextDouble() * 0.10 - 0.05);
+            var newPrice = Math.Max(0.001m, price * (1 + delta));
+            return (newPrice, newOpenDay, now, true);
+        }
+
+        return (price, newOpenDay, lastUpdated.Value, newOpenDay != openDay);
     }
 }

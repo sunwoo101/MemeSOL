@@ -113,6 +113,35 @@ public class AuthService(AppDbContext db, IConfiguration config, PasswordHasher<
     }
 
     /// <summary>
+    /// Validates a refresh token, issues a new JWT, and rotates the refresh token.
+    /// </summary>
+    public async Task<AuthResponse> RefreshAsync(string refreshToken)
+    {
+        var hash = HashUtils.Hash(refreshToken);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.RefreshTokenHash == hash)
+            ?? throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+
+        var newRawRefreshToken = GenerateRefreshToken();
+        user.RefreshTokenHash = HashUtils.Hash(newRawRefreshToken);
+
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+        }
+
+        return new AuthResponse
+        {
+            AccessToken = GenerateJwt(user),
+            WalletPublicKey = user.WalletPublicKey,
+            RefreshToken = newRawRefreshToken,
+        };
+    }
+
+    /// <summary>
     /// Generates a JWT access token for the authenticated user, containing their user ID as a claim.
     /// The token is signed using a secret key from configuration and has an expiration time.
     /// </summary>
