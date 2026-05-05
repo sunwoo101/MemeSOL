@@ -6,13 +6,25 @@
 //
 
 import SwiftUI
+import UIKit
+
 
 struct ReceiveView: View {
     @StateObject var viewModel = ReceiveViewModel()
     
     var body: some View {
         Text(viewModel.address)
+        
+        if let qrImage = viewModel.qrImage {
+            Image(uiImage: qrImage)
+                .resizable()
+                .interpolation(.none)
+                .scaledToFit()
+                .frame(width: 200, height: 200)
+        }
+        
     }
+    
 }
 
 #Preview {
