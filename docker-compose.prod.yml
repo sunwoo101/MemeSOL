@@ -13,8 +13,13 @@ services:
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - Solana__ServerMnemonic=${SOLANA_SERVER_MNEMONIC}
+    volumes:
+      - dp_keys:/root/.aspnet/DataProtection-Keys
     networks:
       - proxy
+
+volumes:
+  dp_keys:
 
 networks:
   proxy:
