@@ -1,0 +1,25 @@
+import Foundation
+
+// MARK: - Models
+
+struct AuthResponse: Decodable {
+    let accessToken: String
+    let walletPublicKey: String
+    let refreshToken: String
+}
+
+// MARK: - AuthController
+
+private let authBase = "/auth"
+
+extension APIClient {
+    func register(email: String, password: String) async throws -> AuthResponse {
+        struct Body: Encodable { let email: String; let password: String }
+        return try await post("\(authBase)/register", body: Body(email: email, password: password))
+    }
+
+    func login(email: String, password: String) async throws -> AuthResponse {
+        struct Body: Encodable { let email: String; let password: String }
+        return try await post("\(authBase)/login", body: Body(email: email, password: password))
+    }
+}
