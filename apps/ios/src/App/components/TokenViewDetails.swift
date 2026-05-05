@@ -9,62 +9,83 @@ import SwiftUI
 
 struct TokenViewDetails: View {
     let token: Token
+    var GoBackToDashboard: () -> Void = {}
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ZStack {
-            AppColors.blackColor.ignoresSafeArea()
-
-            VStack(spacing: AppLayout.sectionSpacing) {
-                AsyncImage(url: URL(string: token.iconUrl)) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image.resizable().scaledToFit()
-                    default:
-                        Image(systemName: "circle.fill")
-                            .resizable()
-                            .scaledToFit()
-                            .foregroundColor(token.color)
+        NavigationStack {
+            ZStack {
+                AppColors.blackColor.ignoresSafeArea()
+                    .overlay(alignment: .topLeading) {
+                        Button { dismiss() } label: {
+                            Image(systemName: "chevron.left")
+                                .foregroundColor(.white)
+                                .font(.body.weight(.semibold))
+                        }
+                        .padding(.top, AppLayout.tokenDetailTopPadding)
+                        .padding(.leading, AppLayout.horizontalPadding)
                     }
+
+                VStack(spacing: AppLayout.sectionSpacing) {
+                    AsyncImage(url: URL(string: token.iconUrl)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image.resizable().scaledToFit()
+                        default:
+                            Image(systemName: "circle.fill")
+                                .resizable()
+                                .scaledToFit()
+                                .foregroundColor(token.color)
+                        }
+                    }
+                    .frame(width: AppLayout.tokenDetailIconSize, height: AppLayout.tokenDetailIconSize)
+
+                    VStack(spacing: AppLayout.tokenTextStackSpacing) {
+                        Text(token.name)
+                            .font(.title.bold())
+                            .foregroundColor(.white)
+                        Text(token.symbol)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+
+                    VStack(spacing: AppLayout.tokenTextStackSpacing) {
+                        Text(token.pricePerToken)
+                            .font(.system(size: AppLayout.tokenDetailPriceFontSize, weight: .bold))
+                            .foregroundColor(.white)
+                        Text(token.percentChange)
+                            .font(.headline)
+                            .foregroundColor(token.positive ? .green : .red)
+                    }
+
+                    VStack(spacing: AppLayout.tokenBalanceSpacing) {
+                        Text("Your Balance")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        Text(token.balance)
+                            .font(.title2.bold())
+                            .foregroundColor(.white)
+                    }
+
+                    Spacer()
+
+                    NavigationLink {
+                        TransactionListView(token: token, GoBackToDashboard: GoBackToDashboard)
+                    } label: {
+                        Text("View Transactions")
+                            .font(.headline)
+                            .foregroundColor(.black)
+                            .frame(width: AppLayout.onboardingButtonWidth)
+                            .frame(height: AppLayout.onboardingButtonHeight)
+                            .background(AppColors.goldColor)
+                            .cornerRadius(AppLayout.cornerRadius)
+                    }
+
+                    Spacer()
                 }
-                .frame(width: AppLayout.tokenDetailIconSize, height: AppLayout.tokenDetailIconSize)
-
-                VStack(spacing: AppLayout.tokenTextStackSpacing) {
-                    Text(token.name)
-                        .font(.title.bold())
-                        .foregroundColor(.white)
-                    Text(token.symbol)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-
-                VStack(spacing: AppLayout.tokenTextStackSpacing) {
-                    Text(token.pricePerToken)
-                        .font(.system(size: AppLayout.tokenDetailPriceFontSize, weight: .bold))
-                        .foregroundColor(.white)
-                    Text(token.percentChange)
-                        .font(.headline)
-                        .foregroundColor(token.positive ? .green : .red)
-                }
-
-                VStack(spacing: AppLayout.tokenBalanceSpacing) {
-                    Text("Your Balance")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text(token.balance)
-                        .font(.title2.bold())
-                        .foregroundColor(.white)
-                }
-
-                Spacer()
-
-                Text("More details coming soon")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-
-                Spacer()
+                .padding(.top, AppLayout.tokenDetailTopPadding)
+                .padding(.horizontal, AppLayout.horizontalPadding)
             }
-            .padding(.top, AppLayout.tokenDetailTopPadding)
-            .padding(.horizontal, AppLayout.horizontalPadding)
         }
     }
 }
