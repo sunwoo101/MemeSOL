@@ -12,6 +12,7 @@ struct DashboardView: View {
     @State var totalBalance: Double = 12345.67
     @State var totalGainLoss: Double = 234.56
     @State var totalGainLossPercent: Double = -1.94
+    @State private var selectedToken: Token? = nil
     
     @State var tokens: [Token] = [
         Token(name: "Ethereum", symbol: "ETH",  pricePerToken: "A$3,241.50",  balance: "A$4,862.25",  percentChange: "+2.4%",  positive: true,  iconUrl: "https://assets.coingecko.com/coins/images/279/large/ethereum.png", color: .blue),
@@ -79,7 +80,7 @@ struct DashboardView: View {
             VStack(spacing: AppLayout.tokenListSpacing) {
                 ForEach(Array(tokens.enumerated()), id: \.element.id) { index, token in
                     Button {
-                        print("Tapped on token \(token.name)")
+                        selectedToken = token
                     } label: {
                         TokenRow(
                             name: token.name, symbol: token.symbol,
@@ -91,6 +92,11 @@ struct DashboardView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    
+                    .sheet(item: $selectedToken) { token in
+                        TokenViewDetails(token: token)
+                    }
+                    
                     if index < tokens.count - 1 {
                         Divider()
                             .background(Color.gray.opacity(AppLayout.dividerOpacity))

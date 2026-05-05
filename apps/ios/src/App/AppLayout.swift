@@ -1,6 +1,6 @@
 //
 //  AppLayout.swift
-//  App
+//  Assignment3
 //
 //  Created by Daniel Liu  on 5/5/2026.
 //
@@ -32,4 +32,9 @@ enum AppLayout {
     static let tokenPriceStackSpacing: CGFloat = 4
     static let tokenRowVerticalPadding: CGFloat = 12
     static let tokenListSpacing: CGFloat = 0
+    static let tokenDetailIconSize: CGFloat = 80
+    static let tokenDetailTopPadding: CGFloat = 40
+    static let tokenDetailPriceFontSize: CGFloat = 32
+    static let tokenBalanceSpacing: CGFloat = 10
+    
 }
