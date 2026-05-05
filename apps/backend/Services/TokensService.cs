@@ -76,28 +76,37 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
 
     public async Task<List<TokenListResponse>> GetAllTokensAsync(string baseUrl)
     {
-        var tokens = await db.Tokens
+        var rows = await db.Tokens
             .Where(t => t.Status == TokenStatus.Completed)
             .OrderByDescending(t => t.CreatedAt)
+            .Select(t => new {
+                t.Id, t.MintAddress, t.Name, t.Symbol,
+                t.Price, t.PriceOpenDay, t.PriceUpdatedAt, t.CreatedAt
+            })
             .ToListAsync();
 
-        foreach (var token in tokens)
-            UpdatePrice(token);
-
-        await db.SaveChangesAsync();
-
-        return tokens.Select(t => new TokenListResponse
+        var results = new List<TokenListResponse>(rows.Count);
+        foreach (var row in rows)
         {
-            Id = t.Id,
-            MintAddress = t.MintAddress!,
-            Name = t.Name,
-            Symbol = t.Symbol,
-            ImgUrl = $"{baseUrl}/tokens/{t.Id}/image",
-            Price = t.Price,
-            GainsPercent = t.PriceOpenDay > 0
-                ? Math.Round((t.Price - t.PriceOpenDay) / t.PriceOpenDay * 100, 2)
-                : 0,
-        }).ToList();
+            var (price, openDay, updatedAt, changed) = ComputeNewPrice(row.Price, row.PriceOpenDay, row.PriceUpdatedAt);
+            if (changed)
+                await db.Tokens.Where(t => t.Id == row.Id).ExecuteUpdateAsync(s => s
+                    .SetProperty(t => t.Price, price)
+                    .SetProperty(t => t.PriceOpenDay, openDay)
+                    .SetProperty(t => t.PriceUpdatedAt, updatedAt));
+
+            results.Add(new TokenListResponse
+            {
+                Id = row.Id,
+                MintAddress = row.MintAddress!,
+                Name = row.Name,
+                Symbol = row.Symbol,
+                ImgUrl = $"{baseUrl}/tokens/{row.Id}/image",
+                Price = price,
+                GainsPercent = openDay > 0 ? Math.Round((price - openDay) / openDay * 100, 2) : 0,
+            });
+        }
+        return results;
     }
 
     public async Task<List<WalletTokenResponse>> GetWalletTokensAsync(Guid userId, string baseUrl)
@@ -105,35 +114,42 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
         var user = await db.Users.FindAsync(userId)
             ?? throw new InvalidOperationException("User not found.");
 
-        var tokens = await db.UserTokens
-            .Where(ut => ut.UserId == userId)
-            .Select(ut => ut.Token)
-            .Where(t => t.Status == TokenStatus.Completed)
-            .OrderByDescending(t => t.CreatedAt)
+        var rows = await db.UserTokens
+            .Where(ut => ut.UserId == userId && ut.Token.Status == TokenStatus.Completed)
+            .OrderByDescending(ut => ut.Token.CreatedAt)
+            .Select(ut => new {
+                ut.Token.Id, ut.Token.MintAddress, ut.Token.Name, ut.Token.Symbol,
+                ut.Token.Price, ut.Token.PriceOpenDay, ut.Token.PriceUpdatedAt, ut.Token.CreatedAt
+            })
             .ToListAsync();
 
-        foreach (var token in tokens)
-            UpdatePrice(token);
+        var results = new List<WalletTokenResponse>(rows.Count);
+        var balanceTasks = rows.Select(r => solanaService.GetTokenBalanceAsync(user.WalletPublicKey, r.MintAddress!));
+        var balances = await Task.WhenAll(balanceTasks);
 
-        await db.SaveChangesAsync();
-
-        var balances = await Task.WhenAll(
-            tokens.Select(t => solanaService.GetTokenBalanceAsync(user.WalletPublicKey, t.MintAddress!))
-        );
-
-        return tokens.Select((t, i) => new WalletTokenResponse
+        for (var i = 0; i < rows.Count; i++)
         {
-            Id = t.Id,
-            MintAddress = t.MintAddress!,
-            Name = t.Name,
-            Symbol = t.Symbol,
-            ImgUrl = $"{baseUrl}/tokens/{t.Id}/image",
-            Price = t.Price,
-            Balance = balances[i],
-            GainsPercent = t.PriceOpenDay > 0
-                ? Math.Round((t.Price - t.PriceOpenDay) / t.PriceOpenDay * 100, 2)
-                : 0,
-        }).ToList();
+            var row = rows[i];
+            var (price, openDay, updatedAt, changed) = ComputeNewPrice(row.Price, row.PriceOpenDay, row.PriceUpdatedAt);
+            if (changed)
+                await db.Tokens.Where(t => t.Id == row.Id).ExecuteUpdateAsync(s => s
+                    .SetProperty(t => t.Price, price)
+                    .SetProperty(t => t.PriceOpenDay, openDay)
+                    .SetProperty(t => t.PriceUpdatedAt, updatedAt));
+
+            results.Add(new WalletTokenResponse
+            {
+                Id = row.Id,
+                MintAddress = row.MintAddress!,
+                Name = row.Name,
+                Symbol = row.Symbol,
+                ImgUrl = $"{baseUrl}/tokens/{row.Id}/image",
+                Price = price,
+                Balance = balances[i],
+                GainsPercent = openDay > 0 ? Math.Round((price - openDay) / openDay * 100, 2) : 0,
+            });
+        }
+        return results;
     }
 
     public async Task<(byte[] Data, string ContentType)?> GetTokenImageAsync(Guid tokenId)
@@ -146,26 +162,26 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
         return token is null ? null : (token.ImageData, token.ImageContentType);
     }
 
-    private static void UpdatePrice(Token token)
+    private static (decimal Price, decimal PriceOpenDay, DateTime PriceUpdatedAt, bool Changed) ComputeNewPrice(
+        decimal price, decimal openDay, DateTime? lastUpdated)
     {
         var now = DateTime.UtcNow;
 
-        if (token.PriceUpdatedAt is null)
+        if (lastUpdated is null)
         {
-            token.Price = (decimal)(Random.Shared.NextDouble() * 190 + 10);
-            token.PriceOpenDay = token.Price;
-            token.PriceUpdatedAt = now;
-            return;
+            var initial = (decimal)(Random.Shared.NextDouble() * 190 + 10);
+            return (initial, initial, now, true);
         }
 
-        if (token.PriceUpdatedAt.Value.Date < now.Date)
-            token.PriceOpenDay = token.Price;
+        var newOpenDay = lastUpdated.Value.Date < now.Date ? price : openDay;
 
-        if ((now - token.PriceUpdatedAt.Value).TotalHours >= 1)
+        if ((now - lastUpdated.Value).TotalHours >= 1)
         {
             var delta = (decimal)(Random.Shared.NextDouble() * 0.10 - 0.05);
-            token.Price = Math.Max(0.001m, token.Price * (1 + delta));
-            token.PriceUpdatedAt = now;
+            var newPrice = Math.Max(0.001m, price * (1 + delta));
+            return (newPrice, newOpenDay, now, true);
         }
+
+        return (price, newOpenDay, lastUpdated.Value, newOpenDay != openDay);
     }
 }
