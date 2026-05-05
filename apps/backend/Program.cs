@@ -13,6 +13,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("Apple", c => c.Timeout = TimeSpan.FromSeconds(10));
 builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddControllers();
