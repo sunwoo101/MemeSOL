@@ -17,6 +17,15 @@ struct TokenResponse: Decodable {
 private let tokensBase = "/tokens"
 
 extension APIClient {
+    // List all tokens that were created using this app by any user.
+    func listAllTokens() async throws -> [TokenResponse] {
+        guard accessToken != nil else {
+            throw APIError.serverError("You must be logged in to list tokens.")
+        }
+        return try await get(tokensBase)
+    }
+
+    // Creates a new token and adds it to the wallet.
     func createToken(name: String, symbol: String, supply: UInt64, imageData: Data) async throws -> TokenResponse {
         guard accessToken != nil else {
             throw APIError.serverError("You must be logged in to create a token.")

@@ -13,6 +13,8 @@ struct ApiTestingView: View {
 
                 AuthSectionView()
                 TokensSectionView()
+                ListAllTokensSectionView()
+                ListWalletTokensSectionView()
             }
             .padding()
         }
@@ -179,6 +181,139 @@ private struct TokensSectionView: View {
                 errorText = error.localizedDescription
             }
         }
+    }
+}
+
+// MARK: - ListAllTokensSectionView
+
+private struct ListAllTokensSectionView: View {
+    @State private var isLoading = false
+    @State private var tokens: [TokenResponse] = []
+    @State private var hasLoaded = false
+    @State private var errorText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("All Tokens")
+                .font(.title2)
+                .bold()
+
+            Button("GET /tokens") { submit() }
+                .buttonStyle(.bordered)
+                .disabled(isLoading)
+
+            if isLoading {
+                ProgressView()
+            }
+
+            if hasLoaded {
+                ResponseCard(endpoint: "GET /api/tokens") {
+                    if tokens.isEmpty {
+                        Text("No tokens")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(tokens, id: \.id) { token in
+                            TokenListRow(token: token)
+                        }
+                    }
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                tokens = try await APIClient.shared.listAllTokens()
+                hasLoaded = true
+                errorText = ""
+            } catch {
+                tokens = []
+                hasLoaded = false
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - ListWalletTokensSectionView
+
+private struct ListWalletTokensSectionView: View {
+    @State private var isLoading = false
+    @State private var tokens: [TokenResponse] = []
+    @State private var hasLoaded = false
+    @State private var errorText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Wallet Tokens")
+                .font(.title2)
+                .bold()
+
+            Button("GET /wallet/tokens") { submit() }
+                .buttonStyle(.bordered)
+                .disabled(isLoading)
+
+            if isLoading {
+                ProgressView()
+            }
+
+            if hasLoaded {
+                ResponseCard(endpoint: "GET /api/wallet/tokens") {
+                    if tokens.isEmpty {
+                        Text("No tokens")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(tokens, id: \.id) { token in
+                            TokenListRow(token: token)
+                        }
+                    }
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                tokens = try await APIClient.shared.listWalletTokens()
+                hasLoaded = true
+                errorText = ""
+            } catch {
+                tokens = []
+                hasLoaded = false
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - TokenListRow
+
+private struct TokenListRow: View {
+    let token: TokenResponse
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("\(token.name) (\(token.symbol))")
+                .font(.footnote)
+                .bold()
+            ResponseRow(label: "Mint Address", value: token.mintAddress)
+            ResponseRow(label: "Supply", value: String(token.supply))
+        }
+        .padding(.vertical, 4)
     }
 }
 

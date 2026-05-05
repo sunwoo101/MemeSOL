@@ -37,6 +37,16 @@ final class APIClient {
         session = .shared
     }
 
+    func get<R: Decodable>(_ path: String) async throws -> R {
+        guard let url = URL(string: baseURL.absoluteString + path) else {
+            throw APIError.invalidResponse
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        setBearerToken(&request)
+        return try await send(request)
+    }
+
     func post<B: Encodable, R: Decodable>(_ path: String, body: B) async throws -> R {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse

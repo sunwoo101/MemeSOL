@@ -15,6 +15,13 @@ namespace Backend.Controllers;
 [Authorize]
 public class TokensController(TokensService tokensService) : ControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<List<TokenResponse>>> GetAllTokens()
+    {
+        var result = await tokensService.GetAllTokensAsync();
+        return Ok(result);
+    }
+
     /// <summary>
     /// Creates a new token on Solana devnet.
     /// </summary>
