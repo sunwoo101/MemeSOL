@@ -128,6 +128,7 @@ private struct TokensSectionView: View {
             }
             .onChange(of: selectedPhotoItem) { _, newItem in
                 Task {
+                    selectedImageData = nil
                     if let data = try? await newItem?.loadTransferable(type: Data.self),
                        let uiImage = UIImage(data: data) {
                         selectedImageData = uiImage.jpegData(compressionQuality: 0.8)

@@ -31,14 +31,19 @@ public class SolanaService(IConfiguration config)
         var payer = wallet.GetAccount(0);
         var mint = new Account();
 
-        var mintRent = (await client.GetMinimumBalanceForRentExemptionAsync(TokenProgram.MintAccountDataSize)).Result;
-        var blockhash = (await client.GetLatestBlockHashAsync()).Result.Value.Blockhash;
+        var rentResponse = await client.GetMinimumBalanceForRentExemptionAsync(TokenProgram.MintAccountDataSize);
+        if (!rentResponse.WasRequestSuccessfullyHandled)
+            throw new InvalidOperationException("Failed to fetch rent exemption from Solana RPC.");
+
+        var blockhashResponse = await client.GetLatestBlockHashAsync();
+        if (!blockhashResponse.WasRequestSuccessfullyHandled || blockhashResponse.Result?.Value is null)
+            throw new InvalidOperationException("Failed to fetch latest blockhash from Solana RPC.");
 
         var tx = new TransactionBuilder()
-            .SetRecentBlockHash(blockhash)
+            .SetRecentBlockHash(blockhashResponse.Result.Value.Blockhash)
             .SetFeePayer(payer.PublicKey)
             .AddInstruction(SystemProgram.CreateAccount(
-                payer.PublicKey, mint.PublicKey, mintRent,
+                payer.PublicKey, mint.PublicKey, rentResponse.Result,
                 TokenProgram.MintAccountDataSize, TokenProgram.ProgramIdKey))
             .AddInstruction(TokenProgram.InitializeMint(
                 mint.PublicKey, TokenDecimals, payer.PublicKey, payer.PublicKey))
@@ -48,6 +53,24 @@ public class SolanaService(IConfiguration config)
         if (!result.WasRequestSuccessfullyHandled)
             throw new InvalidOperationException($"Failed to create token: {result.Reason}");
 
+        await WaitForConfirmationAsync(client, result.Result);
+
         return (mint.PublicKey.Key, TokenDecimals);
+    }
+
+    /// <summary>
+    /// Polls until a transaction reaches confirmed status or throws if it times out.
+    /// </summary>
+    private static async Task WaitForConfirmationAsync(IRpcClient client, string signature, int maxAttempts = 30)
+    {
+        for (var i = 0; i < maxAttempts; i++)
+        {
+            await Task.Delay(1000);
+            var statusResponse = await client.GetSignatureStatusesAsync(new List<string> { signature });
+            var status = statusResponse.Result?.Value?[0];
+            if (status is null) continue;
+            if (status.ConfirmationStatus is "confirmed" or "finalized") return;
+        }
+        throw new InvalidOperationException("Transaction was not confirmed in time.");
     }
 }

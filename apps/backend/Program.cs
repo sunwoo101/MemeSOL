@@ -16,7 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 string[] requiredKeys = ["ConnectionStrings:DefaultConnection", "Jwt:Secret", "Solana:ServerMnemonic"];
 foreach (var key in requiredKeys)
 {
-    if (string.IsNullOrEmpty(builder.Configuration[key]))
+    if (string.IsNullOrWhiteSpace(builder.Configuration[key]))
         throw new InvalidOperationException($"Required configuration '{key}' is not set.");
 }
 
@@ -49,6 +49,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAuthorization();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<AuthService>();
