@@ -15,6 +15,9 @@ struct ApiTestingView: View {
                 TokensSectionView()
                 ListAllTokensSectionView()
                 ListWalletTokensSectionView()
+                AddWalletTokenSectionView()
+                RemoveWalletTokenSectionView()
+                WalletBalanceSectionView()
             }
             .padding()
         }
@@ -300,6 +303,161 @@ private struct ListWalletTokensSectionView: View {
     }
 }
 
+// MARK: - AddWalletTokenSectionView
+
+private struct AddWalletTokenSectionView: View {
+    @State private var mintAddress = ""
+    @State private var isLoading = false
+    @State private var success = false
+    @State private var errorText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Add to Wallet")
+                .font(.title2)
+                .bold()
+
+            TextField("Mint Address", text: $mintAddress)
+                .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+
+            Button("POST /wallet/tokens/{mintAddress}") { submit() }
+                .buttonStyle(.borderedProminent)
+                .disabled(isLoading || mintAddress.isEmpty)
+
+            if isLoading { ProgressView() }
+
+            if success {
+                ResponseCard(endpoint: "POST /api/wallet/tokens/\(mintAddress)") {
+                    Text("Token added to wallet.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                try await APIClient.shared.addWalletToken(mintAddress: mintAddress)
+                success = true
+                errorText = ""
+            } catch {
+                success = false
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - RemoveWalletTokenSectionView
+
+private struct RemoveWalletTokenSectionView: View {
+    @State private var mintAddress = ""
+    @State private var isLoading = false
+    @State private var success = false
+    @State private var errorText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Remove from Wallet")
+                .font(.title2)
+                .bold()
+
+            TextField("Mint Address", text: $mintAddress)
+                .textFieldStyle(.roundedBorder)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+
+            Button("DELETE /wallet/tokens/{mintAddress}") { submit() }
+                .buttonStyle(.bordered)
+                .disabled(isLoading || mintAddress.isEmpty)
+
+            if isLoading { ProgressView() }
+
+            if success {
+                ResponseCard(endpoint: "DELETE /api/wallet/tokens/\(mintAddress)") {
+                    Text("Token removed from wallet.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                try await APIClient.shared.removeWalletToken(mintAddress: mintAddress)
+                success = true
+                errorText = ""
+            } catch {
+                success = false
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
+// MARK: - WalletBalanceSectionView
+
+private struct WalletBalanceSectionView: View {
+    @State private var isLoading = false
+    @State private var response: WalletBalancesResponse? = nil
+    @State private var errorText = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Wallet Balance")
+                .font(.title2)
+                .bold()
+
+            Button("GET /wallet/balance") { submit() }
+                .buttonStyle(.bordered)
+                .disabled(isLoading)
+
+            if isLoading { ProgressView() }
+
+            if let response {
+                ResponseCard(endpoint: "GET /api/wallet/balance") {
+                    ResponseRow(label: "Total Value", value: String(format: "$%.2f", response.totalValue))
+                    ResponseRow(label: "Gain/Loss", value: String(format: "$%.2f", response.gainLoss))
+                    ResponseRow(label: "Gain/Loss %", value: String(format: "%.2f%%", response.gainLossPercent))
+                }
+            }
+
+            APIErrorView(message: errorText)
+        }
+    }
+
+    @MainActor
+    private func submit() {
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                response = try await APIClient.shared.getWalletBalance()
+                errorText = ""
+            } catch {
+                response = nil
+                errorText = error.localizedDescription
+            }
+        }
+    }
+}
+
 // MARK: - TokenListRow
 
 private struct TokenListRow: View {
@@ -312,7 +470,7 @@ private struct TokenListRow: View {
                 Text("\(token.name) (\(token.symbol))")
                     .font(.footnote)
                     .bold()
-                ResponseRow(label: "Mint Address", value: token.mintAddress)
+                CopyableResponseRow(label: "Mint Address", value: token.mintAddress)
                 ResponseRow(label: "Price", value: String(format: "$%.4f", token.price))
                 ResponseRow(label: "Gains", value: String(format: "%.2f%%", token.gainsPercent))
             }
@@ -333,7 +491,7 @@ private struct WalletTokenListRow: View {
                 Text("\(token.name) (\(token.symbol))")
                     .font(.footnote)
                     .bold()
-                ResponseRow(label: "Mint Address", value: token.mintAddress)
+                CopyableResponseRow(label: "Mint Address", value: token.mintAddress)
                 ResponseRow(label: "Price", value: String(format: "$%.4f", token.price))
                 ResponseRow(label: "Balance", value: String(format: "%.4f", token.balance))
                 ResponseRow(label: "Gains", value: String(format: "%.2f%%", token.gainsPercent))
@@ -379,6 +537,28 @@ private struct ResponseCard<Content: View>: View {
         .padding()
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+// MARK: - CopyableResponseRow
+
+private struct CopyableResponseRow: View {
+    let label: String
+    let value: String
+    @State private var copied = false
+
+    var body: some View {
+        Button {
+            UIPasteboard.general.string = value
+            copied = true
+            Task {
+                try? await Task.sleep(for: .seconds(1.5))
+                copied = false
+            }
+        } label: {
+            ResponseRow(label: copied ? "Copied!" : label, value: value)
+        }
+        .buttonStyle(.plain)
     }
 }
 

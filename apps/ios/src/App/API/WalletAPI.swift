@@ -4,6 +4,8 @@ import Foundation
 
 struct WalletBalancesResponse: Decodable {
     let totalValue: Double
+    let gainLoss: Double
+    let gainLossPercent: Double
 }
 
 struct WalletTokenResponse: Decodable {
