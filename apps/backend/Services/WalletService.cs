@@ -61,18 +61,18 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
         var user = await db.Users.FindAsync(userId)
             ?? throw new InvalidOperationException("User not found.");
 
-        var token = await db.Tokens
-            .Where(t => t.MintAddress == mintAddress && t.Status == TokenStatus.Completed)
-            .Select(t => new { t.Decimals })
-            .FirstOrDefaultAsync()
-            ?? throw new KeyNotFoundException("Token not found.");
+        var tokenExists = await db.Tokens
+            .AnyAsync(t => t.MintAddress == mintAddress && t.Status == TokenStatus.Completed);
+        if (!tokenExists)
+            throw new KeyNotFoundException("Token not found.");
 
         if (request.Amount <= 0)
             throw new InvalidOperationException("Amount must be greater than zero.");
 
-        var scaledAmount = request.Amount * (decimal)Math.Pow(10, token.Decimals);
+        const byte decimals = SolanaService.TokenDecimals;
+        var scaledAmount = request.Amount * (decimal)Math.Pow(10, decimals);
         if (scaledAmount != Math.Floor(scaledAmount))
-            throw new InvalidOperationException($"Amount exceeds the precision of this token ({token.Decimals} decimal places).");
+            throw new InvalidOperationException($"Amount exceeds the precision of this token ({decimals} decimal places).");
         if (scaledAmount > ulong.MaxValue)
             throw new InvalidOperationException("Amount is too large.");
 
@@ -81,7 +81,7 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
         var signature = await solanaService.SendTokenAsync(
             user.WalletPublicKey, user.WalletPrivateKey,
             mintAddress, request.RecipientAddress,
-            rawAmount, token.Decimals);
+            rawAmount);
 
         return new SendTokenResponse { Signature = signature };
     }

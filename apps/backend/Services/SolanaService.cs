@@ -13,7 +13,7 @@ namespace Backend.Services;
 /// <param name="config">Injected configuration for accessing secrets.</param>
 public class SolanaService(IConfiguration config)
 {
-    private const byte TokenDecimals = 9;
+    internal const byte TokenDecimals = 9;
 
     /// <summary>
     /// Creates a new SPL token mint on Solana devnet.
@@ -67,7 +67,7 @@ public class SolanaService(IConfiguration config)
     public async Task<string> SendTokenAsync(
         string senderPublicKey, string senderPrivateKey,
         string mintAddress, string recipientPublicKey,
-        ulong rawAmount, byte decimals)
+        ulong rawAmount)
     {
         if (rawAmount == 0)
             throw new ArgumentException("Transfer amount must be greater than zero.", nameof(rawAmount));
@@ -104,7 +104,7 @@ public class SolanaService(IConfiguration config)
                 feePayer.PublicKey, recipientPubKey, mintPubKey));
 
         txBuilder.AddInstruction(TokenProgram.TransferChecked(
-            senderAta, recipientAta, rawAmount, decimals, senderAccount.PublicKey, mintPubKey));
+            senderAta, recipientAta, rawAmount, TokenDecimals, senderAccount.PublicKey, mintPubKey));
 
         var tx = txBuilder.Build(new List<Account> { feePayer, senderAccount });
         var result = await client.SendTransactionAsync(tx);
