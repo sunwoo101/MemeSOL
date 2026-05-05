@@ -189,6 +189,7 @@ private struct TokensSectionView: View {
 private struct ListAllTokensSectionView: View {
     @State private var isLoading = false
     @State private var tokens: [TokenResponse] = []
+    @State private var hasLoaded = false
     @State private var errorText = ""
 
     var body: some View {
@@ -205,10 +206,16 @@ private struct ListAllTokensSectionView: View {
                 ProgressView()
             }
 
-            if !tokens.isEmpty {
+            if hasLoaded {
                 ResponseCard(endpoint: "GET /api/tokens") {
-                    ForEach(tokens, id: \.id) { token in
-                        TokenListRow(token: token)
+                    if tokens.isEmpty {
+                        Text("No tokens")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(tokens, id: \.id) { token in
+                            TokenListRow(token: token)
+                        }
                     }
                 }
             }
@@ -224,6 +231,7 @@ private struct ListAllTokensSectionView: View {
             defer { isLoading = false }
             do {
                 tokens = try await APIClient.shared.listAllTokens()
+                hasLoaded = true
                 errorText = ""
             } catch {
                 tokens = []
@@ -238,6 +246,7 @@ private struct ListAllTokensSectionView: View {
 private struct ListWalletTokensSectionView: View {
     @State private var isLoading = false
     @State private var tokens: [TokenResponse] = []
+    @State private var hasLoaded = false
     @State private var errorText = ""
 
     var body: some View {
@@ -254,10 +263,16 @@ private struct ListWalletTokensSectionView: View {
                 ProgressView()
             }
 
-            if !tokens.isEmpty {
+            if hasLoaded {
                 ResponseCard(endpoint: "GET /api/wallet/tokens") {
-                    ForEach(tokens, id: \.id) { token in
-                        TokenListRow(token: token)
+                    if tokens.isEmpty {
+                        Text("No tokens")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(tokens, id: \.id) { token in
+                            TokenListRow(token: token)
+                        }
                     }
                 }
             }
@@ -273,6 +288,7 @@ private struct ListWalletTokensSectionView: View {
             defer { isLoading = false }
             do {
                 tokens = try await APIClient.shared.listWalletTokens()
+                hasLoaded = true
                 errorText = ""
             } catch {
                 tokens = []
