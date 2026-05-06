@@ -12,17 +12,21 @@ import CoreImage.CIFilterBuiltins
 import UIKit
 
 class ReceiveViewModel: ObservableObject {
-    @Published var address: String
+    //@Published var session = SessionManager()
     @Published var qrImage: UIImage?
     @Published var copyButtonText = "Copy"
     
     let context = CIContext() //convert to image
     let filter = CIFilter.qrCodeGenerator() //generate QR code
     
-    init() {
-        self.address = WalletService().getWalletAddress().address
-        self.qrImage = generateQRCode(from: address)
+//    init() {
+//        //self.qrImage = generateQRCode(from: session.walletAddress)
+//    }
+    
+    func updateQRCode(from string: String) {
+        qrImage = generateQRCode(from: string)
     }
+    
     
     func generateQRCode(from string: String) -> UIImage? {
         filter.setValue(Data(string.utf8), forKey: "inputMessage") //create qr with data from address string
@@ -34,8 +38,8 @@ class ReceiveViewModel: ObservableObject {
         return nil
     }
     
-    func copyAddress() {
-        UIPasteboard.general.string = address
+    func copyAddress(_ address: String) {
+        UIPasteboard.general.string = address 
         copyButtonText = "Copied!"
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

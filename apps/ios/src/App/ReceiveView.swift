@@ -11,6 +11,8 @@ import UIKit
 
 struct ReceiveView: View {
     @StateObject var viewModel = ReceiveViewModel()
+    @Environment(AuthSession.self) private var authSession
+    
     
     var body: some View {
         ZStack {
@@ -41,7 +43,7 @@ struct ReceiveView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     HStack {
-                        Text(viewModel.address)
+                        Text(authSession.walletPublicKey)
                             .foregroundColor(.white)
                             .font(.system(size: 14, design: .monospaced))
                             .lineLimit(1)
@@ -54,7 +56,7 @@ struct ReceiveView: View {
                                 .background(Color.white.opacity(0.9))
                         
                         Button (action: {
-                            viewModel.copyAddress()
+                            viewModel.copyAddress(authSession.walletPublicKey)
                         }) {
                             VStack(spacing: 5) {
                                 Image(systemName: "doc.on.doc")
@@ -67,7 +69,7 @@ struct ReceiveView: View {
                     }
                     .padding()
                     .background(AppColors.charcoalColor)
-                    .cornerRadius(AppLayout.cornerRadius)
+                    .cornerRadius(SharedLayout.cornerRadius)
                     
                     Spacer()
                     
@@ -75,9 +77,16 @@ struct ReceiveView: View {
             }
             .padding(.horizontal, 15)
         }
+        .onAppear {
+            viewModel.updateQRCode(from: authSession.walletPublicKey)
+        }
+        .onChange(of: authSession.walletPublicKey) { newAddress in
+            viewModel.updateQRCode(from: newAddress)
+            
+        }
     }
 }
 
 #Preview {
-    ReceiveView()
+    ReceiveView().environment(AuthSession())
 }
