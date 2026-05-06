@@ -12,16 +12,11 @@ import CoreImage.CIFilterBuiltins
 import UIKit
 
 class ReceiveViewModel: ObservableObject {
-    //@Published var session = SessionManager()
     @Published var qrImage: UIImage?
     @Published var copyButtonText = "Copy"
     
     let context = CIContext() //convert to image
     let filter = CIFilter.qrCodeGenerator() //generate QR code
-    
-//    init() {
-//        //self.qrImage = generateQRCode(from: session.walletAddress)
-//    }
     
     func updateQRCode(from string: String) {
         qrImage = generateQRCode(from: string)
