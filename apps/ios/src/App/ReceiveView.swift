@@ -31,7 +31,7 @@ struct ReceiveView: View {
                                 .resizable()
                                 .interpolation(.none)
                                 .scaledToFit()
-                                .frame(width: min(geometry.size.width, geometry.size.height) * 0.45)
+                                .frame(width: min(geometry.size.width, geometry.size.height) * 0.65)
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -82,7 +82,6 @@ struct ReceiveView: View {
         }
         .onChange(of: authSession.walletPublicKey) { newAddress in
             viewModel.updateQRCode(from: newAddress)
-            
         }
     }
 }
