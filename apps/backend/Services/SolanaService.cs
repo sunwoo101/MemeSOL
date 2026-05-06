@@ -170,11 +170,11 @@ public class SolanaService(IConfiguration config)
                     {
                         var preAmt = pre.FirstOrDefault(b => b.AccountIndex == ataIndex)?.UiTokenAmount.AmountUlong ?? 0UL;
                         var postAmt = post.FirstOrDefault(b => b.AccountIndex == ataIndex)?.UiTokenAmount.AmountUlong ?? 0UL;
-                        var delta = (long)postAmt - (long)preAmt;
-                        if (delta != 0)
+                        if (postAmt != preAmt)
                         {
-                            amount = Math.Abs(delta) / (decimal)Math.Pow(10, TokenDecimals);
-                            txType = delta > 0 ? "received" : "sent";
+                            var diff = postAmt > preAmt ? postAmt - preAmt : preAmt - postAmt;
+                            amount = diff / (decimal)Math.Pow(10, TokenDecimals);
+                            txType = postAmt > preAmt ? "received" : "sent";
                         }
                     }
                 }
