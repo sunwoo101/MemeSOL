@@ -1,11 +1,15 @@
 import SwiftUI
 
+// MARK: - LoginView
+
 struct LoginView: View {
     @Environment(AuthSession.self) private var authSession
     @Binding var showRegister: Bool
 
     @State private var email = ""
     @State private var password = ""
+    @State private var isLoading = false
+    @State private var errorText = ""
 
     var body: some View {
         VStack(spacing: 16) {
@@ -18,37 +22,35 @@ struct LoginView: View {
                 text: $email,
                 prompt: Text("Email").foregroundColor(AppColors.secondaryTextColor)
             )
-                .textContentType(.emailAddress)
-                .keyboardType(.emailAddress)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .padding()
-                .background(AppColors.charcoalColor)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .foregroundColor(.white)
+            .textContentType(.emailAddress)
+            .keyboardType(.emailAddress)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .padding()
+            .background(AppColors.charcoalColor)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .foregroundColor(.white)
 
             SecureField(
                 "",
                 text: $password,
                 prompt: Text("Password").foregroundColor(AppColors.secondaryTextColor)
             )
-                .textContentType(.password)
-                .padding()
-                .background(AppColors.charcoalColor)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-                .foregroundColor(.white)
+            .textContentType(.oneTimeCode)
+            .padding()
+            .background(AppColors.charcoalColor)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .foregroundColor(.white)
 
-            if !authSession.errorMessage.isEmpty {
-                Text(authSession.errorMessage)
+            if !errorText.isEmpty {
+                Text(errorText)
                     .foregroundColor(.red)
                     .font(.footnote)
                     .multilineTextAlignment(.center)
             }
 
-            Button {
-                Task { await authSession.login(email: email, password: password) }
-            } label: {
-                if authSession.isLoading {
+            Button { submit() } label: {
+                if isLoading {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                 } else {
@@ -58,15 +60,35 @@ struct LoginView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(AppColors.goldColor)
-            .disabled(email.isEmpty || password.isEmpty || authSession.isLoading)
+            .disabled(email.isEmpty || password.isEmpty || isLoading)
 
             Button("Create an account") {
                 showRegister = true
-                authSession.errorMessage = ""
+                errorText = ""
             }
             .foregroundColor(AppColors.goldColor)
             .padding(.top, 8)
         }
         .padding()
+    }
+
+    // MARK: - Private
+
+    @MainActor
+    private func submit() {
+        errorText = ""
+        isLoading = true
+        Task {
+            defer { isLoading = false }
+            do {
+                let response = try await APIClient.shared.login(
+                    email: email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+                    password: password.trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+                authSession.apply(response)
+            } catch {
+                errorText = error.localizedDescription
+            }
+        }
     }
 }
