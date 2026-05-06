@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct Main: App {
+    @State private var authSession = AuthSession()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(authSession)
         }
     }
 }

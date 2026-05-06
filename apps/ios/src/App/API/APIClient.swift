@@ -17,7 +17,9 @@ enum APIError: LocalizedError {
 }
 
 private struct APIErrorBody: Decodable {
-    let message: String
+    let message: String?
+    let error: String?
+    let details: [String]?
 }
 
 // MARK: - Client
@@ -52,8 +54,22 @@ final class APIClient {
         }
 
         guard (200...299).contains(http.statusCode) else {
-            let msg = (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
-            throw APIError.serverError(msg)
+            if let decoded = try? decoder.decode(APIErrorBody.self, from: data) {
+                if let message = decoded.message, !message.isEmpty {
+                    throw APIError.serverError(message)
+                }
+                if let error = decoded.error, !error.isEmpty {
+                    throw APIError.serverError(error)
+                }
+                if let details = decoded.details, !details.isEmpty {
+                    throw APIError.serverError(details.joined(separator: "\n"))
+                }
+            }
+
+            let rawBody = String(data: data, encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let fallback = rawBody?.isEmpty == false ? rawBody! : "Unknown error."
+            throw APIError.serverError("Request failed (\(http.statusCode)): \(fallback)")
         }
 
         do {
