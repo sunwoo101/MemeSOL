@@ -202,4 +202,5 @@ struct DashboardView: View {
 
 #Preview {
     DashboardView()
+        .environment(AuthSession())
 }
