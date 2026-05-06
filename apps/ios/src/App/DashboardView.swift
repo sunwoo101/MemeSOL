@@ -150,12 +150,17 @@ struct DashboardView: View {
 
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
-            ActionButton(icon: "arrow.right", label: "Send")
+            NavigationLink {
+                SendView()
+            } label: {
+                ActionButton(icon: "arrow.right", label: "Send")
+                    .allowsHitTesting(false) //disable inner button
+            }
             NavigationLink {
                 ReceiveView()
             } label: {
                 ActionButton(icon: "arrow.down.left", label: "Receive")
-                    .allowsHitTesting(false) //disable inner button
+                    .allowsHitTesting(false)
             }
         }
     }
