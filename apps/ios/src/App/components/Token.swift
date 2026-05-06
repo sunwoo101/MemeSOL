@@ -17,4 +17,5 @@ struct Token: Identifiable {
     let positive: Bool
     let iconUrl: String
     let color: Color
+    let mintAddress: String
 }
