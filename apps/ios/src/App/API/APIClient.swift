@@ -17,7 +17,9 @@ enum APIError: LocalizedError {
 }
 
 private struct APIErrorBody: Decodable {
-    let message: String
+    let message: String?
+    let error: String?
+    let details: [String]?
 }
 
 // MARK: - RefreshCoordinator
@@ -25,7 +27,9 @@ private struct APIErrorBody: Decodable {
 private actor RefreshCoordinator {
     private var task: Task<AuthResponse, Error>?
 
-    func refresh(using perform: @escaping () async throws -> AuthResponse) async throws -> AuthResponse {
+    func refresh(using perform: @escaping () async throws -> AuthResponse) async throws
+        -> AuthResponse
+    {
         if let existing = task {
             return try await existing.value
         }
@@ -107,7 +111,9 @@ final class APIClient {
         try await sendVoid(request)
     }
 
-    func multipart<R: Decodable>(_ path: String, fields: [String: String], imageData: Data, imageMimeType: String) async throws -> R {
+    func multipart<R: Decodable>(
+        _ path: String, fields: [String: String], imageData: Data, imageMimeType: String
+    ) async throws -> R {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse
         }
@@ -115,14 +121,17 @@ final class APIClient {
         let boundary = UUID().uuidString
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue(
+            "multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         setBearerToken(&request)
 
         var body = Data()
         for (key, value) in fields {
-            body += "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\"\r\n\r\n\(value)\r\n"
+            body +=
+                "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\"\r\n\r\n\(value)\r\n"
         }
-        body += "--\(boundary)\r\nContent-Disposition: form-data; name=\"image\"; filename=\"image\"\r\nContent-Type: \(imageMimeType)\r\n\r\n"
+        body +=
+            "--\(boundary)\r\nContent-Disposition: form-data; name=\"image\"; filename=\"image\"\r\nContent-Type: \(imageMimeType)\r\n\r\n"
         body.append(imageData)
         body += "\r\n--\(boundary)--\r\n"
 
@@ -152,10 +161,14 @@ final class APIClient {
         KeychainHelper.delete(forKey: "refreshToken")
     }
 
-    func send<R: Decodable>(_ request: URLRequest, retryOnUnauthorized: Bool = true) async throws -> R {
-        let (data, statusCode) = try await execute(request, retryOnUnauthorized: retryOnUnauthorized)
+    func send<R: Decodable>(_ request: URLRequest, retryOnUnauthorized: Bool = true) async throws
+        -> R
+    {
+        let (data, statusCode) = try await execute(
+            request, retryOnUnauthorized: retryOnUnauthorized)
         guard (200...299).contains(statusCode) else {
-            let msg = (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
+            let msg =
+                (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
             throw APIError.serverError(msg)
         }
         do {
@@ -166,14 +179,18 @@ final class APIClient {
     }
 
     func sendVoid(_ request: URLRequest, retryOnUnauthorized: Bool = true) async throws {
-        let (data, statusCode) = try await execute(request, retryOnUnauthorized: retryOnUnauthorized)
+        let (data, statusCode) = try await execute(
+            request, retryOnUnauthorized: retryOnUnauthorized)
         guard (200...299).contains(statusCode) else {
-            let msg = (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
+            let msg =
+                (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
             throw APIError.serverError(msg)
         }
     }
 
-    private func execute(_ request: URLRequest, retryOnUnauthorized: Bool) async throws -> (Data, Int) {
+    private func execute(_ request: URLRequest, retryOnUnauthorized: Bool) async throws -> (
+        Data, Int
+    ) {
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
@@ -186,7 +203,8 @@ final class APIClient {
                     guard let self else { throw APIError.invalidResponse }
                     return try await self.performRefresh(rt)
                 }
-                persistTokens(accessToken: refreshed.accessToken, refreshToken: refreshed.refreshToken)
+                persistTokens(
+                    accessToken: refreshed.accessToken, refreshToken: refreshed.refreshToken)
             } catch {
                 clearTokens()
                 throw APIError.serverError("Session expired. Please log in again.")
@@ -214,8 +232,8 @@ final class APIClient {
 
 // MARK: - Data Helper
 
-private extension Data {
-    static func += (lhs: inout Data, rhs: String) {
+extension Data {
+    fileprivate static func += (lhs: inout Data, rhs: String) {
         if let data = rhs.data(using: .utf8) { lhs.append(data) }
     }
 }
