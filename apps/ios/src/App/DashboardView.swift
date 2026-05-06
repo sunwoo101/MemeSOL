@@ -17,6 +17,7 @@ struct DashboardView: View {
     @State private var activeTab: Int = 0
     @State private var tokens: [Token] = []
     @State private var isLoading = false
+    @State private var isReceiveSheetPresented = false
 
     private var formattedBalance: String {
         Self.currencyFormatter.string(from: NSNumber(value: totalBalance)) ?? "A$0.00"
@@ -136,7 +137,13 @@ struct DashboardView: View {
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
             ActionButton(icon: "arrow.right", label: "Send")
-            ActionButton(icon: "arrow.down.left", label: "Receive")
+            Button { isReceiveSheetPresented = true } label: {
+                ActionButton(icon: "arrow.down.left", label: "Receive")
+                    .allowsHitTesting(false)
+            }
+        }
+        .sheet(isPresented: $isReceiveSheetPresented) {
+            ReceiveView()
         }
     }
 
