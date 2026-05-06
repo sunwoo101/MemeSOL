@@ -116,7 +116,7 @@ struct DashboardView: View {
             }
             .background(AppColors.blackColor.ignoresSafeArea())
             .sheet(item: $selectedToken) { token in
-                TokenViewDetails(token: token, GoBackToDashboard: { selectedToken = nil })
+                TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
             }
         }
         .background(AppColors.blackColor.ignoresSafeArea())
