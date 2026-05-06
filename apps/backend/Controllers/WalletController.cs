@@ -21,6 +21,15 @@ public class WalletController(WalletService walletService) : ControllerBase
         return Ok(await walletService.GetWalletTokensAsync(userId.Value, baseUrl));
     }
 
+    [HttpPost("tokens/{mintAddress}/buy")]
+    public async Task<ActionResult<SendTokenResponse>> BuyToken(string mintAddress, [FromBody] BuyTokenRequest request)
+    {
+        var userId = GetUserId();
+        if (userId is null) return Unauthorized();
+
+        return Ok(await walletService.BuyTokenAsync(userId.Value, mintAddress, request));
+    }
+
     [HttpPost("tokens/{mintAddress}")]
     public async Task<IActionResult> AddWalletToken(string mintAddress)
     {

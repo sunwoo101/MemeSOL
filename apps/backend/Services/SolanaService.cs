@@ -1,4 +1,5 @@
 using Backend.Models.DTOs;
+using Solnet.Rpc.Types;
 using Solnet.Programs;
 using Solnet.Rpc;
 using Solnet.Rpc.Builders;
@@ -120,7 +121,7 @@ public class SolanaService(IConfiguration config)
     /// <summary>
     /// Returns the most recent raw transaction records for the given wallet's ATA for a token.
     /// </summary>
-    public async Task<List<(string Signature, DateTime Timestamp, bool Success)>> GetTokenTransactionsAsync(
+    public async Task<List<(string Signature, DateTime Timestamp, bool Success, decimal? Amount, string? TransactionType)>> GetTokenTransactionsAsync(
         string walletPublicKey, string mintAddress, int limit = 20)
     {
         if (limit < 1 || limit > 1000)
@@ -131,19 +132,111 @@ public class SolanaService(IConfiguration config)
             new PublicKey(walletPublicKey),
             new PublicKey(mintAddress)
         );
+        var ataKey = ata.Key;
 
-        var response = await client.GetSignaturesForAddressAsync(ata, (ulong)limit);
+        var response = await client.GetSignaturesForAddressAsync(ataKey, (ulong)limit);
         if (!response.WasRequestSuccessfullyHandled || response.Result is null)
             throw new InvalidOperationException(
                 $"Failed to fetch transactions for wallet {walletPublicKey}, mint {mintAddress}: {response.RawRpcResponse}");
 
-        return response.Result.Select(s => (
-            Signature: s.Signature,
-            Timestamp: s.BlockTime.HasValue
+        var semaphore = new SemaphoreSlim(5);
+        var detailTasks = response.Result.Select(async s =>
+        {
+            await semaphore.WaitAsync();
+            try { return await client.GetTransactionAsync(s.Signature, Commitment.Confirmed); }
+            finally { semaphore.Release(); }
+        }).ToList();
+        var details = await Task.WhenAll(detailTasks);
+
+        return response.Result.Select((s, i) =>
+        {
+            var timestamp = s.BlockTime.HasValue
                 ? DateTimeOffset.FromUnixTimeSeconds((long)s.BlockTime.Value).UtcDateTime
-                : DateTime.UtcNow,
-            Success: s.Error is null
-        )).ToList();
+                : DateTime.MinValue;
+
+            decimal? amount = null;
+            string? txType = null;
+
+            try
+            {
+                var tx = details[i];
+                if (tx.WasRequestSuccessfullyHandled
+                    && tx.Result?.Transaction?.Message?.AccountKeys is { } keys
+                    && tx.Result.Meta?.PreTokenBalances is { } pre
+                    && tx.Result.Meta?.PostTokenBalances is { } post)
+                {
+                    var ataIndex = Array.IndexOf(keys, ataKey);
+                    if (ataIndex >= 0)
+                    {
+                        var preAmt = pre.FirstOrDefault(b => b.AccountIndex == ataIndex)?.UiTokenAmount.AmountUlong ?? 0UL;
+                        var postAmt = post.FirstOrDefault(b => b.AccountIndex == ataIndex)?.UiTokenAmount.AmountUlong ?? 0UL;
+                        if (postAmt != preAmt)
+                        {
+                            var diff = postAmt > preAmt ? postAmt - preAmt : preAmt - postAmt;
+                            amount = diff / (decimal)Math.Pow(10, TokenDecimals);
+                            txType = postAmt > preAmt ? "received" : "sent";
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            return (
+                Signature: s.Signature,
+                Timestamp: timestamp,
+                Success: s.Error is null,
+                Amount: amount,
+                TransactionType: txType
+            );
+        }).ToList();
+    }
+
+    /// <summary>
+    /// Mints tokens to the user's ATA using the server wallet as mint authority.
+    /// Creates the ATA if it does not already exist.
+    /// </summary>
+    public async Task<string> MintTokensAsync(string userWalletPublicKey, string mintAddress, ulong rawAmount)
+    {
+        if (rawAmount == 0)
+            throw new ArgumentException("Mint amount must be greater than zero.", nameof(rawAmount));
+
+        var client = ClientFactory.GetClient(Cluster.DevNet);
+
+        var mnemonicString = config["Solana:ServerMnemonic"]
+            ?? throw new InvalidOperationException("Solana:ServerMnemonic not configured.");
+        var serverWallet = new Wallet(new Mnemonic(mnemonicString));
+        var mintAuthority = serverWallet.GetAccount(0);
+
+        var mintPubKey = new PublicKey(mintAddress);
+        var userPubKey = new PublicKey(userWalletPublicKey);
+        var userAta = AssociatedTokenAccountProgram.DeriveAssociatedTokenAccount(userPubKey, mintPubKey);
+
+        var blockhashResponse = await client.GetLatestBlockHashAsync();
+        if (!blockhashResponse.WasRequestSuccessfullyHandled || blockhashResponse.Result?.Value is null)
+            throw new InvalidOperationException("Failed to fetch blockhash.");
+
+        var txBuilder = new TransactionBuilder()
+            .SetRecentBlockHash(blockhashResponse.Result.Value.Blockhash)
+            .SetFeePayer(mintAuthority.PublicKey);
+
+        var ataInfo = await client.GetAccountInfoAsync(userAta);
+        if (!ataInfo.WasRequestSuccessfullyHandled)
+            throw new InvalidOperationException("Failed to check user token account.");
+        if (ataInfo.Result?.Value is null)
+            txBuilder.AddInstruction(AssociatedTokenAccountProgram.CreateAssociatedTokenAccount(
+                mintAuthority.PublicKey, userPubKey, mintPubKey));
+
+        txBuilder.AddInstruction(TokenProgram.MintTo(mintPubKey, userAta, rawAmount, mintAuthority.PublicKey));
+
+        var tx = txBuilder.Build(mintAuthority);
+        var result = await client.SendTransactionAsync(tx);
+        if (!result.WasRequestSuccessfullyHandled)
+            throw new InvalidOperationException($"Mint failed: {result.Reason}");
+        if (string.IsNullOrEmpty(result.Result))
+            throw new InvalidOperationException("Mint submitted but returned no signature.");
+
+        await WaitForConfirmationAsync(client, result.Result);
+        return result.Result;
     }
 
     /// <summary>
