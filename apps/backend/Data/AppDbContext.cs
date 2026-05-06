@@ -18,6 +18,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasIndex(u => u.Email)
             .IsUnique();
 
+        modelBuilder.Entity<User>()
+            .Property<uint>("xmin")
+            .HasColumnType("xid")
+            .HasColumnName("xmin")
+            .IsConcurrencyToken()
+            .ValueGeneratedOnAddOrUpdate();
+
         modelBuilder.Entity<Token>()
             .HasIndex(t => t.MintAddress)
             .IsUnique();

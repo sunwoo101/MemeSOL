@@ -33,4 +33,15 @@ public class AuthController(AuthService authService) : ControllerBase
         var result = await authService.LoginAsync(request.Email, request.Password);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Issues a new JWT and rotated refresh token given a valid refresh token.
+    /// </summary>
+    /// <param name="request">The request containing the refresh token.</param>
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> Refresh([FromBody] RefreshRequest request)
+    {
+        var result = await authService.RefreshAsync(request.RefreshToken);
+        return Ok(result);
+    }
 }

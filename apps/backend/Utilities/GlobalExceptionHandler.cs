@@ -19,6 +19,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             SecurityTokenException => (StatusCodes.Status401Unauthorized, exception.Message),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, exception.Message),
+            KeyNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
             InvalidOperationException => (StatusCodes.Status400BadRequest, exception.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };

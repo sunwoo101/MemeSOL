@@ -1,6 +1,6 @@
 //
 //  AppColors.swift
-//  App
+//  Assignment3
 //
 //  Created by Daniel Liu  on 5/5/2026.
 //
