@@ -11,15 +11,19 @@ struct SendView: View {
     @State var address = ""
     @State var amount = ""
     @State var selectedToken: WalletTokenResponse?
+    
+    @State var showingConfirmModal: Bool = false
+    
     @StateObject var viewModel = SendViewModel()
     
+    //check to ensure the address input is not empty and that the user has enough crypto to make the transaction
     private var isSendDisabled: Bool {
+        address.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
         !viewModel.isTransactionValid(
             balance: selectedToken?.balance,
             amount: Decimal(string: amount)
         )
     }
-    
     
     var body: some View {
         ZStack {
@@ -31,6 +35,7 @@ struct SendView: View {
                     .foregroundColor(AppColors.goldColor)
                     .padding(.top, 10)
                 
+                //recipient address input & scanner
                 VStack (alignment: .leading, spacing: 20) {
                     Text("Recipient Address")
                         .foregroundColor(.white)
@@ -64,6 +69,7 @@ struct SendView: View {
                     .background(AppColors.charcoalColor)
                     .cornerRadius(SharedLayout.cornerRadius)
                     
+                    //token selector
                     VStack (alignment: .leading, spacing: 10) {
                         Text("Token")
                             .foregroundColor(.white)
@@ -93,7 +99,7 @@ struct SendView: View {
                         }
                     }
                     
-                    
+                    //amount input
                     VStack (alignment: .leading, spacing: 10) {
                         HStack {
                             Text("Amount")
@@ -146,8 +152,9 @@ struct SendView: View {
                 }
                 .padding(.bottom, 15)
                 
+                //send button
                 Button("Send") {
-                    // show confirm modal
+                    showingConfirmModal = true
                 }
                 .disabled(isSendDisabled)
                 .frame(maxWidth: .infinity)
@@ -164,7 +171,64 @@ struct SendView: View {
         }
         .task {
             await viewModel.loadTokens()
-
+        }
+        
+        //confirm modal
+        .sheet(isPresented: $showingConfirmModal) {
+                VStack (spacing: 20) {
+                    Text("Confirm Transaction")
+                        .font(.title2.bold())
+                }
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack (alignment: .leading, spacing: 4) {
+                        Text("Recipient")
+                            .foregroundColor(.secondary)
+                        
+                        Text(address)
+                            .font(.system(.body, design: .monospaced))
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Token")
+                            .foregroundColor(.secondary)
+                        Text(selectedToken?.symbol ?? "")
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Amount")
+                            .foregroundColor(.secondary)
+                        
+                        Text("\(amount) \(selectedToken?.symbol ?? "")")
+                            .font(.title3.bold())
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+                .cornerRadius(20)
+                
+                HStack(spacing: 16) {
+                    Button("Cancel") {
+                        showingConfirmModal = false
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(AppColors.charcoalColor)
+                    .foregroundColor(.white)
+                    .cornerRadius(SharedLayout.cornerRadius)
+                    
+                    Button("Send Now") {
+                        showingConfirmModal = false
+                        //put api call
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(AppColors.goldColor)
+                    .foregroundColor(.black)
+                    .cornerRadius(SharedLayout.cornerRadius)
+                }
+                .padding()
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
     }
 }
@@ -173,7 +237,10 @@ struct SendView: View {
     SendView()
 }
 
-//things to do
+//things to do:
 //scan button should scan address and fill it in the field
-//send with confirmation modal
-//make sure that the user can only put numbers in amount field and it auto formats
+//button needs to go when the user taps anywhere on the button not just one specific part
+//color of modal (background)
+//modal needs to actually send amount
+//blur background when in confirm moda
+//reintroduce crypto image?
