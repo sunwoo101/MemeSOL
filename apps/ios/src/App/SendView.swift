@@ -11,6 +11,8 @@ struct SendView: View {
     @State var address = ""
     @State var amount = ""
     @State var selectedToken = ""
+    @StateObject var viewModel = SendViewModel()
+
     
     let tokenBalances: [String: Double] = [
         "SOL": 2.53,
@@ -66,25 +68,6 @@ struct SendView: View {
                             .foregroundColor(.white)
                             .font(.headline)
                         
-//                        HStack {
-//                                Text(selectedToken.isEmpty ? "Select Token" : selectedToken)
-//                                    .foregroundColor(
-//                                        selectedToken.isEmpty
-//                                        ? AppColors.secondaryTextColor
-//                                        : .white
-//                                    )
-//
-//                                Spacer()
-//
-//                                Picker("", selection: $selectedToken) {
-//                                    Text("SOL").tag("SOL")
-//                                    Text("USDC").tag("USDC")
-//                                }
-//                                .pickerStyle(.menu)
-//                            }
-//                            .padding()
-//                            .background(AppColors.charcoalColor)
-//                            .cornerRadius(SharedLayout.cornerRadius)
                         Menu {
                             Button("SOL") {
                                 selectedToken = "SOL"
