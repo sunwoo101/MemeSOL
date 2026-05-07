@@ -50,9 +50,9 @@ struct TransactionListView: View {
         .alert("Send \(token.symbol)", isPresented: $showingSend) {
             Button("OK", role: .cancel) {}
         } message: { Text("Send functionality coming soon.") }
-        .alert("Receive \(token.symbol)", isPresented: $showingReceive) {
-            Button("OK", role: .cancel) {}
-        } message: { Text("Receive functionality coming soon.") }
+        .sheet(isPresented: $showingReceive) {
+            ReceiveView()
+        }
     }
 
     private var navHeader: some View {
