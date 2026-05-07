@@ -186,32 +186,32 @@ struct SendView: View {
                 VStack (spacing: 24) {
                     Text("Confirm Transaction")
                         .font(.title2.bold())
-                        .foregroundColor(AppColors.blackColor)
+                        .foregroundColor(.white)
                     
                     VStack(alignment: .leading, spacing: 16) {
                         VStack (alignment: .leading, spacing: 4) {
                             Text("Recipient")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.white)
                             
                             Text(address)
                                 .font(.system(.body, design: .monospaced))
-                                .foregroundColor(AppColors.blackColor)
+                                .foregroundColor(.white)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Token")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.white)
                             Text(selectedToken?.symbol ?? "")
-                                .foregroundColor(.black)
+                                .foregroundColor(.white)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Amount")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.white)
                             
                             Text("\(amount) \(selectedToken?.symbol ?? "")")
                                 .font(.title3.bold())
-                                .foregroundColor(AppColors.blackColor)
+                                .foregroundColor(.white)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -249,13 +249,14 @@ struct SendView: View {
                             }
         
                         } label: {
-                            Text("Send Now")
+                            Text(viewModel.isSending ? "Sending..." : "Send Now")
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(AppColors.goldColor)
-                                .foregroundColor(.black)
+                                .background(viewModel.isSending ? AppColors.charcoalColor : AppColors.goldColor)
+                                .foregroundColor(viewModel.isSending ? AppColors.secondaryTextColor : .black)
                                 .cornerRadius(SharedLayout.cornerRadius)
                         }
+                        .disabled(viewModel.isSending)
                     }
                     if !viewModel.sendError.isEmpty {
                         Text(viewModel.sendError)
@@ -265,6 +266,7 @@ struct SendView: View {
                 .padding()
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+                .presentationBackground(AppColors.blackColor)
                 .onDisappear {
                     viewModel.sendError = ""
                 }
