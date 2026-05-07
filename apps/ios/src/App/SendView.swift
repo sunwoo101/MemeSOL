@@ -187,6 +187,7 @@ struct SendView: View {
                     Text("Confirm Transaction")
                         .font(.title2.bold())
                         .foregroundColor(.white)
+
                     
                     VStack(alignment: .leading, spacing: 16) {
                         VStack (alignment: .leading, spacing: 4) {
@@ -274,7 +275,7 @@ struct SendView: View {
         
         //qr scanner sheet
         .sheet(isPresented: $showingScanner) {
-            CodeScannerView(codeTypes: [.qr], completion: {result in
+            CodeScannerView(codeTypes: [.qr], completion: { result in
                 if case let .success(code) = result {
                     address = code.string
                     self.showingScanner = false
