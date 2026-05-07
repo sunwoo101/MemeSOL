@@ -7,50 +7,12 @@
 
 import SwiftUI
 
-struct TokenTransactionGroup {
-    let token: Token
-    let transactions: [MockTransaction]
-}
-
 struct AllTransactionsView: View {
     let tokens: [Token]
 
-    private let groups: [TokenTransactionGroup] = [
-        TokenTransactionGroup(token: Token(
-            name: "Ethereum", symbol: "ETH", pricePerToken: "A$3,241.50", balance: "A$4,862.25",
-            percentChange: "+2.4%", positive: true,
-            iconUrl: "https://assets.coingecko.com/coins/images/279/large/ethereum.png", color: .blue
-        ), transactions: [
-            MockTransaction(type: "Sent",     time: "23:27", amount: "-0.5 ETH",   value: "A$1,620.75"),
-            MockTransaction(type: "Received", time: "22:25", amount: "+0.47 ETH",  value: "A$1,523.50"),
-            MockTransaction(type: "Received", time: "19:49", amount: "+0.005 ETH", value: "A$16.20"),
-            MockTransaction(type: "Sent",     time: "14:10", amount: "-0.1 ETH",   value: "A$324.15"),
-        ]),
-        TokenTransactionGroup(token: Token(
-            name: "Bitcoin", symbol: "BTC", pricePerToken: "A$98,430.00", balance: "A$2,952.90",
-            percentChange: "+1.1%", positive: true,
-            iconUrl: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png", color: .orange
-        ), transactions: [
-            MockTransaction(type: "Received", time: "21:10", amount: "+0.02 BTC",  value: "A$1,968.60"),
-            MockTransaction(type: "Sent",     time: "15:45", amount: "-0.01 BTC",  value: "A$984.30"),
-        ]),
-        TokenTransactionGroup(token: Token(
-            name: "Solana", symbol: "SOL", pricePerToken: "A$142.30", balance: "A$1,423.00",
-            percentChange: "-3.8%", positive: false,
-            iconUrl: "https://assets.coingecko.com/coins/images/4128/large/solana.png", color: .purple
-        ), transactions: [
-            MockTransaction(type: "Received", time: "18:30", amount: "+5 SOL",     value: "A$711.50"),
-            MockTransaction(type: "Sent",     time: "11:00", amount: "-2 SOL",     value: "A$284.60"),
-        ]),
-        TokenTransactionGroup(token: Token(
-            name: "Chainlink", symbol: "LINK", pricePerToken: "A$13.75", balance: "A$1,007.52",
-            percentChange: "-1.2%", positive: false,
-            iconUrl: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png", color: .cyan
-        ), transactions: [
-            MockTransaction(type: "Received", time: "09:15", amount: "+20 LINK",   value: "A$275.00"),
-            MockTransaction(type: "Sent",     time: "08:00", amount: "-10 LINK",   value: "A$137.50"),
-        ]),
-    ]
+    @State private var transactions: [TransactionHistoryResponse] = []
+    @State private var isLoading = false
+    @State private var errorText = ""
 
     var body: some View {
         VStack(spacing: TransactionLayout.sectionSpacing) {
@@ -63,86 +25,109 @@ struct AllTransactionsView: View {
                 .padding(.bottom, SharedLayout.sectionSpacing)
                 .background(AppColors.blackColor)
 
-            ScrollView(.vertical, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: TransactionLayout.listSpacing) {
-                    Text("May 5, 2026")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                        .padding(.horizontal, SharedLayout.horizontalPadding)
+            if isLoading {
+                Spacer()
+                ProgressView().tint(.white)
+                Spacer()
+            } else if !errorText.isEmpty {
+                Spacer()
+                Text(errorText)
+                    .foregroundColor(.gray)
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                    .padding()
+                Spacer()
+            } else if transactions.isEmpty {
+                Spacer()
+                Text("No transactions yet.")
+                    .foregroundColor(.gray)
+                    .font(.subheadline)
+                Spacer()
+            } else {
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: TransactionLayout.listSpacing) {
+                        ForEach(groupedTransactions, id: \.0) { dateStr, txs in
+                            Text(dateStr)
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .padding(.horizontal, SharedLayout.horizontalPadding)
+                                .padding(.top, SharedLayout.sectionSpacing)
 
-                    ForEach(groups, id: \.token.id) { group in
-                        groupHeader(group.token)
-
-                        ForEach(group.transactions) { tx in
-                            AllTransactionRow(transaction: tx, tokenColor: group.token.color)
-                            Divider()
-                                .background(Color.gray.opacity(SharedLayout.dividerOpacity))
-                                .padding(.leading, SharedLayout.dividerLeadingPadding + SharedLayout.horizontalPadding)
+                            ForEach(txs, id: \.signature) { tx in
+                                AllTransactionRow(transaction: tx)
+                                Divider()
+                                    .background(Color.gray.opacity(SharedLayout.dividerOpacity))
+                                    .padding(.leading, SharedLayout.dividerLeadingPadding + SharedLayout.horizontalPadding)
+                            }
                         }
                     }
+                    .padding(.top, TransactionLayout.listTopPadding)
+                    .padding(.bottom, TransactionLayout.listBottomPadding)
                 }
-                .padding(.top, TransactionLayout.listTopPadding)
-                .padding(.bottom, TransactionLayout.listBottomPadding)
+                .background(AppColors.blackColor)
             }
-            .background(AppColors.blackColor)
         }
         .background(AppColors.blackColor.ignoresSafeArea())
+        .task { await loadTransactions() }
     }
 
-    private func groupHeader(_ token: Token) -> some View {
-        HStack(spacing: TokenLayout.rowIconSpacing) {
-            AsyncImage(url: URL(string: token.iconUrl)) { phase in
+    private var groupedTransactions: [(String, [TransactionHistoryResponse])] {
+        var groups: [(String, [TransactionHistoryResponse])] = []
+        var index: [String: Int] = [:]
+        for tx in transactions {
+            let key = tx.formattedDate
+            if let i = index[key] {
+                groups[i].1.append(tx)
+            } else {
+                index[key] = groups.count
+                groups.append((key, [tx]))
+            }
+        }
+        return groups
+    }
+
+    @MainActor
+    private func loadTransactions() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            transactions = try await APIClient.shared.getAllTransactions()
+        } catch {
+            errorText = error.localizedDescription
+        }
+    }
+}
+
+private struct AllTransactionRow: View {
+    let transaction: TransactionHistoryResponse
+
+    var body: some View {
+        HStack(spacing: TransactionLayout.rowSpacing) {
+            AsyncImage(url: URL(string: transaction.imgUrl)) { phase in
                 switch phase {
-                case .success(let image): image.resizable().scaledToFit()
+                case .success(let image):
+                    image.resizable().scaledToFill()
                 default:
-                    Image(systemName: "circle.fill")
-                        .resizable().scaledToFit()
-                        .foregroundColor(token.color)
+                    Circle().fill(Color.gray.opacity(0.3))
                 }
             }
             .frame(width: TransactionLayout.iconSize, height: TransactionLayout.iconSize)
             .clipShape(Circle())
 
-            Text(token.name)
-                .font(.subheadline.bold())
-                .foregroundColor(.white)
-        }
-        .padding(.horizontal, SharedLayout.horizontalPadding)
-        .padding(.top, SharedLayout.sectionSpacing)
-    }
-}
-
-private struct AllTransactionRow: View {
-    let transaction: MockTransaction
-    let tokenColor: Color
-
-    var body: some View {
-        HStack(spacing: TransactionLayout.rowSpacing) {
-            Image(systemName: transaction.isSent ? "paperplane.fill" : "arrow.down.circle.fill")
-                .foregroundColor(transaction.isSent ? .gray : .green)
-                .frame(width: TransactionLayout.iconSize, height: TransactionLayout.iconSize)
-                .background(AppColors.charcoalColor)
-                .clipShape(Circle())
-
             VStack(alignment: .leading, spacing: TransactionLayout.textSpacing) {
-                Text(transaction.type)
+                Text(transaction.transactionType?.capitalized ?? "Unknown")
                     .font(.subheadline)
                     .foregroundColor(.white)
-                Text(transaction.time)
+                Text(transaction.formattedTime)
                     .font(.caption)
                     .foregroundColor(.gray)
             }
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: TransactionLayout.textSpacing) {
-                Text(transaction.amount)
-                    .font(.subheadline)
-                    .foregroundColor(.white)
-                Text(transaction.value)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
+            Text(transaction.amountText)
+                .font(.subheadline)
+                .foregroundColor(.white)
         }
         .padding(.horizontal, SharedLayout.horizontalPadding)
         .padding(.vertical, TransactionLayout.rowVerticalPadding)
