@@ -10,40 +10,17 @@ import SwiftUI
 struct DashboardView: View {
     @Environment(AuthSession.self) private var authSession
 
-    @State var totalBalance: Double = 12345.67
-    @State var totalGainLoss: Double = 234.56
-    @State var totalGainLossPercent: Double = -1.94
+    @State private var totalBalance: Double = 0
+    @State private var totalGainLoss: Double = 0
+    @State private var totalGainLossPercent: Double = 0
     @State private var selectedToken: Token? = nil
     @State private var activeTab: Int = 0
-
-    @State var tokens: [Token] = [
-        Token(
-            name: "Ethereum", symbol: "ETH", pricePerToken: "A$3,241.50", balance: "A$4,862.25",
-            percentChange: "+2.4%", positive: true,
-            iconUrl: "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
-            color: .blue),
-        Token(
-            name: "Bitcoin", symbol: "BTC", pricePerToken: "$A98,430.00", balance: "A$2,952.90",
-            percentChange: "+1.1%", positive: true,
-            iconUrl: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png", color: .orange
-        ),
-        Token(
-            name: "Solana", symbol: "SOL", pricePerToken: "A$142.30", balance: "A$1,423.00",
-            percentChange: "-3.8%", positive: false,
-            iconUrl: "https://assets.coingecko.com/coins/images/4128/large/solana.png",
-            color: .purple),
-        Token(
-            name: "Chainlink", symbol: "LINK", pricePerToken: "A$13.75", balance: "A$1,007.52",
-            percentChange: "-1.2%", positive: false,
-            iconUrl: "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png",
-            color: .cyan),
-    ]
+    @State private var tokens: [Token] = []
+    @State private var isLoading = false
+    @State private var isReceiveSheetPresented = false
 
     private var formattedBalance: String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.currencyCode = "AUD"
-        return formatter.string(from: NSNumber(value: totalBalance)) ?? "$0.00"
+        Self.currencyFormatter.string(from: NSNumber(value: totalBalance)) ?? "A$0.00"
     }
 
     var body: some View {
@@ -116,34 +93,43 @@ struct DashboardView: View {
             }
             .background(AppColors.blackColor.ignoresSafeArea())
             .sheet(item: $selectedToken) { token in
-                TokenViewDetails(token: token, GoBackToDashboard: { selectedToken = nil })
+                TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
             }
         }
         .background(AppColors.blackColor.ignoresSafeArea())
+        .task { await loadDashboard() }
     }
+
+    // MARK: - Subviews
 
     private var totalBalanceView: some View {
         VStack(alignment: .center, spacing: BalanceLayout.stackSpacing) {
             Text("Total Balance")
                 .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
                 .foregroundColor(AppColors.goldColor)
-            Text(formattedBalance)
-                .font(.system(size: BalanceLayout.fontSize, weight: .bold))
-                .foregroundColor(.white)
 
-            let isGain = totalGainLoss >= 0
-            let sign = isGain ? "+" : "-"
-            let gainLossColor: Color = isGain ? .green : .red
-            Label {
-                Text(
-                    "\(sign)$\(String(format: BalanceLayout.currencyFormat, abs(totalGainLoss))) (\(sign)\(String(format: BalanceLayout.currencyFormat, abs(totalGainLossPercent)))%)"
-                )
-                .font(.system(size: GainLossLayout.fontSize, weight: .medium))
-                .foregroundColor(gainLossColor)
-            } icon: {
-                Image(systemName: isGain ? "arrow.up.right" : "arrow.down.right")
-                    .font(.system(size: GainLossLayout.iconSize, weight: .bold))
+            if isLoading {
+                ProgressView().tint(.white)
+                    .frame(height: BalanceLayout.fontSize)
+            } else {
+                Text(formattedBalance)
+                    .font(.system(size: BalanceLayout.fontSize, weight: .bold))
+                    .foregroundColor(.white)
+
+                let isGain = totalGainLoss >= 0
+                let sign = isGain ? "+" : "-"
+                let gainLossColor: Color = isGain ? .green : .red
+                Label {
+                    Text(
+                        "\(sign)$\(String(format: BalanceLayout.currencyFormat, abs(totalGainLoss))) (\(sign)\(String(format: BalanceLayout.currencyFormat, abs(totalGainLossPercent)))%)"
+                    )
+                    .font(.system(size: GainLossLayout.fontSize, weight: .medium))
                     .foregroundColor(gainLossColor)
+                } icon: {
+                    Image(systemName: isGain ? "arrow.up.right" : "arrow.down.right")
+                        .font(.system(size: GainLossLayout.iconSize, weight: .bold))
+                        .foregroundColor(gainLossColor)
+                }
             }
         }
     }
@@ -151,12 +137,13 @@ struct DashboardView: View {
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
             ActionButton(icon: "arrow.right", label: "Send")
-            NavigationLink {
-                ReceiveView()
-            } label: {
+            Button { isReceiveSheetPresented = true } label: {
                 ActionButton(icon: "arrow.down.left", label: "Receive")
-                    .allowsHitTesting(false) //disable inner button
+                    .allowsHitTesting(false)
             }
+        }
+        .sheet(isPresented: $isReceiveSheetPresented) {
+            ReceiveView()
         }
     }
 
@@ -164,26 +151,38 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: TokenLayout.rowSpacing) {
             sectionHeader("Tokens")
 
-            VStack(spacing: TokenLayout.listSpacing) {
-                ForEach(Array(tokens.enumerated()), id: \.element.id) { index, token in
-                    Button {
-                        selectedToken = token
-                    } label: {
-                        TokenRow(
-                            name: token.name, symbol: token.symbol,
-                            price: token.pricePerToken,
-                            balance: token.balance,
-                            change: token.percentChange,
-                            positive: token.positive,
-                            iconUrl: token.iconUrl, color: token.color
-                        )
-                    }
-                    .buttonStyle(.plain)
+            if isLoading {
+                ProgressView().tint(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, SharedLayout.sectionSpacing)
+            } else if tokens.isEmpty {
+                Text("No tokens in wallet.")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, SharedLayout.sectionSpacing)
+            } else {
+                VStack(spacing: TokenLayout.listSpacing) {
+                    ForEach(Array(tokens.enumerated()), id: \.element.id) { index, token in
+                        Button {
+                            selectedToken = token
+                        } label: {
+                            TokenRow(
+                                name: token.name, symbol: token.symbol,
+                                price: token.pricePerToken,
+                                balance: token.balance,
+                                change: token.percentChange,
+                                positive: token.positive,
+                                iconUrl: token.iconUrl, color: token.color
+                            )
+                        }
+                        .buttonStyle(.plain)
 
-                    if index < tokens.count - 1 {
-                        Divider()
-                            .background(Color.gray.opacity(SharedLayout.dividerOpacity))
-                            .padding(.leading, SharedLayout.dividerLeadingPadding)
+                        if index < tokens.count - 1 {
+                            Divider()
+                                .background(Color.gray.opacity(SharedLayout.dividerOpacity))
+                                .padding(.leading, SharedLayout.dividerLeadingPadding)
+                        }
                     }
                 }
             }
@@ -191,17 +190,69 @@ struct DashboardView: View {
     }
 
     private func sectionHeader(_ title: String) -> some View {
-        Button {
-        } label: {
-            HStack(spacing: SharedLayout.sectionHeaderSpacing) {
-                Text(title)
-                    .font(.headline.bold())
-                    .foregroundColor(.white)
-                Image(systemName: "chevron.right")
-                    .font(.caption.bold())
-                    .foregroundColor(.gray)
-            }
+        HStack(spacing: SharedLayout.sectionHeaderSpacing) {
+            Text(title)
+                .font(.headline.bold())
+                .foregroundColor(.white)
+            Image(systemName: "chevron.right")
+                .font(.caption.bold())
+                .foregroundColor(.gray)
         }
+    }
+
+    // MARK: - Data loading
+
+    @MainActor
+    private func loadDashboard() async {
+        isLoading = true
+        defer { isLoading = false }
+        async let tokensFetch = APIClient.shared.listWalletTokens()
+        async let balanceFetch = APIClient.shared.getWalletBalance()
+        do {
+            let (walletTokens, walletBalance) = try await (tokensFetch, balanceFetch)
+            tokens = walletTokens.map { Token(walletToken: $0) }
+            totalBalance = walletBalance.totalValue
+            totalGainLoss = walletBalance.gainLoss
+            totalGainLossPercent = walletBalance.gainLossPercent
+        } catch {
+            // balance/tokens stay at zero/empty — user can see empty state
+        }
+    }
+
+    // MARK: - Helpers
+
+    static let currencyFormatter: NumberFormatter = {
+        let f = NumberFormatter()
+        f.numberStyle = .currency
+        f.currencyCode = "AUD"
+        return f
+    }()
+}
+
+// MARK: - WalletTokenResponse → Token mapping
+
+private extension Token {
+    init(walletToken w: WalletTokenResponse) {
+        let fmt = DashboardView.currencyFormatter
+        let audBalance = w.balance * w.price
+        let pct = w.gainsPercent
+        self.init(
+            name: w.name,
+            symbol: w.symbol,
+            pricePerToken: fmt.string(from: NSNumber(value: w.price)) ?? "A$0.00",
+            balance: fmt.string(from: NSNumber(value: audBalance)) ?? "A$0.00",
+            percentChange: "\(pct >= 0 ? "+" : "")\(String(format: "%.2f", pct))%",
+            positive: pct >= 0,
+            iconUrl: w.imgUrl,
+            color: Token.color(for: w.symbol),
+            mintAddress: w.mintAddress
+        )
+    }
+
+    private static func color(for symbol: String) -> Color {
+        let palette: [Color] = [.blue, .orange, .purple, .cyan, .green, .red, .yellow, .pink, .indigo, .teal]
+        let hash = symbol.unicodeScalars.reduce(0) { $0 + Int($1.value) }
+        return palette[hash % palette.count]
     }
 }
 
