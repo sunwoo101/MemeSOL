@@ -10,14 +10,8 @@ import SwiftUI
 struct SendView: View {
     @State var address = ""
     @State var amount = ""
-    @State var selectedToken = ""
+    @State var selectedToken: WalletTokenResponse?
     @StateObject var viewModel = SendViewModel()
-
-    
-    let tokenBalances: [String: Double] = [
-        "SOL": 2.53,
-        "USDC": 145.80
-    ]
     
     
     var body: some View {
@@ -69,19 +63,17 @@ struct SendView: View {
                             .font(.headline)
                         
                         Menu {
-                            Button("SOL") {
-                                selectedToken = "SOL"
-                            }
-                            Button("USDC") {
-                                selectedToken = "USDC"
+                            ForEach(viewModel.walletTokens, id: \.id) { token in
+                                Button {
+                                    selectedToken = token
+                                } label: {
+                                    Text(token.symbol)
+                                }
                             }
                         } label: {
-                            HStack {
-                                Image(systemName: tokenIcon(for: selectedToken))
-                                        .foregroundColor(AppColors.goldColor)
-                                
-                                Text(selectedToken.isEmpty ? "Select Token" : selectedToken)
-                                    .foregroundColor(selectedToken.isEmpty ? AppColors.secondaryTextColor : .white)
+                            HStack {                        
+                                Text(selectedToken?.symbol ?? "Select Token")
+                                    .foregroundColor(selectedToken == nil ? AppColors.secondaryTextColor : .white)
                                 
                                 Spacer ()
                                 
@@ -103,7 +95,7 @@ struct SendView: View {
                             
                             Spacer()
                             
-                            Text("Balance: \(tokenBalances[selectedToken] ?? 0, specifier: "%.2f") \(selectedToken)")
+                            Text("Balance: \(selectedToken?.balance ?? 0, specifier: "%.2f")")
                                 .foregroundColor(AppColors.secondaryTextColor)
                                 .font(.subheadline)
                         }
@@ -118,7 +110,7 @@ struct SendView: View {
                                 .font(.system(size: 30, weight: .semibold))
                                 .foregroundColor(.white)
                             
-                                Text(selectedToken)
+                            Text(selectedToken?.symbol ?? "")
                                     .foregroundColor(AppColors.secondaryTextColor)
                                     .font(.headline)
                             }
@@ -144,6 +136,11 @@ struct SendView: View {
                 
             }
             .padding(.horizontal, 10)
+            
+        }
+        .task {
+            await viewModel.loadTokens()
+
         }
     }
 }
