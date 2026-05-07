@@ -10,14 +10,15 @@ import CodeScanner
 internal import AVFoundation
 
 struct SendView: View {
-    @State var address = ""
-    @State var amount = ""
-    @State var selectedToken: WalletTokenResponse?
+    @State private var address = ""
+    @State private var amount = ""
+    @State private var selectedToken: WalletTokenResponse?
     
-    @State var showingConfirmModal: Bool = false
-    @State var showingScanner: Bool = false
     
-    @StateObject var viewModel = SendViewModel()
+    @State private var showingConfirmModal: Bool = false
+    @State private var showingScanner: Bool = false
+    
+    @StateObject private var viewModel = SendViewModel()
     
     //check to ensure the address input is not empty and that the user has enough crypto to make the transaction
     private var isSendDisabled: Bool {
@@ -181,64 +182,92 @@ struct SendView: View {
         
         //confirm modal
         .sheet(isPresented: $showingConfirmModal) {
-                VStack (spacing: 20) {
+                
+                VStack (spacing: 24) {
                     Text("Confirm Transaction")
                         .font(.title2.bold())
-                }
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack (alignment: .leading, spacing: 4) {
-                        Text("Recipient")
-                            .foregroundColor(.secondary)
+                        .foregroundColor(AppColors.blackColor)
+                    
+                    VStack(alignment: .leading, spacing: 16) {
+                        VStack (alignment: .leading, spacing: 4) {
+                            Text("Recipient")
+                                .foregroundColor(.secondary)
+                            
+                            Text(address)
+                                .font(.system(.body, design: .monospaced))
+                                .foregroundColor(AppColors.blackColor)
+                        }
                         
-                        Text(address)
-                            .font(.system(.body, design: .monospaced))
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Token")
-                            .foregroundColor(.secondary)
-                        Text(selectedToken?.symbol ?? "")
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Amount")
-                            .foregroundColor(.secondary)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Token")
+                                .foregroundColor(.secondary)
+                            Text(selectedToken?.symbol ?? "")
+                                .foregroundColor(.black)
+                        }
                         
-                        Text("\(amount) \(selectedToken?.symbol ?? "")")
-                            .font(.title3.bold())
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Amount")
+                                .foregroundColor(.secondary)
+                            
+                            Text("\(amount) \(selectedToken?.symbol ?? "")")
+                                .font(.title3.bold())
+                                .foregroundColor(AppColors.blackColor)
+                        }
                     }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-                .cornerRadius(20)
-                
-                HStack(spacing: 16) {
-                    Button {
-                        showingConfirmModal = false
-                    } label: {
-                        Text("Cancel")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(AppColors.charcoalColor)
-                            .foregroundColor(.white)
-                            .cornerRadius(SharedLayout.cornerRadius)
-                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .cornerRadius(20)
                     
-                    Button {
-                        showingConfirmModal = false
-                        //put api call
-                    } label: {
-                        Text("Send Now")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(AppColors.goldColor)
-                            .foregroundColor(.black)
-                            .cornerRadius(SharedLayout.cornerRadius)
+                    HStack(spacing: 16) {
+                        
+                        Button {
+                            showingConfirmModal = false
+                        } label: {
+                            Text("Cancel")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(AppColors.charcoalColor)
+                                .foregroundColor(.white)
+                                .cornerRadius(SharedLayout.cornerRadius)
+                        }
+                        
+                        Button {
+                            guard let token = selectedToken,
+                                  let decimalAmount = Decimal(string: amount)
+                            else { return }
+                            
+                            Task {
+                                await viewModel.sendToken(mintAddress: token.mintAddress, recipientAddress: address, amount: decimalAmount)
+                                
+                                if viewModel.sendError.isEmpty {
+                                    amount = ""
+                                    address = ""
+                                    selectedToken = nil
+                                    showingConfirmModal = false
+                                }
+                                
+                            }
+        
+                        } label: {
+                            Text("Send Now")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(AppColors.goldColor)
+                                .foregroundColor(.black)
+                                .cornerRadius(SharedLayout.cornerRadius)
+                        }
+                    }
+                    if !viewModel.sendError.isEmpty {
+                        Text(viewModel.sendError)
+                            .foregroundColor(.red)
                     }
                 }
                 .padding()
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
+                .onDisappear {
+                    viewModel.sendError = ""
+                }
         }
         
         //qr scanner sheet
@@ -255,13 +284,3 @@ struct SendView: View {
 #Preview {
     SendView()
 }
-
-//things to do:
-//styling
-//blur background when in confirm modal
-//reintroduce crypto image?
-//color of modal (background)
-
-//functionality
-//scan button should scan address and fill it in the field
-//modal needs to actually send amount

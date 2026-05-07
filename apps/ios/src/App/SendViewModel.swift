@@ -13,6 +13,10 @@ class SendViewModel: ObservableObject {
     @Published var walletTokens: [WalletTokenResponse] = []
     @Published var errorMessage = ""
     
+    @Published var isSending = false
+    @Published var sendError = ""
+    @Published var sendSuccess = false
+    
     //get user's tokens
     func loadTokens() async {
         do {
@@ -21,6 +25,25 @@ class SendViewModel: ObservableObject {
             errorMessage = error.localizedDescription
             print(error)
         }
+    }
+    
+    //send token to recipient
+    func sendToken(mintAddress: String, recipientAddress: String, amount: Decimal) async {
+        isSending = true
+        sendError = ""
+        
+        do {
+            _ = try await APIClient.shared.sendToken(mintAddress: mintAddress,
+                                                     recipientAddress: recipientAddress,
+                                                     amount: amount)
+            await loadTokens()
+            
+            sendSuccess = true
+        } catch {
+            sendError = error.localizedDescription
+        }
+        
+        isSending = false
     }
     
     //check if the user has enough crypto for the transaction 
