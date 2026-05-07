@@ -275,11 +275,24 @@ struct SendView: View {
         
         //qr scanner sheet
         .sheet(isPresented: $showingScanner) {
-            CodeScannerView(codeTypes: [.qr], completion: { result in
-                if case let .success(code) = result {
-                    address = code.string
-                    self.showingScanner = false
-                }})
+            ZStack {
+                AppColors.blackColor.ignoresSafeArea()
+                
+                VStack(spacing: 20) {
+                    Text("Scan QR Code")
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                    
+                    CodeScannerView(codeTypes: [.qr], completion: { result in
+                        if case let .success(code) = result {
+                            address = code.string
+                            self.showingScanner = false
+                        }})
+                    .cornerRadius(SharedLayout.cornerRadius)
+                    .frame(width: 300, height: 300)
+                }
+            }
+            
         }
     }
 }
