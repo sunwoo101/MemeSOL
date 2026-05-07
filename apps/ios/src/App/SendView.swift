@@ -153,15 +153,17 @@ struct SendView: View {
                 .padding(.bottom, 15)
                 
                 //send button
-                Button("Send") {
+                Button {
                     showingConfirmModal = true
+                } label: {
+                    Text("Send")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(isSendDisabled ? AppColors.charcoalColor : AppColors.goldColor)
+                        .foregroundColor(isSendDisabled ? AppColors.secondaryTextColor : .black)
+                        .cornerRadius(SharedLayout.cornerRadius)
                 }
                 .disabled(isSendDisabled)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(isSendDisabled ? AppColors.charcoalColor : AppColors.goldColor)
-                .foregroundColor(isSendDisabled ? AppColors.secondaryTextColor : .black)
-                .cornerRadius(SharedLayout.cornerRadius)
                 
                 Spacer()
                 
@@ -207,24 +209,28 @@ struct SendView: View {
                 .cornerRadius(20)
                 
                 HStack(spacing: 16) {
-                    Button("Cancel") {
+                    Button {
                         showingConfirmModal = false
+                    } label: {
+                        Text("Cancel")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(AppColors.charcoalColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(SharedLayout.cornerRadius)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(AppColors.charcoalColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(SharedLayout.cornerRadius)
                     
-                    Button("Send Now") {
+                    Button {
                         showingConfirmModal = false
                         //put api call
+                    } label: {
+                        Text("Send Now")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(AppColors.goldColor)
+                            .foregroundColor(.black)
+                            .cornerRadius(SharedLayout.cornerRadius)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(AppColors.goldColor)
-                    .foregroundColor(.black)
-                    .cornerRadius(SharedLayout.cornerRadius)
                 }
                 .padding()
                 .presentationDetents([.medium])
@@ -239,8 +245,7 @@ struct SendView: View {
 
 //things to do:
 //scan button should scan address and fill it in the field
-//button needs to go when the user taps anywhere on the button not just one specific part
 //color of modal (background)
 //modal needs to actually send amount
-//blur background when in confirm moda
+//blur background when in confirm modal
 //reintroduce crypto image?
