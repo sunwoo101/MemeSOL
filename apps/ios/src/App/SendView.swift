@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import CodeScanner
+internal import AVFoundation
 
 struct SendView: View {
     @State var address = ""
@@ -13,6 +15,7 @@ struct SendView: View {
     @State var selectedToken: WalletTokenResponse?
     
     @State var showingConfirmModal: Bool = false
+    @State var showingScanner: Bool = false
     
     @StateObject var viewModel = SendViewModel()
     
@@ -55,6 +58,7 @@ struct SendView: View {
                                 .background(Color.white.opacity(0.9))
                         
                         Button (action: {
+                            showingScanner = true
                         }) {
                             VStack(spacing: 5) {
                                 Image(systemName: "qrcode.viewfinder")
@@ -236,6 +240,15 @@ struct SendView: View {
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
         }
+        
+        //qr scanner sheet
+        .sheet(isPresented: $showingScanner) {
+            CodeScannerView(codeTypes: [.qr], completion: {result in
+                if case let .success(code) = result {
+                    address = code.string
+                    self.showingScanner = false
+                }})
+        }
     }
 }
 
@@ -244,8 +257,11 @@ struct SendView: View {
 }
 
 //things to do:
-//scan button should scan address and fill it in the field
-//color of modal (background)
-//modal needs to actually send amount
+//styling
 //blur background when in confirm modal
 //reintroduce crypto image?
+//color of modal (background)
+
+//functionality
+//scan button should scan address and fill it in the field
+//modal needs to actually send amount
