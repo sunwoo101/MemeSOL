@@ -21,4 +21,11 @@ class SendViewModel: ObservableObject {
             print(error)
         }
     }
+    
+    func isTransactionValid(balance: Double?, amount: Decimal?) -> Bool {
+        guard let balance, let amount, amount > 0 else {
+            return false
+        }
+        return Decimal(balance) >= amount 
+    }
 }
