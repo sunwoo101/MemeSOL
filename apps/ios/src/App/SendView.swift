@@ -13,6 +13,13 @@ struct SendView: View {
     @State var selectedToken: WalletTokenResponse?
     @StateObject var viewModel = SendViewModel()
     
+    private var isSendDisabled: Bool {
+        !viewModel.isTransactionValid(
+            balance: selectedToken?.balance,
+            amount: Decimal(string: amount)
+        )
+    }
+    
     
     var body: some View {
         ZStack {
@@ -71,7 +78,7 @@ struct SendView: View {
                                 }
                             }
                         } label: {
-                            HStack {                        
+                            HStack {
                                 Text(selectedToken?.symbol ?? "Select Token")
                                     .foregroundColor(selectedToken == nil ? AppColors.secondaryTextColor : .white)
                                 
@@ -109,6 +116,23 @@ struct SendView: View {
                                 .keyboardType(.decimalPad)
                                 .font(.system(size: 30, weight: .semibold))
                                 .foregroundColor(.white)
+                                .onChange(of: amount) {
+                                    let filtered = amount.filter { "0123456789.".contains($0)
+                                    }
+                                    
+                                    let dotCount = filtered.filter { $0 == "."}.count
+                                    
+                                    if dotCount > 1 {
+                                        if let firstDot = filtered.firstIndex(of: ".") {
+                                            var cleaned = filtered
+                                            cleaned.remove(at: firstDot)
+                                            
+                                            amount = cleaned
+                                        }
+                                    } else {
+                                        amount = filtered
+                                    }
+                                }
                             
                             Text(selectedToken?.symbol ?? "")
                                     .foregroundColor(AppColors.secondaryTextColor)
@@ -122,14 +146,14 @@ struct SendView: View {
                 }
                 .padding(.bottom, 15)
                 
-                
                 Button("Send") {
                     // show confirm modal
                 }
+                .disabled(isSendDisabled)
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(AppColors.goldColor)
-                .foregroundColor(.black)
+                .background(isSendDisabled ? AppColors.charcoalColor : AppColors.goldColor)
+                .foregroundColor(isSendDisabled ? AppColors.secondaryTextColor : .black)
                 .cornerRadius(SharedLayout.cornerRadius)
                 
                 Spacer()
@@ -144,18 +168,6 @@ struct SendView: View {
         }
     }
 }
-
-func tokenIcon(for token: String) -> String {
-    switch token {
-    case "SOL":
-        return "circle.hexagongrid.fill"
-    case "USDC":
-        return "dollarsign.circle.fill"
-    default:
-        return "questionmark.circle"
-    }
-}
-
 
 #Preview {
     SendView()
