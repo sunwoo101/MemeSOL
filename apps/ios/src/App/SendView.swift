@@ -48,9 +48,9 @@ struct SendView: View {
                     HStack {
                         TextField("",
                                   text: $address,
-                                  prompt: Text("Enter or scan address").foregroundColor(AppColors.secondaryTextColor),
-                                    axis: .vertical)
+                                  prompt: Text("Enter or scan address").foregroundColor(AppColors.secondaryTextColor))
                         .foregroundColor(.white)
+                        .autocorrectionDisabled()
                     
                         Spacer()
                         
