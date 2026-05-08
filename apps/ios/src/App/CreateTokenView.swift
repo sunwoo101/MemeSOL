@@ -19,13 +19,11 @@ struct CreateTokenView: View {
     
     @StateObject private var viewModel = CreateTokenViewModel()
     
-    //check there are values for name, symbol, image and supply
-    //if these conditions are met -> variable equals true
-    private var isFormValid: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !symbol.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !supply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        imageData != nil
+    private var isCreateDisabled: Bool {
+        name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        symbol.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        supply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+        imageData == nil
     }
     
     var body: some View {
@@ -115,6 +113,7 @@ struct CreateTokenView: View {
                     .background(AppColors.charcoalColor)
                     .cornerRadius(SharedLayout.cornerRadius)
                 }
+                .padding(.bottom, 15)
                 
                 //create token
                 Button {
@@ -124,11 +123,16 @@ struct CreateTokenView: View {
                         await viewModel.createToken(name: name, symbol: symbol, supply: supplyValue, image: imageData)
                     }
                 } label: {
-                    Text("Create Token")
-                        .foregroundColor(.white)
-                    //need to add more styling here later
+                    Text(viewModel.isCreating ? "Creating..." : "Create Token")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(isCreateDisabled || viewModel.isCreating ? AppColors.charcoalColor : AppColors.goldColor)
+                        .foregroundColor(isCreateDisabled || viewModel.isCreating ? AppColors.secondaryTextColor : .black)
+                        .cornerRadius(SharedLayout.cornerRadius)
                 }
-                .disabled(!isFormValid) //if form not valid disable button
+                .disabled(isCreateDisabled || viewModel.isCreating)
+                
+                Spacer()
             }
             .padding()
         }
@@ -136,7 +140,7 @@ struct CreateTokenView: View {
             guard let selectedItem else { return }
             
             if let data = try? await selectedItem.loadTransferable(type: Data.self) {
-                imageData = data  
+                imageData = data
                 if let uiImage = UIImage(data: data) {
                     selectedImage = Image(uiImage: uiImage)
                 }
@@ -153,5 +157,3 @@ struct CreateTokenView: View {
 //make symbol input uppercase
 //symbol has to be between 3 and 6 characters
 //token name cannot be longer than 20 characters
-//create token disabled when token is being created
-//create token has "creating..." while it is being processed

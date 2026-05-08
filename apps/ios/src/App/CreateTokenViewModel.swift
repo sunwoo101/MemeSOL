@@ -18,7 +18,7 @@ class CreateTokenViewModel : ObservableObject {
         errorMessage = ""
         
         do {
-            try await APIClient.shared.createToken(name: name, symbol: symbol, supply: supply, imageData: image)
+            _ = try await APIClient.shared.createToken(name: name, symbol: symbol, supply: supply, imageData: image)
             creationSuccess = true
         } catch {
             errorMessage = error.localizedDescription
