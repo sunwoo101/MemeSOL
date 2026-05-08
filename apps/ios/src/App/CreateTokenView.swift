@@ -86,6 +86,9 @@ struct CreateTokenView: View {
                                   text: $symbol,
                                   prompt: Text("Enter token symbol").foregroundColor(AppColors.secondaryTextColor))
                         .padding()
+                        .onChange(of: symbol) {
+                            symbol = symbol.uppercased()
+                        }
                     }
                     .foregroundColor(.white)
                     .background(AppColors.charcoalColor)
@@ -154,6 +157,5 @@ struct CreateTokenView: View {
 }
 
 //things to do:
-//make symbol input uppercase
 //symbol has to be between 3 and 6 characters
 //token name cannot be longer than 20 characters

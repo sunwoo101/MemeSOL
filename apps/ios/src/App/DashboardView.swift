@@ -141,6 +141,12 @@ struct DashboardView: View {
                 ActionButton(icon: "arrow.down.left", label: "Receive")
                     .allowsHitTesting(false)
             }
+            NavigationLink {
+                CreateTokenView()
+            } label : {
+                ActionButton(icon: "", label: "Create")
+                    .allowsHitTesting(false)
+            }
         }
         .sheet(isPresented: $isReceiveSheetPresented) {
             ReceiveView()
