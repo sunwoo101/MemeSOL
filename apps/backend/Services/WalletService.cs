@@ -101,15 +101,17 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
                 .Select(t => t.Id)
                 .FirstAsync();
 
-            db.UserTokens.Add(new UserToken { UserId = recipientUser.Id, TokenId = tokenId });
+            var userToken = new UserToken { UserId = recipientUser.Id, TokenId = tokenId };
+            db.UserTokens.Add(userToken);
             try
             {
                 await db.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when ((ex.InnerException as Npgsql.PostgresException)?.SqlState == "23505") { }
+            catch (DbUpdateException ex) when ((ex.InnerException as Npgsql.PostgresException)?.SqlState == "23505")
+            {
+                db.Entry(userToken).State = EntityState.Detached;
+            }
         }
-
-        await db.SaveChangesAsync();
 
         return new SendTokenResponse { Signature = signature };
     }
