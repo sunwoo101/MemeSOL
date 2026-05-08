@@ -6,24 +6,27 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct CreateTokenView: View {
     @State private var name = ""
     @State private var symbol = ""
     @State private var supply = ""
-    @State private var image: Data?
+    
+    @State private var selectedItem: PhotosPickerItem? //image user selected from photo library
+    @State private var selectedImage: Image? //to display image
+    @State private var imageData: Data? //image data for api
     
     @StateObject private var viewModel = CreateTokenViewModel()
     
     //check there are values for name, symbol, image and supply
     //if these conditions are met -> variable equals true
     private var isFormValid: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        !symbol.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        !supply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
-        image != nil
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !symbol.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !supply.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        imageData != nil
     }
-    
     
     var body: some View {
         ZStack {
@@ -35,6 +38,30 @@ struct CreateTokenView: View {
                     .foregroundColor(AppColors.goldColor)
                     .padding(.top, 10)
                 
+                //upload image
+                PhotosPicker(selection: $selectedItem, matching: .images) {
+                    VStack(spacing: 10) {
+                        if let selectedImage {
+                            selectedImage
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 120, height: 120)
+                                .clipShape(Circle())
+                        } else {
+                            ZStack {
+                                Circle()
+                                    .fill(AppColors.charcoalColor)
+                                    .frame(width: 120, height: 120)
+                                Image(systemName: "photo")
+                                    .font(.system(size: 35))
+                                    .foregroundColor(.white.opacity(0.75))
+                            }
+                        }
+                        Text("Upload Token Image")
+                            .foregroundColor(.white)
+                    }
+                }
+                
                 //token name
                 VStack (alignment: .leading, spacing: 10) {
                     Text("Token Name")
@@ -44,6 +71,7 @@ struct CreateTokenView: View {
                         TextField("",
                                   text: $name,
                                   prompt: Text("Enter token name").foregroundColor(AppColors.secondaryTextColor))
+                        .padding()
                     }
                     .foregroundColor(.white)
                     .background(AppColors.charcoalColor)
@@ -59,6 +87,7 @@ struct CreateTokenView: View {
                         TextField("",
                                   text: $symbol,
                                   prompt: Text("Enter token symbol").foregroundColor(AppColors.secondaryTextColor))
+                        .padding()
                     }
                     .foregroundColor(.white)
                     .background(AppColors.charcoalColor)
@@ -74,39 +103,44 @@ struct CreateTokenView: View {
                         TextField("",
                                   text: $supply,
                                   prompt: Text("Enter token supply").foregroundColor(AppColors.secondaryTextColor))
+                        .padding()
                         .keyboardType(.decimalPad)
                         .onChange(of: supply) {
                             let filtered = supply.filter { "0123456789".contains($0)}
                             supply = filtered
                         }
                     }
+                    
                     .foregroundColor(.white)
                     .background(AppColors.charcoalColor)
                     .cornerRadius(SharedLayout.cornerRadius)
                 }
                 
-                
-                
-                
-                
-                //upload image
-                Button() {
-                    //upload image
-                } label: {
-                    Text("Upload Token Image")
-                        .foregroundColor(.white)
-                }
-                
                 //create token
-                Button() {
-                    //api call for create token
+                Button {
+                    guard let imageData, let supplyValue = UInt64(supply)
+                    else { return }
+                    Task {
+                        await viewModel.createToken(name: name, symbol: symbol, supply: supplyValue, image: imageData)
+                    }
                 } label: {
                     Text("Create Token")
                         .foregroundColor(.white)
+                    //need to add more styling here later
                 }
                 .disabled(!isFormValid) //if form not valid disable button
             }
             .padding()
+        }
+        .task(id: selectedItem) {
+            guard let selectedItem else { return }
+            
+            if let data = try? await selectedItem.loadTransferable(type: Data.self) {
+                imageData = data  
+                if let uiImage = UIImage(data: data) {
+                    selectedImage = Image(uiImage: uiImage)
+                }
+            }
         }
     }
 }
@@ -114,3 +148,10 @@ struct CreateTokenView: View {
 #Preview {
     CreateTokenView()
 }
+
+//things to do:
+//make symbol input uppercase
+//symbol has to be between 3 and 6 characters
+//token name cannot be longer than 20 characters
+//create token disabled when token is being created
+//create token has "creating..." while it is being processed
