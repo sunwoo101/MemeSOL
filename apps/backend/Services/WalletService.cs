@@ -83,6 +83,18 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             mintAddress, request.RecipientAddress,
             rawAmount);
 
+        var recipientUser = await db.Users
+            .Where(u => u.WalletPublicKey == request.RecipientAddress)
+            .FirstOrDefaultAsync();
+
+        if (recipientUser != null && !await db.UserTokens.AnyAsync(ut => ut.UserId == recipientUser.Id && ut.Token.MintAddress == mintAddress))
+        {
+            var token = await db.Tokens.Where(t => t.MintAddress == mintAddress).FirstAsync();
+            db.UserTokens.Add(new UserToken { UserId = recipientUser.Id, TokenId = token.Id });
+        }
+
+        await db.SaveChangesAsync();
+
         return new SendTokenResponse { Signature = signature };
     }
 
