@@ -94,10 +94,19 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             .Where(u => u.WalletPublicKey == request.RecipientAddress)
             .FirstOrDefaultAsync();
 
-        if (recipientUser != null && !await db.UserTokens.AnyAsync(ut => ut.UserId == recipientUser.Id && ut.Token.MintAddress == mintAddress))
+        if (recipientUser != null)
         {
-            var token = await db.Tokens.Where(t => t.MintAddress == mintAddress).FirstAsync();
-            db.UserTokens.Add(new UserToken { UserId = recipientUser.Id, TokenId = token.Id });
+            var tokenId = await db.Tokens
+                .Where(t => t.MintAddress == mintAddress && t.Status == TokenStatus.Completed)
+                .Select(t => t.Id)
+                .FirstAsync();
+
+            db.UserTokens.Add(new UserToken { UserId = recipientUser.Id, TokenId = tokenId });
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when ((ex.InnerException as Npgsql.PostgresException)?.SqlState == "23505") { }
         }
 
         await db.SaveChangesAsync();
