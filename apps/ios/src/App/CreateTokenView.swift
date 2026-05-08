@@ -26,6 +26,15 @@ struct CreateTokenView: View {
         imageData == nil
     }
     
+    private func clearForm() {
+        name = ""
+        symbol = ""
+        supply = ""
+        selectedItem = nil
+        selectedImage = nil
+        imageData = nil
+    }
+    
     var body: some View {
         ZStack {
             AppColors.blackColor.ignoresSafeArea()
@@ -149,13 +158,18 @@ struct CreateTokenView: View {
                 }
             }
         }
+        
+        .alert("Token Created!", isPresented: $viewModel.creationSuccess) {
+            Button("OK") {
+                clearForm()
+                viewModel.creationSuccess = false
+            }
+        } message: {
+            Text("Your token was successfully created.")
+        }
     }
 }
 
 #Preview {
     CreateTokenView()
 }
-
-//things to do:
-//symbol has to be between 3 and 6 characters
-//token name cannot be longer than 20 characters

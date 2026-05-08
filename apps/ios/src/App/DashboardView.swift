@@ -144,7 +144,7 @@ struct DashboardView: View {
             NavigationLink {
                 CreateTokenView()
             } label : {
-                ActionButton(icon: "", label: "Create")
+                ActionButton(icon: "pencil", label: "Create")
                     .allowsHitTesting(false)
             }
         }
