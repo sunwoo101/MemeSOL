@@ -19,7 +19,7 @@ struct BuyMenuView: View {
                 VStack {
                     Text("Buy Tokens")
                         .foregroundColor(AppColors.goldColor)
-                        .font(.title3.bold())
+                        .font(.title2.bold())
                     
                     HStack {
                         TextField("",
@@ -39,8 +39,8 @@ struct BuyMenuView: View {
                         } label: {
                             TokenRow(name: token.name,
                                      symbol: token.symbol,
-                                     price: String(format: "$%.2f", token.price),
-                                     balance: "",
+                                     price: "",
+                                     balance: String(format: "$%.2f", token.price),
                                      change: String(format: "%.2f%%", token.gainsPercent),
                                      positive: token.gainsPercent >= 0,
                                      iconUrl: token.imgUrl,
