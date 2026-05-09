@@ -59,5 +59,7 @@ struct TokenRow: View {
             }
         }
         .padding(.vertical, TokenLayout.rowVerticalPadding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
     }
 }
