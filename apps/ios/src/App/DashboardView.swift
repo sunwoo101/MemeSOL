@@ -152,31 +152,31 @@ struct DashboardView: View {
 
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
-
-                NavigationLink {
-                    SendView()
-                } label: {
-                    ActionButton(icon: "arrow.right", label: "Send")
-                        .allowsHitTesting(false)
-                }
-
-                Button {
-                    isReceiveSheetPresented = true
-                } label: {
-                    ActionButton(icon: "arrow.down.left", label: "Receive")
-                        .allowsHitTesting(false)
-                }
-
-                NavigationLink {
-                    CreateTokenView()
-                } label: {
-                    ActionButton(icon: "pencil", label: "Create")
-                        .allowsHitTesting(false)
-                }
+            
+            NavigationLink {
+                SendView()
+            } label: {
+                ActionButton(icon: "arrow.right", label: "Send")
+                    .allowsHitTesting(false)
             }
-            .sheet(isPresented: $isReceiveSheetPresented) {
+
+            
+            NavigationLink {
                 ReceiveView()
+            } label: {
+                ActionButton(icon: "arrow.down.left", label: "Receive")
+                    .allowsHitTesting(false)
             }
+            
+            NavigationLink {
+                CreateTokenView()
+            } label: {
+                ActionButton(icon: "pencil", label: "Create")
+                    .allowsHitTesting(false)
+            }
+            
+            
+        }
     }
 
     private var tokensSection: some View {
