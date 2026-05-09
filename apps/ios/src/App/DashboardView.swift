@@ -153,11 +153,10 @@ struct DashboardView: View {
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
             NavigationLink {
-                EmptyView()
+                BuyMenuView()
             } label: {
                 ActionButton(icon: "cart.fill", label: "Buy")
             }
-            .disabled(true)
 
             NavigationLink {
                 SendView()
