@@ -12,6 +12,8 @@ class BuyViewModel : ObservableObject {
     @Published var tokens: [TokenListResponse] = []
     @Published var walletToken: WalletTokenResponse?
     
+    @Published var isBuying = false
+
     @Published var errorMessage = ""
     
     @Published var searchText = ""
