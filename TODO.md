@@ -1,4 +1,4 @@
-# Memecoin Wallet App — Todo
+# MemeSOL App — Todo
 
 ## Backend
 - [x] Set up database models (User, Token)
@@ -7,7 +7,6 @@
 - [x] `POST /auth/login` — validate login and return JWT, refresh token + public wallet address
 - [x] `POST /tokens` — create SPL token on Solana devnet
 - [x] `GET /tokens` — list all tokens on the platform
-- ~~`GET /tokens/{mintAddress}` — get token details~~
 - [x] `GET /wallet/tokens` — list tokens in user's wallet
 - [x] `POST /wallet/tokens/{mintAddress}` — add a token to user's wallet
 - [x] `DELETE /wallet/tokens/{mintAddress}` — remove a token from user's wallet
@@ -17,15 +16,26 @@
 - [x] Fund backend devnet wallet with airdropped SOL
 
 ## iOS
-- [ ] Apple Sign In flow (`ASAuthorizationAppleIDProvider`)
+- [x] User registration and login with JWT authentication
 - [x] JWT storage in Keychain
 - [x] API client (networking layer using `URLSession`)
-- [ ] Portfolio screen — list holdings with live prices and overall balance with gains/losses for today
-- [ ] Create token screen — name, symbol, supply
-- [ ] Token detail screen — balance, transactions
-- [ ] Send screen — recipient address + amount
-- [ ] Receive screen — display public wallet address + QR code
+- [x] Portfolio screen — list holdings with live prices and overall balance with gains/losses for today
+- [x] Create token screen — name, symbol, supply
+- [x] Token detail screen — balance, transactions
+- [x] Send screen — recipient address + amount
+- [x] Receive screen — display public wallet address + QR code
+- [ ] Buy screen — fund tokens on devnet
+- [ ] Ensure every screen is wired up
+
+## QA
+- [ ] Test user registration and login flows
+- [ ] Test token creation and listing
+- [ ] Test adding/removing tokens from wallet
+- [ ] Test token transfer functionality
+- [ ] Test portfolio balance and transaction history accuracy
+- [ ] Test buying tokens on devnet
+- [ ] Test UI responsiveness and error handling
 
 ## Design
 - [ ] Agree on UI style/theme as a team
-- [ ] Design main screens (portfolio, create token, token detail, send, receive)
+- [x] Design main screens (portfolio, create token, token detail, send, receive)
