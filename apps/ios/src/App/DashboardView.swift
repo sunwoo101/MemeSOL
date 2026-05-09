@@ -136,15 +136,24 @@ struct DashboardView: View {
 
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
-            ActionButton(icon: "arrow.right", label: "Send")
-            Button { isReceiveSheetPresented = true } label: {
-                ActionButton(icon: "arrow.down.left", label: "Receive")
-                    .allowsHitTesting(false)
+
+                NavigationLink {
+                    SendView()
+                } label: {
+                    ActionButton(icon: "arrow.right", label: "Send")
+                        .allowsHitTesting(false)
+                }
+
+                Button {
+                    isReceiveSheetPresented = true
+                } label: {
+                    ActionButton(icon: "arrow.down.left", label: "Receive")
+                        .allowsHitTesting(false)
+                }
             }
-        }
-        .sheet(isPresented: $isReceiveSheetPresented) {
-            ReceiveView()
-        }
+            .sheet(isPresented: $isReceiveSheetPresented) {
+                ReceiveView()
+            }
     }
 
     private var tokensSection: some View {
