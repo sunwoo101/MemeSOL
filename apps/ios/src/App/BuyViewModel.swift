@@ -10,6 +10,8 @@ import Combine
 
 class BuyViewModel : ObservableObject {
     @Published var tokens: [TokenListResponse] = []
+    @Published var walletToken: WalletTokenResponse?
+    
     @Published var errorMessage = ""
     
     @Published var searchText = ""
@@ -32,6 +34,18 @@ class BuyViewModel : ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
             print(error)
+        }
+    }
+    
+    func loadWalletData (mintAddress: String) async {
+        do {
+            let walletTokens = try await APIClient.shared.listWalletTokens()
+            
+            walletToken = walletTokens.first {
+                $0.mintAddress == mintAddress
+            }
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
     
