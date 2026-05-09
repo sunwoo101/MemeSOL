@@ -59,9 +59,7 @@ struct DashboardView: View {
                 } else if activeTab == 1 {
                     AllTransactionsView(tokens: tokens)
                 } else {
-                    AllCoinsView {
-                        activeTab = 0
-                    }
+                    AllCoinsView()
                 }
 
                 HStack {

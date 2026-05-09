@@ -1,9 +1,6 @@
 import SwiftUI
 
 struct AllCoinsView: View {
-    @Environment(\.dismiss) private var dismiss
-    var onBack: (() -> Void)? = nil
-
     @State private var isLoading = false
     @State private var coins: [TokenListResponse] = []
     @State private var errorText = ""
@@ -11,24 +8,11 @@ struct AllCoinsView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Image(systemName: "chevron.left")
-                    .foregroundColor(.white)
-                    .font(.body.weight(.semibold))
-                    .onTapGesture {
-                        if let onBack {
-                            onBack()
-                        } else {
-                            dismiss()
-                        }
-                    }
-                    .accessibilityLabel("Back to dashboard")
-                Spacer()
                 Text("All Coins")
                     .font(.headline.bold())
                     .foregroundColor(.white)
-                Spacer()
-                Color.clear.frame(width: 14, height: 14)
             }
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, SharedLayout.horizontalPadding)
             .padding(.top, TransactionLayout.titleTopPadding)
             .padding(.bottom, TransactionLayout.navBarBottomPadding)
