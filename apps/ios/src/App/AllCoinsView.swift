@@ -78,8 +78,16 @@ struct AllCoinsView: View {
             .navigationTitle("All Coins")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("Dashboard")
+                        }
+                    }
+                    .accessibilityLabel("Back to dashboard")
                 }
             }
         }
