@@ -16,6 +16,8 @@ struct BuyTokenView: View {
     
     @State private var showingConfirmModal: Bool = false
     
+    @Environment(\.dismiss) private var dismiss
+    
     
     var body: some View {
         ZStack {
@@ -181,6 +183,8 @@ struct BuyTokenView: View {
                                 amount = ""
                                 showingConfirmModal = false
                             }
+                            
+                            dismiss()
                         }
                         
                     } label: {
@@ -222,8 +226,3 @@ struct BuyTokenView: View {
 #Preview {
     BuyTokenView(token: TokenListResponse(id: "1", mintAddress: "ahifh1i1fiwq13", name: "Bitcoin", symbol: "BTC", imgUrl: "", price: 121.1, gainsPercent: 2.4))
 }
-
-    
-//things to do
-//if not in wallet, when bought, add to wallet
-//balance needs to udpate -> could just exit out of screen to avoid that
