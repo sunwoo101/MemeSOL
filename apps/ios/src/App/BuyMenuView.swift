@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct BuyMenuView: View {
-    @State private var selectedToken: TokenListResponse?
-    
     @StateObject private var viewModel = BuyViewModel()
 
     
@@ -23,9 +21,21 @@ struct BuyMenuView: View {
                         .foregroundColor(AppColors.goldColor)
                         .font(.title3.bold())
                     
-                    ForEach(viewModel.tokens, id: \.id) { token in
-                        Button {
-                            selectedToken = token
+                    HStack {
+                        TextField("",
+                                  text: $viewModel.searchText,
+                                  prompt: Text("Enter token name or symbol").foregroundColor(AppColors.secondaryTextColor))
+                        .foregroundColor(.white)
+                        .autocorrectionDisabled()
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 15)
+                    .background(AppColors.charcoalColor)
+                    .cornerRadius(SharedLayout.cornerRadius)
+                    
+                    ForEach(viewModel.filteredTokens, id: \.id) { token in
+                        NavigationLink {
+                            BuyTokenView(token: token)
                         } label: {
                             TokenRow(name: token.name,
                                      symbol: token.symbol,
@@ -34,10 +44,10 @@ struct BuyMenuView: View {
                                      change: String(format: "%.2f%%", token.gainsPercent),
                                      positive: token.gainsPercent >= 0,
                                      iconUrl: token.imgUrl,
-                                     color: .blue)
-                            .buttonStyle(.plain)
+                                     color: .blue
+                            )
                         }
-                        
+                
                         Divider()
                             .background(Color.gray.opacity(0.3))
                             .padding(.leading, 20)
@@ -49,9 +59,7 @@ struct BuyMenuView: View {
         .task {
             await viewModel.loadTokens()
         }
-//        .navigationDestination(item: $selectedToken) { token in
-//            BuyTokenView(token: token)
-//        }
+        .searchable(text: $viewModel.searchText)
     }
 }
 
