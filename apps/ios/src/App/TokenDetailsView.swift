@@ -56,13 +56,23 @@ struct TokenDetailsView: View {
                     
                     //add to wallet + favourite
                     HStack (spacing: 16) {
-                        Button("Add to Wallet") {
-                            
+                        Button {
+                            Task {
+                                if viewModel.isInWallet {
+                                    try await APIClient.shared.removeWalletToken(mintAddress: token.mintAddress)
+                                } else {
+                                    try await APIClient.shared.addWalletToken(mintAddress: token.mintAddress)
+                                }
+                                
+                                await viewModel.checkIfInWallet(mintAddress: token.mintAddress)
+                            }
+                        } label : {
+                            Text(viewModel.isInWallet ? "Remove from Wallet" : "Add to Wallet")
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(AppColors.goldColor)
-                        .foregroundColor(.black)
+                        .background(viewModel.isInWallet ? .red : AppColors.goldColor)
+                        .foregroundColor(viewModel.isInWallet ? .white : .black)
                         .cornerRadius(16)
                         
                         Button {
