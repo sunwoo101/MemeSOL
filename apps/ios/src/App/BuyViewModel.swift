@@ -13,6 +13,7 @@ class BuyViewModel : ObservableObject {
     @Published var walletToken: WalletTokenResponse?
     
     @Published var isBuying = false
+    @Published var isInWallet = false
 
     @Published var errorMessage = ""
     
@@ -39,6 +40,28 @@ class BuyViewModel : ObservableObject {
         }
     }
     
+    func buyToken(mintAddress: String, amount: Decimal) async {
+        isBuying = true
+        errorMessage = ""
+        
+        do {
+            if !isInWallet {
+                do {
+                    try await APIClient.shared.addWalletToken(mintAddress: mintAddress)
+                } catch {
+                    errorMessage = error.localizedDescription
+                }
+            }
+            
+            try await APIClient.shared.buyToken(mintAddress: mintAddress, amount: amount)
+            await loadWalletData(mintAddress: mintAddress)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        
+        isBuying = false
+    }
+    
     func loadWalletData (mintAddress: String) async {
         do {
             let walletTokens = try await APIClient.shared.listWalletTokens()
@@ -46,6 +69,9 @@ class BuyViewModel : ObservableObject {
             walletToken = walletTokens.first {
                 $0.mintAddress == mintAddress
             }
+            
+            isInWallet = walletToken != nil
+            
         } catch {
             errorMessage = error.localizedDescription
         }
