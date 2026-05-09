@@ -17,14 +17,18 @@ struct ActionButton: View {
                 Image(systemName: icon)
                     .font(.system(size: ActionButtonLayout.iconSize))
                     .foregroundColor(.white)
+                    .frame(
+                        width: ActionButtonLayout.circleSize,
+                        height: ActionButtonLayout.circleSize
+                    )
+                    .background(AppColors.charcoalColor)
+                    .clipShape(Circle())
                 Text(label)
                     .font(.caption)
                     .foregroundColor(.white)
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, ActionButtonLayout.verticalPadding)
-            .background(AppColors.charcoalColor)
-            .cornerRadius(SharedLayout.cornerRadius)
         }
     }
 }

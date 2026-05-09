@@ -12,4 +12,5 @@ enum ActionButtonLayout {
     static let contentSpacing: CGFloat = 8
     static let verticalPadding: CGFloat = 16
     static let iconSize: CGFloat = 18
+    static let circleSize: CGFloat = 48
 }
