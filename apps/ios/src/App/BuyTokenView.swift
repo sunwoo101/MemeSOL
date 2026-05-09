@@ -113,7 +113,7 @@ struct BuyTokenView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(amount.isEmpty ? AppColors.charcoalColor : AppColors.goldColor)
-                                .foregroundColor(amount.isEmpty ? .white : .black)
+                                .foregroundColor(amount.isEmpty ? AppColors.secondaryTextColor : .black)
                                 .cornerRadius(SharedLayout.cornerRadius)
                         }
                         .disabled(amount.isEmpty)
@@ -123,6 +123,9 @@ struct BuyTokenView: View {
                 
             }
             
+        }
+        .task {
+            await viewModel.loadWalletData(mintAddress: token.mintAddress)
         }
         
         .sheet(isPresented: $showingConfirmModal) {
@@ -200,6 +203,7 @@ struct BuyTokenView: View {
         }
             
         }
+    
     }
 
 
@@ -210,8 +214,6 @@ struct BuyTokenView: View {
 
     
 //things to do
-//show users current balance
 //if not in wallet, when bought, add to wallet
-//if no amount, buy button disabled
 //balance needs to udpate
-//could just exit out of screen to avoid that 
+//could just exit out of screen to avoid that
