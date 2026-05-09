@@ -12,23 +12,22 @@ struct ActionButton: View {
     let label: String
     
     var body: some View {
-        Button {} label: {
-            VStack(spacing: ActionButtonLayout.contentSpacing) {
-                Image(systemName: icon)
-                    .font(.system(size: ActionButtonLayout.iconSize))
-                    .foregroundColor(.white)
-                    .frame(
-                        width: ActionButtonLayout.circleSize,
-                        height: ActionButtonLayout.circleSize
-                    )
-                    .background(AppColors.charcoalColor)
-                    .clipShape(Circle())
-                Text(label)
-                    .font(.caption)
-                    .foregroundColor(.white)
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.vertical, ActionButtonLayout.verticalPadding)
+        VStack(spacing: ActionButtonLayout.contentSpacing) {
+            Image(systemName: icon)
+                .font(.system(size: ActionButtonLayout.iconSize))
+                .foregroundColor(.white)
+                .frame(
+                    width: ActionButtonLayout.circleSize,
+                    height: ActionButtonLayout.circleSize
+                )
+                .background(AppColors.charcoalColor)
+                .clipShape(Circle())
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.white)
         }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.vertical, ActionButtonLayout.verticalPadding)
+        .contentShape(Rectangle())
     }
 }

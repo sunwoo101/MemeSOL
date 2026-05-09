@@ -153,32 +153,28 @@ struct DashboardView: View {
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
             NavigationLink {
-                AllCoinsView()
+                EmptyView()
             } label: {
                 ActionButton(icon: "cart.fill", label: "Buy")
-                    .allowsHitTesting(false)
             }
+            .disabled(true)
 
             NavigationLink {
                 SendView()
             } label: {
                 ActionButton(icon: "arrow.right", label: "Send")
-                    .allowsHitTesting(false)
             }
 
-            
             NavigationLink {
                 ReceiveView()
             } label: {
                 ActionButton(icon: "arrow.down.left", label: "Receive")
-                    .allowsHitTesting(false)
             }
 
             NavigationLink {
                 CreateTokenView()
             } label: {
                 ActionButton(icon: "pencil", label: "Create")
-                    .allowsHitTesting(false)
             }
         }
     }
