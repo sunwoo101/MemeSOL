@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AllCoinsView: View {
+    @Environment(\.dismiss) private var dismiss
+
     @State private var isLoading = false
     @State private var coins: [TokenListResponse] = []
     @State private var errorText = ""
@@ -75,6 +77,11 @@ struct AllCoinsView: View {
             }
             .navigationTitle("All Coins")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
         }
         .task {
             await loadAllCoins(showLoadingUI: true)
