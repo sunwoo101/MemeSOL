@@ -11,9 +11,26 @@ struct AllCoinsView: View {
                 if isLoading {
                     ProgressView("Loading all coins...")
                 } else if !errorText.isEmpty {
-                    Text("Failed to load coins.")
-                        .font(.subheadline)
-                        .foregroundStyle(.red)
+                    VStack(spacing: 12) {
+                        Text("Could not load coins")
+                            .font(.headline)
+                        Text(errorText)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 24)
+                        Button("Try Again") {
+                            Task { await loadAllCoins() }
+                        }
+                        .buttonStyle(.borderedProminent)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if coins.isEmpty {
+                    ContentUnavailableView(
+                        "No Coins Yet",
+                        systemImage: "bitcoinsign.circle",
+                        description: Text("Coins created on the platform will show here.")
+                    )
                 } else {
                     List(coins, id: \.id) { coin in
                         HStack(spacing: 12) {
