@@ -12,13 +12,16 @@ struct AllCoinsView: View {
             Group {
                 if isLoading {
                     ProgressView("Loading all coins...")
+                        .tint(.white)
+                        .foregroundStyle(.white)
                 } else if !errorText.isEmpty {
                     VStack(spacing: 12) {
                         Text("Could not load coins")
                             .font(.headline)
+                            .foregroundStyle(.white)
                         Text(errorText)
                             .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(AppColors.secondaryTextColor)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
                         Button("Try Again") {
@@ -33,6 +36,7 @@ struct AllCoinsView: View {
                         systemImage: "bitcoinsign.circle",
                         description: Text("Coins created on the platform will show here.")
                     )
+                    .foregroundStyle(.white)
                 } else {
                     List(coins, id: \.id) { coin in
                         HStack(spacing: 12) {
@@ -50,11 +54,13 @@ struct AllCoinsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(coin.name)
                                     .font(.headline)
+                                    .foregroundStyle(.white)
                                 Text(coin.symbol)
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(AppColors.secondaryTextColor)
                                 Text(coin.mintAddress)
                                     .font(.caption2.monospaced())
+                                    .foregroundStyle(AppColors.secondaryTextColor)
                                     .lineLimit(1)
                                     .truncationMode(.middle)
                             }
@@ -62,21 +68,30 @@ struct AllCoinsView: View {
                             VStack(alignment: .trailing, spacing: 2) {
                                 Text(String(format: "$%.4f", coin.price))
                                     .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.white)
                                 Text(String(format: "%.2f%%", coin.gainsPercent))
                                     .font(.caption)
                                     .foregroundStyle(coin.gainsPercent >= 0 ? .green : .red)
                             }
                         }
                         .padding(.vertical, 4)
+                        .listRowBackground(AppColors.blackColor)
                     }
                     .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .background(AppColors.blackColor)
                     .refreshable {
                         await loadAllCoins(showLoadingUI: false)
                     }
                 }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AppColors.blackColor)
             .navigationTitle("All Coins")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(AppColors.blackColor, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -86,11 +101,13 @@ struct AllCoinsView: View {
                             Image(systemName: "chevron.left")
                             Text("Dashboard")
                         }
+                        .foregroundStyle(AppColors.goldColor)
                     }
                     .accessibilityLabel("Back to dashboard")
                 }
             }
         }
+        .background(AppColors.blackColor.ignoresSafeArea())
         .task {
             await loadAllCoins(showLoadingUI: true)
         }
