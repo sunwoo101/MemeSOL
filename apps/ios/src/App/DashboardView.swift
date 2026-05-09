@@ -136,6 +136,14 @@ struct DashboardView: View {
 
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
+            
+            
+            NavigationLink {
+                BuyMenuView()
+            } label: {
+                ActionButton(icon: "arrow.right", label: "Buy")
+                    .allowsHitTesting(false)
+            }
 
                 NavigationLink {
                     SendView()
@@ -157,6 +165,8 @@ struct DashboardView: View {
                     ActionButton(icon: "pencil", label: "Create")
                         .allowsHitTesting(false)
                 }
+        
+            
             }
             .sheet(isPresented: $isReceiveSheetPresented) {
                 ReceiveView()
