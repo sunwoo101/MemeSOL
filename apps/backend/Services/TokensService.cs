@@ -79,9 +79,16 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
         var rows = await db.Tokens
             .Where(t => t.Status == TokenStatus.Completed)
             .OrderByDescending(t => t.CreatedAt)
-            .Select(t => new {
-                t.Id, t.MintAddress, t.Name, t.Symbol,
-                t.Price, t.PriceOpenDay, t.PriceUpdatedAt, t.CreatedAt
+            .Select(t => new
+            {
+                t.Id,
+                t.MintAddress,
+                t.Name,
+                t.Symbol,
+                t.Price,
+                t.PriceOpenDay,
+                t.PriceUpdatedAt,
+                t.CreatedAt
             })
             .ToListAsync();
 

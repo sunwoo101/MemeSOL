@@ -20,9 +20,16 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
         var rows = await db.UserTokens
             .Where(ut => ut.UserId == userId && ut.Token.Status == TokenStatus.Completed)
             .OrderByDescending(ut => ut.Token.CreatedAt)
-            .Select(ut => new {
-                ut.Token.Id, ut.Token.MintAddress, ut.Token.Name, ut.Token.Symbol,
-                ut.Token.Price, ut.Token.PriceOpenDay, ut.Token.PriceUpdatedAt, ut.Token.CreatedAt
+            .Select(ut => new
+            {
+                ut.Token.Id,
+                ut.Token.MintAddress,
+                ut.Token.Name,
+                ut.Token.Symbol,
+                ut.Token.Price,
+                ut.Token.PriceOpenDay,
+                ut.Token.PriceUpdatedAt,
+                ut.Token.CreatedAt
             })
             .ToListAsync();
 
@@ -82,6 +89,29 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             user.WalletPublicKey, user.WalletPrivateKey,
             mintAddress, request.RecipientAddress,
             rawAmount);
+
+        var recipientUser = await db.Users
+            .Where(u => u.WalletPublicKey == request.RecipientAddress)
+            .FirstOrDefaultAsync();
+
+        if (recipientUser != null)
+        {
+            var tokenId = await db.Tokens
+                .Where(t => t.MintAddress == mintAddress && t.Status == TokenStatus.Completed)
+                .Select(t => t.Id)
+                .FirstAsync();
+
+            var userToken = new UserToken { UserId = recipientUser.Id, TokenId = tokenId };
+            db.UserTokens.Add(userToken);
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when ((ex.InnerException as Npgsql.PostgresException)?.SqlState == "23505")
+            {
+                db.Entry(userToken).State = EntityState.Detached;
+            }
+        }
 
         return new SendTokenResponse { Signature = signature };
     }
