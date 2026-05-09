@@ -8,16 +8,26 @@
 import SwiftUI
 
 struct DashboardView: View {
+    private enum ActiveTab: Int {
+        case dashboard = 0
+        case transactions = 1
+        case coins = 2
+        case buy = 3
+        case send = 4
+        case receive = 5
+        case create = 6
+        case tokenTransactions = 7
+    }
+
     @Environment(AuthSession.self) private var authSession
 
     @State private var totalBalance: Double = 0
     @State private var totalGainLoss: Double = 0
     @State private var totalGainLossPercent: Double = 0
     @State private var selectedToken: Token? = nil
-    @State private var activeTab: Int = 0
+    @State private var activeTab: ActiveTab = .dashboard
     @State private var tokens: [Token] = []
     @State private var isLoading = false
-    @State private var isReceiveSheetPresented = false
 
     private var formattedBalance: String {
         Self.currencyFormatter.string(from: NSNumber(value: totalBalance)) ?? "A$0.00"
@@ -44,7 +54,7 @@ struct DashboardView: View {
             .background(AppColors.blackColor)
 
             VStack(spacing: TransactionLayout.sectionSpacing) {
-                if activeTab == 0 {
+                if activeTab == .dashboard {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: SharedLayout.sectionSpacing) {
                             totalBalanceView
@@ -56,15 +66,34 @@ struct DashboardView: View {
                         .padding(.bottom, SharedLayout.horizontalPadding)
                     }
                     .background(AppColors.blackColor)
-                } else if activeTab == 1 {
+                } else if activeTab == .transactions {
                     AllTransactionsView(tokens: tokens)
-                } else {
+                } else if activeTab == .coins {
                     AllCoinsView()
+                } else if activeTab == .buy {
+                    Color.clear
+                        .background(AppColors.blackColor)
+                } else if activeTab == .send {
+                    SendView()
+                } else if activeTab == .receive {
+                    ReceiveView()
+                } else if activeTab == .create {
+                    CreateTokenView()
+                } else if let selectedToken {
+                    TransactionListView(
+                        token: selectedToken,
+                        GoBackToDashboard: {
+                            self.selectedToken = nil
+                            activeTab = .dashboard
+                        }
+                    )
+                } else {
+                    Color.clear
                 }
 
                 HStack {
                     Button {
-                        activeTab = 0
+                        activeTab = .dashboard
                     } label: {
                         VStack(spacing: TabBarLayout.itemSpacing) {
                             Image(systemName: "house.fill")
@@ -72,12 +101,12 @@ struct DashboardView: View {
                             Text("Dashboard")
                                 .font(.caption2)
                         }
-                        .foregroundColor(activeTab == 0 ? AppColors.goldColor : .gray)
+                        .foregroundColor(activeTab == .dashboard ? AppColors.goldColor : .gray)
                         .frame(maxWidth: .infinity)
                     }
 
                     Button {
-                        activeTab = 1
+                        activeTab = .transactions
                     } label: {
                         VStack(spacing: TabBarLayout.itemSpacing) {
                             Image(systemName: "list.bullet")
@@ -85,12 +114,12 @@ struct DashboardView: View {
                             Text("Transactions")
                                 .font(.caption2)
                         }
-                        .foregroundColor(activeTab == 1 ? AppColors.goldColor : .gray)
+                        .foregroundColor(activeTab == .transactions ? AppColors.goldColor : .gray)
                         .frame(maxWidth: .infinity)
                     }
 
                     Button {
-                        activeTab = 2
+                        activeTab = .coins
                     } label: {
                         VStack(spacing: TabBarLayout.itemSpacing) {
                             Image(systemName: "bitcoinsign.circle.fill")
@@ -98,7 +127,7 @@ struct DashboardView: View {
                             Text("Coins")
                                 .font(.caption2)
                         }
-                        .foregroundColor(activeTab == 2 ? AppColors.goldColor : .gray)
+                        .foregroundColor(activeTab == .coins ? AppColors.goldColor : .gray)
                         .frame(maxWidth: .infinity)
                     }
                     .accessibilityLabel("Show coins")
@@ -108,9 +137,6 @@ struct DashboardView: View {
                 .background(AppColors.charcoalColor)
             }
             .background(AppColors.blackColor.ignoresSafeArea())
-            .sheet(item: $selectedToken) { token in
-                TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
-            }
         }
         .background(AppColors.blackColor.ignoresSafeArea())
         .task { await loadDashboard() }
@@ -152,30 +178,30 @@ struct DashboardView: View {
 
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
-            NavigationLink {
-                AllCoinsView()
+            Button {
+                activeTab = .buy
             } label: {
                 ActionButton(icon: "cart.fill", label: "Buy")
                     .allowsHitTesting(false)
             }
 
-            NavigationLink {
-                SendView()
+            Button {
+                activeTab = .send
             } label: {
                 ActionButton(icon: "arrow.right", label: "Send")
                     .allowsHitTesting(false)
             }
 
             
-            NavigationLink {
-                ReceiveView()
+            Button {
+                activeTab = .receive
             } label: {
                 ActionButton(icon: "arrow.down.left", label: "Receive")
                     .allowsHitTesting(false)
             }
 
-            NavigationLink {
-                CreateTokenView()
+            Button {
+                activeTab = .create
             } label: {
                 ActionButton(icon: "pencil", label: "Create")
                     .allowsHitTesting(false)
@@ -202,6 +228,7 @@ struct DashboardView: View {
                     ForEach(Array(tokens.enumerated()), id: \.element.id) { index, token in
                         Button {
                             selectedToken = token
+                            activeTab = .tokenTransactions
                         } label: {
                             TokenRow(
                                 name: token.name, symbol: token.symbol,
