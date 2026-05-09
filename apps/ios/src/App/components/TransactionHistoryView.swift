@@ -13,6 +13,7 @@ struct TransactionListView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingSend = false
     @State private var showingReceive = false
+    @State private var showingBuy = false
     @State private var transactions: [TransactionHistoryResponse] = []
     @State private var isLoading = false
     @State private var errorText = ""
@@ -82,6 +83,7 @@ struct TransactionListView: View {
 
     private var actionButtons: some View {
         HStack(spacing: TransactionLayout.actionButtonSpacing) {
+            TransactionActionButton(icon: "creditcard.fill",        label: "Buy")    { showingBuy    = true }
             TransactionActionButton(icon: "paperplane.fill",        label: "Send")    { showingSend    = true }
             TransactionActionButton(icon: "arrow.down.circle.fill", label: "Receive") { showingReceive = true }
         }
