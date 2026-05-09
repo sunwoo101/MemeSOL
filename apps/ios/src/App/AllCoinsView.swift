@@ -2,13 +2,38 @@ import SwiftUI
 
 struct AllCoinsView: View {
     @Environment(\.dismiss) private var dismiss
+    var onBack: (() -> Void)? = nil
 
     @State private var isLoading = false
     @State private var coins: [TokenListResponse] = []
     @State private var errorText = ""
 
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            HStack {
+                Image(systemName: "chevron.left")
+                    .foregroundColor(.white)
+                    .font(.body.weight(.semibold))
+                    .onTapGesture {
+                        if let onBack {
+                            onBack()
+                        } else {
+                            dismiss()
+                        }
+                    }
+                    .accessibilityLabel("Back to dashboard")
+                Spacer()
+                Text("All Coins")
+                    .font(.headline.bold())
+                    .foregroundColor(.white)
+                Spacer()
+                Color.clear.frame(width: 14, height: 14)
+            }
+            .padding(.horizontal, SharedLayout.horizontalPadding)
+            .padding(.top, TransactionLayout.titleTopPadding)
+            .padding(.bottom, TransactionLayout.navBarBottomPadding)
+            .background(AppColors.blackColor)
+
             Group {
                 if isLoading {
                     ProgressView("Loading all coins...")
@@ -87,25 +112,6 @@ struct AllCoinsView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(AppColors.blackColor)
-            .navigationTitle("All Coins")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarColorScheme(.dark, for: .navigationBar)
-            .toolbarBackground(AppColors.blackColor, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Dashboard")
-                        }
-                        .foregroundStyle(AppColors.goldColor)
-                    }
-                    .accessibilityLabel("Back to dashboard")
-                }
-            }
         }
         .background(AppColors.blackColor.ignoresSafeArea())
         .task {

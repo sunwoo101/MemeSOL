@@ -18,7 +18,6 @@ struct DashboardView: View {
     @State private var tokens: [Token] = []
     @State private var isLoading = false
     @State private var isReceiveSheetPresented = false
-    @State private var isAllCoinsPresented = false
 
     private var formattedBalance: String {
         Self.currencyFormatter.string(from: NSNumber(value: totalBalance)) ?? "A$0.00"
@@ -57,8 +56,12 @@ struct DashboardView: View {
                         .padding(.bottom, SharedLayout.horizontalPadding)
                     }
                     .background(AppColors.blackColor)
-                } else {
+                } else if activeTab == 1 {
                     AllTransactionsView(tokens: tokens)
+                } else {
+                    AllCoinsView {
+                        activeTab = 0
+                    }
                 }
 
                 HStack {
@@ -89,7 +92,7 @@ struct DashboardView: View {
                     }
 
                     Button {
-                        isAllCoinsPresented = true
+                        activeTab = 2
                     } label: {
                         VStack(spacing: TabBarLayout.itemSpacing) {
                             Image(systemName: "bitcoinsign.circle.fill")
@@ -97,7 +100,7 @@ struct DashboardView: View {
                             Text("Coins")
                                 .font(.caption2)
                         }
-                        .foregroundColor(AppColors.goldColor)
+                        .foregroundColor(activeTab == 2 ? AppColors.goldColor : .gray)
                         .frame(maxWidth: .infinity)
                     }
                     .accessibilityLabel("Show coins")
@@ -109,9 +112,6 @@ struct DashboardView: View {
             .background(AppColors.blackColor.ignoresSafeArea())
             .sheet(item: $selectedToken) { token in
                 TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
-            }
-            .sheet(isPresented: $isAllCoinsPresented) {
-                AllCoinsView()
             }
         }
         .background(AppColors.blackColor.ignoresSafeArea())
