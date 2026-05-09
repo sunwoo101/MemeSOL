@@ -10,6 +10,8 @@ import SwiftUI
 struct TokenDetailsView: View {
     let token: TokenListResponse
     
+    @StateObject var viewModel = TokenDetailsViewModel()
+    
     
     var body: some View {
         ZStack {
@@ -43,7 +45,7 @@ struct TokenDetailsView: View {
                         Text("Your Balance")
                             .foregroundColor(AppColors.secondaryTextColor)
                         
-                        Text("2.18 BTC")
+                        Text("\(viewModel.walletToken?.balance ?? 0, specifier: "%.2f") \(token.symbol)")
                             .font(.title.bold())
                             .foregroundColor(.white)
                     }
@@ -80,18 +82,21 @@ struct TokenDetailsView: View {
                             .font(.headline)
                             .foregroundColor(.white)
                         
-                        transactionRow(type: "Received",
-                                       amount: "+0.52 BTC",
-                                       date: "Today • 2:31 PM",
-                                       isIncoming: true)
                         
-                        Divider()
-                            .background(Color.white.opacity(0.2))
-                        
-                        transactionRow(type: "Sent",
-                                       amount: "-0.20 BTC",
-                                       date: "Yesterday • 11:08 AM",
-                                       isIncoming: false)
+                        ForEach(viewModel.transactions, id: \.signature) { transaction in
+                            let formattedAmount = (transaction.transactionType == "receive" ? "+" : "-") +
+                                "\(transaction.amount ?? 0) \(transaction.tokenSymbol)"
+
+                            
+                            transactionRow(type: transaction.transactionType ?? "Unknown",
+                                           amount: formattedAmount,
+                                           date: transaction.timestamp,
+                                           isIncoming: transaction.transactionType == "receive")
+                            
+                            Divider()
+                                .background(Color.white.opacity(0.2))
+                            
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
@@ -100,6 +105,11 @@ struct TokenDetailsView: View {
                 }
                 .padding()
             }
+        }
+        .task {
+            await viewModel.loadWalletData(mintAddress: token.mintAddress)
+            
+            await viewModel.loadTransactionData(mintAddress: token.mintAddress)
         }
     }
     
@@ -119,9 +129,7 @@ struct TokenDetailsView: View {
             Spacer()
             
             Text(amount)
-                .foregroundColor(amount.starts(with: "+")
-                                 ? .green
-                                 : .white)
+                .foregroundColor(isIncoming ? .green : .white)
                 .font(.headline)
         }
     }
