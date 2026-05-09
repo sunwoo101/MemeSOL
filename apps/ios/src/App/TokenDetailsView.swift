@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TokenDetailsView: View {
-    //let token: TokenListResponse
+    let token: TokenListResponse
     
     
     var body: some View {
@@ -24,12 +24,17 @@ struct TokenDetailsView: View {
                             .foregroundColor(.blue)
                         
                         VStack (spacing: 6) {
-                            Text("Bitcoin")
+                            Text(token.name)
                                 .font(.title.bold())
                                 .foregroundColor(.white)
                             
-                            Text("BTC")
+                            Text(token.symbol)
                                 .foregroundColor(AppColors.secondaryTextColor)
+                            
+                            Text("$\(token.price, specifier: "%.2f")")
+                                .font(.title3.bold())
+                                .foregroundColor(AppColors.goldColor)
+                            
                         }
                     }
                     
@@ -69,21 +74,6 @@ struct TokenDetailsView: View {
                         .cornerRadius(16)
                     }
                     
-                    //token info
-                    VStack (alignment: .leading, spacing: 20) {
-                        Text("Token Information")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        
-                        informationRow(title: "Supply", value: "1,202,191")
-                        
-                        informationRow(title: "Price", value: "$281.19")
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .background(AppColors.charcoalColor)
-                    .cornerRadius(20)
-                    
                     //transactions
                     VStack (alignment: .leading, spacing: 20) {
                         Text("Recent Transactions")
@@ -113,19 +103,6 @@ struct TokenDetailsView: View {
         }
     }
     
-    //view for the rows in the token information section
-    func informationRow (title: String, value: String) -> some View {
-        HStack {
-            Text(title)
-                .foregroundColor(AppColors.secondaryTextColor)
-            
-            Spacer()
-            
-            Text(value)
-                .foregroundColor(.white)
-        }
-    }
-    
     //view for the rows in the recent transactions section
     func transactionRow (type: String, amount: String, date: String, isIncoming: Bool) -> some View {
         HStack (spacing: 14) {
@@ -151,5 +128,5 @@ struct TokenDetailsView: View {
 }
 
 #Preview {
-    TokenDetailsView()
+    TokenDetailsView(token: TokenListResponse(id: "1", mintAddress: "ahifh1i1fiwq13", name: "Bitcoin", symbol: "BTC", imgUrl: "", price: 121.1, gainsPercent: 2.4))
 }
