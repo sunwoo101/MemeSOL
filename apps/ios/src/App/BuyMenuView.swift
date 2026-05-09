@@ -59,7 +59,6 @@ struct BuyMenuView: View {
         .task {
             await viewModel.loadTokens()
         }
-        .searchable(text: $viewModel.searchText)
     }
 }
 
