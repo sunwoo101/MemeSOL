@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct AllCoinsView: View {
+    @Environment(\.dismiss) private var dismiss
+
     @State private var isLoading = false
     @State private var coins: [TokenListResponse] = []
     @State private var errorText = ""
@@ -68,20 +70,34 @@ struct AllCoinsView: View {
                         .padding(.vertical, 4)
                     }
                     .listStyle(.plain)
+                    .refreshable {
+                        await loadAllCoins(showLoadingUI: false)
+                    }
                 }
             }
             .navigationTitle("All Coins")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
         }
         .task {
-            await loadAllCoins()
+            await loadAllCoins(showLoadingUI: true)
         }
     }
 
     @MainActor
-    private func loadAllCoins() async {
-        isLoading = true
-        defer { isLoading = false }
+    private func loadAllCoins(showLoadingUI: Bool = true) async {
+        if showLoadingUI {
+            isLoading = true
+        }
+        defer {
+            if showLoadingUI {
+                isLoading = false
+            }
+        }
         do {
             coins = try await APIClient.shared.listAllTokens()
             errorText = ""

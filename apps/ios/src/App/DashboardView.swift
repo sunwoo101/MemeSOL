@@ -18,6 +18,7 @@ struct DashboardView: View {
     @State private var tokens: [Token] = []
     @State private var isLoading = false
     @State private var isReceiveSheetPresented = false
+    @State private var isAllCoinsPresented = false
 
     private var formattedBalance: String {
         Self.currencyFormatter.string(from: NSNumber(value: totalBalance)) ?? "A$0.00"
@@ -94,6 +95,9 @@ struct DashboardView: View {
             .background(AppColors.blackColor.ignoresSafeArea())
             .sheet(item: $selectedToken) { token in
                 TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
+            }
+            .sheet(isPresented: $isAllCoinsPresented) {
+                AllCoinsView()
             }
         }
         .background(AppColors.blackColor.ignoresSafeArea())
