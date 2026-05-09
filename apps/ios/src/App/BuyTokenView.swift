@@ -171,7 +171,18 @@ struct BuyTokenView: View {
                     }
 
                     Button {
-                        // logic
+                        guard let decimalAmount = Decimal(string: amount)
+                        else { return }
+                        
+                        Task {
+                            await viewModel.buyToken(mintAddress: token.mintAddress, amount: decimalAmount)
+                            
+                            if viewModel.errorMessage.isEmpty {
+                                amount = ""
+                                showingConfirmModal = false
+                            }
+                        }
+                        
                     } label: {
                         Text(viewModel.isBuying ? "Purchasing..." : "Purchase")
                             .frame(maxWidth: .infinity)
@@ -215,5 +226,4 @@ struct BuyTokenView: View {
     
 //things to do
 //if not in wallet, when bought, add to wallet
-//balance needs to udpate
-//could just exit out of screen to avoid that
+//balance needs to udpate -> could just exit out of screen to avoid that
