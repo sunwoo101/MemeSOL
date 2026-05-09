@@ -94,13 +94,13 @@ struct DashboardView: View {
                         VStack(spacing: TabBarLayout.itemSpacing) {
                             Image(systemName: "bitcoinsign.circle.fill")
                                 .font(.system(size: TabBarLayout.iconSize))
-                            Text("All Coins")
+                            Text("Coins")
                                 .font(.caption2)
                         }
                         .foregroundColor(AppColors.goldColor)
                         .frame(maxWidth: .infinity)
                     }
-                    .accessibilityLabel("Show all coins")
+                    .accessibilityLabel("Show coins")
                 }
                 .padding(.vertical, TabBarLayout.verticalPadding)
                 .padding(.bottom, TabBarLayout.bottomPadding)
@@ -117,8 +117,6 @@ struct DashboardView: View {
         .background(AppColors.blackColor.ignoresSafeArea())
         .task { await loadDashboard() }
     }
-
-    // MARK: - Subviews
 
     private var totalBalanceView: some View {
         VStack(alignment: .center, spacing: BalanceLayout.stackSpacing) {
@@ -218,8 +216,6 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: - Data loading
-
     @MainActor
     private func loadDashboard() async {
         isLoading = true
@@ -237,8 +233,6 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: - Helpers
-
     static let currencyFormatter: NumberFormatter = {
         let f = NumberFormatter()
         f.numberStyle = .currency
@@ -246,8 +240,6 @@ struct DashboardView: View {
         return f
     }()
 }
-
-// MARK: - WalletTokenResponse → Token mapping
 
 private extension Token {
     init(walletToken w: WalletTokenResponse) {
