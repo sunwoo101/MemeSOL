@@ -152,6 +152,12 @@ struct DashboardView: View {
 
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
+            NavigationLink {
+                BuyView()
+            } label: {
+                ActionButton(icon: "cart.fill", label: "Buy")
+                    .allowsHitTesting(false)
+            }
             
             NavigationLink {
                 SendView()
@@ -167,15 +173,13 @@ struct DashboardView: View {
                 ActionButton(icon: "arrow.down.left", label: "Receive")
                     .allowsHitTesting(false)
             }
-            
+
             NavigationLink {
                 CreateTokenView()
             } label: {
                 ActionButton(icon: "pencil", label: "Create")
                     .allowsHitTesting(false)
             }
-            
-            
         }
     }
 
