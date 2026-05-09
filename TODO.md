@@ -16,7 +16,7 @@
 - [x] Fund backend devnet wallet with airdropped SOL
 
 ## iOS
-- [ ] Apple Sign In flow (`ASAuthorizationAppleIDProvider`)
+- [x] User registration and login with JWT authentication
 - [x] JWT storage in Keychain
 - [x] API client (networking layer using `URLSession`)
 - [x] Portfolio screen — list holdings with live prices and overall balance with gains/losses for today
@@ -24,6 +24,17 @@
 - [x] Token detail screen — balance, transactions
 - [x] Send screen — recipient address + amount
 - [x] Receive screen — display public wallet address + QR code
+- [ ] Buy screen — fund tokens on devnet
+- [ ] Ensure every screen is wired up
+
+## QA
+- [ ] Test user registration and login flows
+- [ ] Test token creation and listing
+- [ ] Test adding/removing tokens from wallet
+- [ ] Test token transfer functionality
+- [ ] Test portfolio balance and transaction history accuracy
+- [ ] Test buying tokens on devnet
+- [ ] Test UI responsiveness and error handling
 
 ## Design
 - [ ] Agree on UI style/theme as a team
