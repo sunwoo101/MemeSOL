@@ -56,8 +56,10 @@ struct DashboardView: View {
                         .padding(.bottom, SharedLayout.horizontalPadding)
                     }
                     .background(AppColors.blackColor)
-                } else {
+                } else if activeTab == 1 {
                     AllTransactionsView(tokens: tokens)
+                } else {
+                    AllCoinsView()
                 }
 
                 HStack {
@@ -86,6 +88,20 @@ struct DashboardView: View {
                         .foregroundColor(activeTab == 1 ? AppColors.goldColor : .gray)
                         .frame(maxWidth: .infinity)
                     }
+
+                    Button {
+                        activeTab = 2
+                    } label: {
+                        VStack(spacing: TabBarLayout.itemSpacing) {
+                            Image(systemName: "bitcoinsign.circle.fill")
+                                .font(.system(size: TabBarLayout.iconSize))
+                            Text("Coins")
+                                .font(.caption2)
+                        }
+                        .foregroundColor(activeTab == 2 ? AppColors.goldColor : .gray)
+                        .frame(maxWidth: .infinity)
+                    }
+                    .accessibilityLabel("Show coins")
                 }
                 .padding(.vertical, TabBarLayout.verticalPadding)
                 .padding(.bottom, TabBarLayout.bottomPadding)
