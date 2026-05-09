@@ -48,6 +48,16 @@ struct TransactionListView: View {
         .background(AppColors.blackColor.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task { await loadTransactions() }
+        .sheet(isPresented: $showingBuy) {
+            let cleanedPrice = token.pricePerToken
+                    .replacingOccurrences(of: "$", with: "")
+                    .replacingOccurrences(of: ",", with: "")
+            
+            let cleanedPercent = token.percentChange
+                    .replacingOccurrences(of: "%", with: "")
+            
+            BuyTokenView(token: TokenListResponse(id: token.id.uuidString, mintAddress: token.mintAddress, name: token.name, symbol: token.symbol, imgUrl: token.iconUrl, price: Double(cleanedPrice) ?? 0, gainsPercent: Double(cleanedPercent) ?? 0))
+        }
         .alert("Send \(token.symbol)", isPresented: $showingSend) {
             Button("OK", role: .cancel) {}
         } message: { Text("Send functionality coming soon.") }
