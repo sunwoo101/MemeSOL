@@ -21,9 +21,15 @@ struct TokenDetailsView: View {
                 VStack (spacing: 24) {
                     //header
                     VStack (spacing: 16) {
-                        Circle()
-                            .frame(width: 120, height: 120)
-                            .foregroundColor(.blue)
+                        AsyncImage(url: URL(string: token.imgUrl)) { image in
+                            image
+                                .resizable()
+                                .scaledToFill()
+                        } placeholder : {
+                            Circle().fill(AppColors.charcoalColor)
+                        }
+                        .frame(width: 120, height: 120)
+                        .clipShape(Circle())
                         
                         VStack (spacing: 6) {
                             Text(token.name)
@@ -68,22 +74,22 @@ struct TokenDetailsView: View {
                             }
                         } label : {
                             Text(viewModel.isInWallet ? "Remove from Wallet" : "Add to Wallet")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(viewModel.isInWallet ? .red : AppColors.goldColor)
+                                .foregroundColor(viewModel.isInWallet ? .white : .black)
+                                .cornerRadius(16)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(viewModel.isInWallet ? .red : AppColors.goldColor)
-                        .foregroundColor(viewModel.isInWallet ? .white : .black)
-                        .cornerRadius(16)
                         
                         Button {
-                            //function
+                            viewModel.toggleFavourite(token.mintAddress)
                         } label: {
-                            Image(systemName: "heart")
+                            Image(systemName: viewModel.isFavourite(token.mintAddress) ? "heart.fill" : "heart")
+                                .frame(width: 60, height: 55)
+                                .background(AppColors.charcoalColor)
+                                .foregroundColor(viewModel.isFavourite(token.mintAddress) ? .red : .white)
+                                .cornerRadius(16)
                         }
-                        .frame(width: 60, height: 55)
-                        .background(AppColors.charcoalColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(16)
                     }
                     
                     //transactions
@@ -92,20 +98,26 @@ struct TokenDetailsView: View {
                             .font(.headline)
                             .foregroundColor(.white)
                         
+                        if viewModel.transactions.isEmpty {
+                            Text("No transactions yet.")
+                                .foregroundColor(AppColors.secondaryTextColor)
+                        }
                         
-                        ForEach(viewModel.transactions, id: \.signature) { transaction in
-                            let formattedAmount = (transaction.transactionType == "receive" ? "+" : "-") +
+                        else {
+                            ForEach(viewModel.transactions, id: \.signature) { transaction in
+                                let formattedAmount = (transaction.transactionType == "receive" ? "+" : "-") +
                                 "\(transaction.amount ?? 0) \(transaction.tokenSymbol)"
-
-                            
-                            transactionRow(type: transaction.transactionType ?? "Unknown",
-                                           amount: formattedAmount,
-                                           date: transaction.timestamp,
-                                           isIncoming: transaction.transactionType == "receive")
-                            
-                            Divider()
-                                .background(Color.white.opacity(0.2))
-                            
+                                
+                                
+                                transactionRow(type: transaction.transactionType ?? "Unknown",
+                                               amount: formattedAmount,
+                                               date: transaction.timestamp,
+                                               isIncoming: transaction.transactionType == "receive")
+                                
+                                Divider()
+                                    .background(Color.white.opacity(0.2))
+                                
+                            }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
