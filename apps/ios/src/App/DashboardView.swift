@@ -87,6 +87,20 @@ struct DashboardView: View {
                         .foregroundColor(activeTab == 1 ? AppColors.goldColor : .gray)
                         .frame(maxWidth: .infinity)
                     }
+
+                    Button {
+                        isAllCoinsPresented = true
+                    } label: {
+                        VStack(spacing: TabBarLayout.itemSpacing) {
+                            Image(systemName: "bitcoinsign.circle.fill")
+                                .font(.system(size: TabBarLayout.iconSize))
+                            Text("All Coins")
+                                .font(.caption2)
+                        }
+                        .foregroundColor(AppColors.goldColor)
+                        .frame(maxWidth: .infinity)
+                    }
+                    .accessibilityLabel("Show all coins")
                 }
                 .padding(.vertical, TabBarLayout.verticalPadding)
                 .padding(.bottom, TabBarLayout.bottomPadding)
