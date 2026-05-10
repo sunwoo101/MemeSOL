@@ -53,6 +53,9 @@ Link: https://github.com/sunwoo101/ios-assignment-3
 - **CodeScanner 2.5.2**
 : QR code scanning (Swift Package)
 
+- **ASP.NET**
+: Backend framework
+
 ## Architecture
 
 This project follows the **MVVM** (Model–View–ViewModel) pattern.
@@ -122,6 +125,7 @@ App/
 │
 └── TestViews/              Dev-only testing screens
 ```
+
 ## Getting Started
 Requirements
 
@@ -141,12 +145,7 @@ Then in Xcode:
 4. Select an iOS 17+ simulator. Tested on iPhone 17 Pro; iPhone 15 and later should also work.
 5. Press **⌘R** to build and run.
 
-For backend setup, see the backend README. Once it's running, ensure the base URL in `Services/API/APIClient.swift` points to the correct host.
-
 ## Backend 
 
-See the backend README for setup instructions.
-
-## Contributing
-See CONTRIBUTING.md in the repo root for commit message conventions and PR guidelines.
+Deployed at `https://ios-assignment.sunwookim.dev/api`
    
