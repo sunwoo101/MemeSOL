@@ -13,6 +13,7 @@ struct TransactionListView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingSend = false
     @State private var showingReceive = false
+    @State private var showingBuy = false
     @State private var transactions: [TransactionHistoryResponse] = []
     @State private var isLoading = false
     @State private var errorText = ""
@@ -47,6 +48,16 @@ struct TransactionListView: View {
         .background(AppColors.blackColor.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task { await loadTransactions() }
+        .sheet(isPresented: $showingBuy) {
+            let cleanedPrice = token.pricePerToken
+                    .replacingOccurrences(of: "$", with: "")
+                    .replacingOccurrences(of: ",", with: "")
+            
+            let cleanedPercent = token.percentChange
+                    .replacingOccurrences(of: "%", with: "")
+            
+            BuyTokenView(token: TokenListResponse(id: token.id.uuidString, mintAddress: token.mintAddress, name: token.name, symbol: token.symbol, imgUrl: token.iconUrl, price: Double(cleanedPrice) ?? 0, gainsPercent: Double(cleanedPercent) ?? 0))
+        }
         .alert("Send \(token.symbol)", isPresented: $showingSend) {
             Button("OK", role: .cancel) {}
         } message: { Text("Send functionality coming soon.") }
@@ -82,6 +93,7 @@ struct TransactionListView: View {
 
     private var actionButtons: some View {
         HStack(spacing: TransactionLayout.actionButtonSpacing) {
+            TransactionActionButton(icon: "creditcard.fill",        label: "Buy")    { showingBuy    = true }
             TransactionActionButton(icon: "paperplane.fill",        label: "Send")    { showingSend    = true }
             TransactionActionButton(icon: "arrow.down.circle.fill", label: "Receive") { showingReceive = true }
         }
