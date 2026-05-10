@@ -48,14 +48,7 @@ struct TransactionListView: View {
         .toolbar(.hidden, for: .navigationBar)
         .task { await loadTransactions() }
         .sheet(isPresented: $showingSend) {
-            NavigationStack {
-                SendView(preselectedMintAddress: token.mintAddress)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") { showingSend = false }
-                        }
-                    }
-            }
+            SendView(preselectedMintAddress: token.mintAddress)
         }
         .sheet(isPresented: $showingReceive) {
             ReceiveView()
