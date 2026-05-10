@@ -49,6 +49,9 @@ struct TransactionListView: View {
         .background(AppColors.blackColor.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task { await loadTransactions() }
+        .sheet(isPresented: $showingSend) {
+            SendView(preselectedMintAddress: token.mintAddress)
+        }
         .sheet(isPresented: $showingBuy) {
             let cleanedPrice = token.pricePerToken
                     .replacingOccurrences(of: "$", with: "")
@@ -59,9 +62,6 @@ struct TransactionListView: View {
             
             BuyTokenView(token: TokenListResponse(id: token.id.uuidString, mintAddress: token.mintAddress, name: token.name, symbol: token.symbol, imgUrl: token.iconUrl, price: Double(cleanedPrice) ?? 0, gainsPercent: Double(cleanedPercent) ?? 0))
         }
-        .alert("Send \(token.symbol)", isPresented: $showingSend) {
-            Button("OK", role: .cancel) {}
-        } message: { Text("Send functionality coming soon.") }
         .sheet(isPresented: $showingReceive) {
             ReceiveView()
         }
