@@ -47,9 +47,16 @@ struct TransactionListView: View {
         .background(AppColors.blackColor.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task { await loadTransactions() }
-        .alert("Send \(token.symbol)", isPresented: $showingSend) {
-            Button("OK", role: .cancel) {}
-        } message: { Text("Send functionality coming soon.") }
+        .sheet(isPresented: $showingSend) {
+            NavigationStack {
+                SendView(preselectedMintAddress: token.mintAddress)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Close") { showingSend = false }
+                        }
+                    }
+            }
+        }
         .sheet(isPresented: $showingReceive) {
             ReceiveView()
         }

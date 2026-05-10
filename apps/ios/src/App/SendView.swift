@@ -10,6 +10,9 @@ import CodeScanner
 internal import AVFoundation
 
 struct SendView: View {
+    /// When set (e.g. from token transaction history), selects this mint after wallet tokens load.
+    var preselectedMintAddress: String? = nil
+
     @State private var address = ""
     @State private var amount = ""
     @State private var selectedToken: WalletTokenResponse?
@@ -178,6 +181,11 @@ struct SendView: View {
         }
         .task {
             await viewModel.loadTokens()
+            if let mint = preselectedMintAddress?.trimmingCharacters(in: .whitespacesAndNewlines),
+               !mint.isEmpty,
+               let match = viewModel.walletTokens.first(where: { $0.mintAddress == mint }) {
+                selectedToken = match
+            }
         }
         
         //confirm modal
