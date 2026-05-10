@@ -129,7 +129,7 @@ Setup
 
 1. Clone the repository:
 ```bash
-git clone <repo-url>
+git clone <https://github.com/sunwoo101/ios-assignment-3.git>
 cd ios-assignment-3/apps/ios
 ```
 Then in Xcode:
