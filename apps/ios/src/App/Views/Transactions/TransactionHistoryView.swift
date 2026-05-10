@@ -13,6 +13,7 @@ struct TransactionListView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingSend = false
     @State private var showingReceive = false
+    @State private var showingBuy = false
     @State private var transactions: [TransactionHistoryResponse] = []
     @State private var isLoading = false
     @State private var errorText = ""
@@ -20,6 +21,7 @@ struct TransactionListView: View {
     var body: some View {
         VStack(spacing: 0) {
             navHeader
+            tokenBalanceSection
             actionButtons
 
             if isLoading {
@@ -47,9 +49,19 @@ struct TransactionListView: View {
         .background(AppColors.blackColor.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
         .task { await loadTransactions() }
-        .alert("Send \(token.symbol)", isPresented: $showingSend) {
-            Button("OK", role: .cancel) {}
-        } message: { Text("Send functionality coming soon.") }
+        .sheet(isPresented: $showingSend) {
+            SendView(preselectedMintAddress: token.mintAddress)
+        }
+        .sheet(isPresented: $showingBuy) {
+            let cleanedPrice = token.pricePerToken
+                    .replacingOccurrences(of: "$", with: "")
+                    .replacingOccurrences(of: ",", with: "")
+            
+            let cleanedPercent = token.percentChange
+                    .replacingOccurrences(of: "%", with: "")
+            
+            BuyTokenView(token: TokenListResponse(id: token.id.uuidString, mintAddress: token.mintAddress, name: token.name, symbol: token.symbol, imgUrl: token.iconUrl, price: Double(cleanedPrice) ?? 0, gainsPercent: Double(cleanedPercent) ?? 0))
+        }
         .sheet(isPresented: $showingReceive) {
             ReceiveView()
         }
@@ -80,8 +92,25 @@ struct TransactionListView: View {
         .background(AppColors.blackColor)
     }
 
+    private var tokenBalanceSection: some View {
+        VStack(spacing: BalanceLayout.stackSpacing) {
+            Text("Balance")
+                .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
+                .foregroundColor(AppColors.goldColor)
+            Text(token.balance)
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, SharedLayout.horizontalPadding)
+        .padding(.bottom, 12)
+        .background(AppColors.blackColor)
+    }
+
     private var actionButtons: some View {
         HStack(spacing: TransactionLayout.actionButtonSpacing) {
+            TransactionActionButton(icon: "creditcard.fill",        label: "Buy")    { showingBuy    = true }
             TransactionActionButton(icon: "paperplane.fill",        label: "Send")    { showingSend    = true }
             TransactionActionButton(icon: "arrow.down.circle.fill", label: "Receive") { showingReceive = true }
         }
