@@ -20,6 +20,7 @@ struct TransactionListView: View {
     var body: some View {
         VStack(spacing: 0) {
             navHeader
+            tokenBalanceSection
             actionButtons
 
             if isLoading {
@@ -77,6 +78,22 @@ struct TransactionListView: View {
         .padding(.horizontal, SharedLayout.horizontalPadding)
         .padding(.top, TransactionLayout.titleTopPadding)
         .padding(.bottom, TransactionLayout.navBarBottomPadding)
+        .background(AppColors.blackColor)
+    }
+
+    private var tokenBalanceSection: some View {
+        VStack(spacing: BalanceLayout.stackSpacing) {
+            Text("Balance")
+                .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
+                .foregroundColor(AppColors.goldColor)
+            Text(token.balance)
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, SharedLayout.horizontalPadding)
+        .padding(.bottom, 12)
         .background(AppColors.blackColor)
     }
 
