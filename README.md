@@ -2,6 +2,8 @@
 
 A crypto wallet app that lets users manage tokens, send and receive transfers and track transaction history.
 
+Link: https://github.com/sunwoo101/ios-assignment-3
+
 ## Features
 ### Authentication
 
