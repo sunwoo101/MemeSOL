@@ -55,6 +55,7 @@ struct DashboardView: View {
                         .padding(.top, SharedLayout.horizontalPadding)
                         .padding(.bottom, SharedLayout.horizontalPadding)
                     }
+                    .refreshable { await loadDashboard() }
                     .background(AppColors.blackColor)
                 } else if activeTab == 1 {
                     AllTransactionsView(tokens: tokens)
@@ -113,7 +114,7 @@ struct DashboardView: View {
             }
         }
         .background(AppColors.blackColor.ignoresSafeArea())
-        .task { await loadDashboard() }
+        .onAppear { Task { await loadDashboard() } }
     }
 
     // MARK: - Subviews

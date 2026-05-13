@@ -48,11 +48,11 @@ struct TransactionListView: View {
         }
         .background(AppColors.blackColor.ignoresSafeArea())
         .toolbar(.hidden, for: .navigationBar)
-        .task { await loadTransactions() }
-        .sheet(isPresented: $showingSend) {
+        .onAppear { Task { await loadTransactions() } }
+        .sheet(isPresented: $showingSend, onDismiss: { Task { await loadTransactions() } }) {
             SendView(preselectedMintAddress: token.mintAddress)
         }
-        .sheet(isPresented: $showingBuy) {
+        .sheet(isPresented: $showingBuy, onDismiss: { Task { await loadTransactions() } }) {
             let cleanedPrice = token.pricePerToken
                     .replacingOccurrences(of: "$", with: "")
                     .replacingOccurrences(of: ",", with: "")
@@ -62,7 +62,7 @@ struct TransactionListView: View {
             
             BuyTokenView(token: TokenListResponse(id: token.id.uuidString, mintAddress: token.mintAddress, name: token.name, symbol: token.symbol, imgUrl: token.iconUrl, price: Double(cleanedPrice) ?? 0, gainsPercent: Double(cleanedPercent) ?? 0))
         }
-        .sheet(isPresented: $showingReceive) {
+        .sheet(isPresented: $showingReceive, onDismiss: { Task { await loadTransactions() } }) {
             ReceiveView()
         }
     }
@@ -139,6 +139,7 @@ struct TransactionListView: View {
             .padding(.top, TransactionLayout.listTopPadding)
             .padding(.bottom, TransactionLayout.listBottomPadding)
         }
+        .refreshable { await loadTransactions() }
         .background(AppColors.blackColor)
     }
 

@@ -19,6 +19,7 @@ struct TokenDetailsView: View {
             
             ScrollView {
                 VStack (spacing: 24) {
+
                     //header
                     VStack (spacing: 16) {
                         AsyncImage(url: URL(string: token.imgUrl)) { image in
@@ -128,10 +129,15 @@ struct TokenDetailsView: View {
                 .padding()
             }
         }
-        .task {
+        .refreshable {
             await viewModel.loadWalletData(mintAddress: token.mintAddress)
-            
             await viewModel.loadTransactionData(mintAddress: token.mintAddress)
+        }
+        .onAppear {
+            Task {
+                await viewModel.loadWalletData(mintAddress: token.mintAddress)
+                await viewModel.loadTransactionData(mintAddress: token.mintAddress)
+            }
         }
     }
     
