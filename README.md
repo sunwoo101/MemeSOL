@@ -147,5 +147,6 @@ Then in Xcode:
 
 ## Backend 
 
-Deployed at `https://ios-assignment.sunwookim.dev/api`
+- Developed using ASP.NET
+- Deployed on a VPS
    
