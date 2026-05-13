@@ -48,6 +48,10 @@ struct AllCoinsView: View {
                     .foregroundStyle(.white)
                 } else {
                     List(coins, id: \.id) { coin in
+                        NavigationLink {
+                            TokenDetailsView(token: coin)
+                        } label: {
+                        
                         HStack(spacing: 12) {
                             AsyncImage(url: URL(string: coin.imgUrl)) { phase in
                                 switch phase {
@@ -59,7 +63,7 @@ struct AllCoinsView: View {
                             }
                             .frame(width: 42, height: 42)
                             .clipShape(Circle())
-
+                            
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(coin.name)
                                     .font(.headline)
@@ -84,6 +88,7 @@ struct AllCoinsView: View {
                             }
                         }
                         .padding(.vertical, 4)
+                    }
                         .listRowBackground(AppColors.blackColor)
                     }
                     .listStyle(.plain)
