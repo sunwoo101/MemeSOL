@@ -55,6 +55,7 @@ struct DashboardView: View {
                         .padding(.top, SharedLayout.horizontalPadding)
                         .padding(.bottom, SharedLayout.horizontalPadding)
                     }
+                    .refreshable { await loadDashboard() }
                     .background(AppColors.blackColor)
                 } else if activeTab == 1 {
                     AllTransactionsView(tokens: tokens)
@@ -108,12 +109,12 @@ struct DashboardView: View {
                 .background(AppColors.charcoalColor)
             }
             .background(AppColors.blackColor.ignoresSafeArea())
-            .sheet(item: $selectedToken) { token in
+            .sheet(item: $selectedToken, onDismiss: { Task { await loadDashboard() } }) { token in
                 TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
             }
         }
         .background(AppColors.blackColor.ignoresSafeArea())
-        .task { await loadDashboard() }
+        .onAppear { Task { await loadDashboard() } }
     }
 
     // MARK: - Subviews
@@ -135,9 +136,10 @@ struct DashboardView: View {
                 let isGain = totalGainLoss >= 0
                 let sign = isGain ? "+" : "-"
                 let gainLossColor: Color = isGain ? .green : .red
+                let formattedGainLoss = Self.currencyFormatter.string(from: NSNumber(value: abs(totalGainLoss))) ?? "$0.00"
                 Label {
                     Text(
-                        "\(sign)$\(String(format: BalanceLayout.currencyFormat, abs(totalGainLoss))) (\(sign)\(String(format: BalanceLayout.currencyFormat, abs(totalGainLossPercent)))%)"
+                        "\(sign)\(formattedGainLoss) (\(sign)\(String(format: BalanceLayout.currencyFormat, abs(totalGainLossPercent)))%)"
                     )
                     .font(.system(size: GainLossLayout.fontSize, weight: .medium))
                     .foregroundColor(gainLossColor)
@@ -235,18 +237,17 @@ struct DashboardView: View {
 
     @MainActor
     private func loadDashboard() async {
-        isLoading = true
+        if tokens.isEmpty { isLoading = true }
         defer { isLoading = false }
         async let tokensFetch = APIClient.shared.listWalletTokens()
         async let balanceFetch = APIClient.shared.getWalletBalance()
-        do {
-            let (walletTokens, walletBalance) = try await (tokensFetch, balanceFetch)
+        if let walletTokens = try? await tokensFetch {
             tokens = walletTokens.map { Token(walletToken: $0) }
-            totalBalance = walletBalance.totalValue
+            totalBalance = walletTokens.reduce(0) { $0 + $1.balance * $1.price }
+        }
+        if let walletBalance = try? await balanceFetch {
             totalGainLoss = walletBalance.gainLoss
             totalGainLossPercent = walletBalance.gainLossPercent
-        } catch {
-            // balance/tokens stay at zero/empty — user can see empty state
         }
     }
 
