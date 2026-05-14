@@ -237,7 +237,7 @@ struct DashboardView: View {
 
     @MainActor
     private func loadDashboard() async {
-        isLoading = true
+        if tokens.isEmpty { isLoading = true }
         defer { isLoading = false }
         async let tokensFetch = APIClient.shared.listWalletTokens()
         async let balanceFetch = APIClient.shared.getWalletBalance()
