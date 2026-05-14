@@ -243,7 +243,7 @@ struct DashboardView: View {
         do {
             let (walletTokens, walletBalance) = try await (tokensFetch, balanceFetch)
             tokens = walletTokens.map { Token(walletToken: $0) }
-            totalBalance = walletBalance.totalValue
+            totalBalance = walletTokens.reduce(0) { $0 + $1.balance * $1.price }
             totalGainLoss = walletBalance.gainLoss
             totalGainLossPercent = walletBalance.gainLossPercent
         } catch {
