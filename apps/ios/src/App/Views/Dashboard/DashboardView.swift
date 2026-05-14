@@ -136,9 +136,10 @@ struct DashboardView: View {
                 let isGain = totalGainLoss >= 0
                 let sign = isGain ? "+" : "-"
                 let gainLossColor: Color = isGain ? .green : .red
+                let formattedGainLoss = Self.currencyFormatter.string(from: NSNumber(value: abs(totalGainLoss))) ?? "$0.00"
                 Label {
                     Text(
-                        "\(sign)$\(String(format: BalanceLayout.currencyFormat, abs(totalGainLoss))) (\(sign)\(String(format: BalanceLayout.currencyFormat, abs(totalGainLossPercent)))%)"
+                        "\(sign)\(formattedGainLoss) (\(sign)\(String(format: BalanceLayout.currencyFormat, abs(totalGainLossPercent)))%)"
                     )
                     .font(.system(size: GainLossLayout.fontSize, weight: .medium))
                     .foregroundColor(gainLossColor)

@@ -73,6 +73,7 @@ final class APIClient {
         }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         setBearerToken(&request)
         return try await send(request)
     }
