@@ -38,7 +38,7 @@ class TokenDetailsViewModel : ObservableObject {
     
     func loadTransactionData (mintAddress: String) async {
         do {
-           _ = try await APIClient.shared.getTransactions(mintAddress: mintAddress)
+            transactions = try await APIClient.shared.getTransactions(mintAddress: mintAddress)
         } catch {
             errorMessage = error.localizedDescription
         }

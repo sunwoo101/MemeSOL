@@ -132,11 +132,13 @@ struct TokenDetailsView: View {
         .refreshable {
             await viewModel.loadWalletData(mintAddress: token.mintAddress)
             await viewModel.loadTransactionData(mintAddress: token.mintAddress)
+            await viewModel.checkIfInWallet(mintAddress: token.mintAddress)
         }
         .onAppear {
             Task {
                 await viewModel.loadWalletData(mintAddress: token.mintAddress)
                 await viewModel.loadTransactionData(mintAddress: token.mintAddress)
+                await viewModel.checkIfInWallet(mintAddress: token.mintAddress)
             }
         }
     }
