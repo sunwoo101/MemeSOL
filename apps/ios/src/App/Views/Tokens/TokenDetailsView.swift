@@ -106,14 +106,14 @@ struct TokenDetailsView: View {
                         
                         else {
                             ForEach(viewModel.transactions, id: \.signature) { transaction in
-                                let formattedAmount = (transaction.transactionType == "receive" ? "+" : "-") +
+                                let formattedAmount = (transaction.transactionType == "received" ? "+" : "-") +
                                 "\(transaction.amount ?? 0) \(transaction.tokenSymbol)"
                                 
                                 
-                                transactionRow(type: transaction.transactionType ?? "Unknown",
+                                transactionRow(type: transaction.transactionType?.capitalized ?? "Unknown",
                                                amount: formattedAmount,
-                                               date: transaction.timestamp,
-                                               isIncoming: transaction.transactionType == "receive")
+                                               date: formattedDate(timestamp: transaction.timestamp),
+                                               isIncoming: transaction.transactionType == "received")
                                 
                                 Divider()
                                     .background(Color.white.opacity(0.2))
@@ -162,6 +162,18 @@ struct TokenDetailsView: View {
                 .foregroundColor(isIncoming ? .green : .white)
                 .font(.headline)
         }
+    }
+    
+    func formattedDate(timestamp: String) -> String {
+        let inputFormatter = ISO8601DateFormatter()
+        
+        guard let date = inputFormatter.date(from: timestamp) else {
+            return timestamp
+        }
+                
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "MMM d - h:mm a"
+        return outputFormatter.string(from: date)
     }
 }
 
