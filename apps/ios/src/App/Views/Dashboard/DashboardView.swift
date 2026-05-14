@@ -109,7 +109,7 @@ struct DashboardView: View {
                 .background(AppColors.charcoalColor)
             }
             .background(AppColors.blackColor.ignoresSafeArea())
-            .sheet(item: $selectedToken) { token in
+            .sheet(item: $selectedToken, onDismiss: { Task { await loadDashboard() } }) { token in
                 TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
             }
         }

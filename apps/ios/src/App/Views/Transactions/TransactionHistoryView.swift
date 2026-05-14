@@ -15,6 +15,7 @@ struct TransactionListView: View {
     @State private var showingReceive = false
     @State private var showingBuy = false
     @State private var transactions: [TransactionHistoryResponse] = []
+    @State private var liveBalance: String = ""
     @State private var isLoading = false
     @State private var errorText = ""
 
@@ -97,7 +98,7 @@ struct TransactionListView: View {
             Text("Balance")
                 .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
                 .foregroundColor(AppColors.goldColor)
-            Text(token.balance)
+            Text(liveBalance.isEmpty ? token.balance : liveBalance)
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
@@ -167,7 +168,14 @@ struct TransactionListView: View {
         isLoading = true
         defer { isLoading = false }
         do {
-            transactions = try await APIClient.shared.getTransactions(mintAddress: token.mintAddress)
+            async let txFetch = APIClient.shared.getTransactions(mintAddress: token.mintAddress)
+            async let walletFetch = APIClient.shared.listWalletTokens()
+            let (txs, walletTokens) = try await (txFetch, walletFetch)
+            transactions = txs
+            if let match = walletTokens.first(where: { $0.mintAddress == token.mintAddress }) {
+                let audValue = match.balance * match.price
+                liveBalance = DashboardView.currencyFormatter.string(from: NSNumber(value: audValue)) ?? token.balance
+            }
         } catch {
             errorText = error.localizedDescription
         }
