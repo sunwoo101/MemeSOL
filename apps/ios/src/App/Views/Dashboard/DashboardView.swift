@@ -240,14 +240,13 @@ struct DashboardView: View {
         defer { isLoading = false }
         async let tokensFetch = APIClient.shared.listWalletTokens()
         async let balanceFetch = APIClient.shared.getWalletBalance()
-        do {
-            let (walletTokens, walletBalance) = try await (tokensFetch, balanceFetch)
+        if let walletTokens = try? await tokensFetch {
             tokens = walletTokens.map { Token(walletToken: $0) }
             totalBalance = walletTokens.reduce(0) { $0 + $1.balance * $1.price }
+        }
+        if let walletBalance = try? await balanceFetch {
             totalGainLoss = walletBalance.gainLoss
             totalGainLossPercent = walletBalance.gainLossPercent
-        } catch {
-            // balance/tokens stay at zero/empty — user can see empty state
         }
     }
 
