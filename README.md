@@ -2,7 +2,7 @@
 
 A crypto wallet app that lets users manage tokens, send and receive transfers and track transaction history.
 
-Link: https://github.com/sunwoo101/ios-assignment-3
+Link: https://github.com/sunwoo101/MemeSOL
 
 ## Features
 ### Authentication
@@ -135,8 +135,8 @@ Setup
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/sunwoo101/ios-assignment-3.git
-cd ios-assignment-3/apps/ios
+git clone https://github.com/sunwoo101/MemeSOL.git
+cd MemeSOL/apps/ios
 ```
 Then in Xcode:
 
