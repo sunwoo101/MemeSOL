@@ -14,8 +14,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const variants: Record<Variant, string> = {
   primary: "bg-accent text-ink hover:brightness-110", // Solid purple, main action
   secondary:
-    "bg-white/5 text-ink border border-white/10 hover:bg-white/10 backdrop-blur", // Subtle outlined
-  ghost: "text-ink/80 hover:text-ink hover:bg-white/5", // Transparent, text-only
+    "bg-ink/5 text-ink border border-ink/10 hover:bg-ink/10 backdrop-blur", // Subtle outlined
+  ghost: "text-ink/80 hover:text-ink hover:bg-ink/5", // Transparent, text-only
 };
 
 // Height, padding and text size for each size.

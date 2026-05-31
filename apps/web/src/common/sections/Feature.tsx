@@ -1,92 +1,56 @@
-// Shape of a single feature card.
-type Item = {
+import type { ReactNode } from "react";
+
+type FeatureProps = {
   title: string;
   description: string;
-  accent: string; // Gradient colors for the icon badge
-  icon: string;
+  step?: number;
+  reverse?: boolean;
+  screen?: ReactNode;
 };
 
-// The list of features shown in the grid.
-const items: Item[] = [
-  {
-    title: "Secure authentication",
-    description:
-      "Email and password registration with strong validation, persistent sessions via Keychain and auto-login on relaunch.",
-    accent: "from-success to-info",
-    icon: "✓",
-  },
-  {
-    title: "Portfolio dashboard",
-    description:
-      "See your total balance with live gains and losses, plus quick buttons to Send, Receive and Buy.",
-    accent: "from-warning to-accent",
-    icon: "◎",
-  },
-  {
-    title: "Token explorer",
-    description:
-      "Browse all available tokens, view detailed price, percent change, mint address and create your own token in seconds.",
-    accent: "from-accent to-info",
-    icon: "✦",
-  },
-  {
-    title: "Send & receive",
-    description:
-      "Send tokens to any wallet address, generate a QR code to receive or scan a QR to auto fill the recipient.",
-    accent: "from-info to-success",
-    icon: "⇄",
-  },
-  {
-    title: "Transaction history",
-    description:
-      "Full transaction history with clear status indicators, so you always know where every transfer stands.",
-    accent: "from-accent to-warning",
-    icon: "≡",
-  },
-  {
-    title: "Native iOS feel",
-    description:
-      "Designed for iOS 17+ to feel fast, smooth, and right at home.",
-    accent: "from-error to-warning",
-    icon: "",
-  },
-];
-
-// Feature: section showing what the app can do as a grid of cards.
-function Feature() {
+function IPhoneMockup({ children }: { children?: ReactNode }) {
   return (
-    <section id="features" className="relative py-28">
-      <div className="max-w-6xl mx-auto px-6">
-        {/* Section heading */}
-        <div className="max-w-2xl">
-          <p className="text-sm font-semibold text-accent uppercase tracking-wider">
-            Features
-          </p>
-          <h2 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tight">
-            Everything you need to manage your tokens.
-          </h2>
-        </div>
+    <div className="relative mx-auto w-[260px] aspect-[9/19.5] rounded-[3rem] border-[10px] border-ink/20 bg-canvas shadow-2xl shadow-canvas overflow-hidden">
+      {/* Notch */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-5 bg-ink/20 rounded-b-2xl z-10" />
+      {/* Volume buttons */}
+      <div className="absolute -left-[14px] top-20 w-[4px] h-8 rounded-l-full bg-ink/20" />
+      <div className="absolute -left-[14px] top-32 w-[4px] h-12 rounded-l-full bg-ink/20" />
+      <div className="absolute -left-[14px] top-48 w-[4px] h-12 rounded-l-full bg-ink/20" />
+      {/* Power button */}
+      <div className="absolute -right-[14px] top-28 w-[4px] h-16 rounded-r-full bg-ink/20" />
+      {/* Screen content */}
+      <div className="absolute inset-0 pt-7 px-4 pb-5 flex flex-col">
+        {children}
+      </div>
+    </div>
+  );
+}
 
-        {/* Responsive grid: 1 / 2 / 3 columns as the screen grows */}
-        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {/* One card per feature */}
-          {items.map((item) => (
-            <div
-              key={item.title}
-              className="group relative rounded-2xl border border-white/10 bg-white/[0.03] p-6 hover:bg-white/[0.06] hover:border-white/20 transition-all"
-            >
-              {/* Colored icon badge */}
-              <div
-                className={`h-11 w-11 rounded-xl bg-gradient-to-br ${item.accent} flex items-center justify-center text-lg font-bold`}
-              >
-                {item.icon}
-              </div>
-              <h3 className="mt-5 text-lg font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm text-ink/65 leading-relaxed">
-                {item.description}
+function Feature({ title, description, step, reverse = false, screen }: FeatureProps) {
+  return (
+    <section className="relative py-24 border-t border-ink/5">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-16`}>
+          {/* Text */}
+          <div className="flex-1 max-w-lg">
+            {step !== undefined && (
+              <p className="text-sm font-semibold text-accent uppercase tracking-wider mb-3">
+                Step {step}
               </p>
-            </div>
-          ))}
+            )}
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
+              {title}
+            </h2>
+            <p className="mt-5 text-base text-ink/60 leading-relaxed">
+              {description}
+            </p>
+          </div>
+
+          {/* iPhone mockup */}
+          <div className="flex-1 flex justify-center">
+            <IPhoneMockup>{screen}</IPhoneMockup>
+          </div>
         </div>
       </div>
     </section>

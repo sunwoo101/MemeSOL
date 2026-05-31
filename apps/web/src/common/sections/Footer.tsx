@@ -19,67 +19,26 @@ function Footer() {
   ];
 
   return (
-    <footer className="relative border-t border-white/5">
-      <div className="max-w-6xl mx-auto px-6 pt-20 pb-12">
-        {/* Final call-to-action card */}
-        <div className="relative rounded-3xl border border-white/10 bg-gradient-to-br from-accent/15 via-info/10 to-transparent p-10 sm:p-14 overflow-hidden">
-          <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
-            <div>
-              <h3 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                Your tokens. Your transfers. Your history.
-              </h3>
-              <p className="mt-3 text-ink/70 max-w-lg">
-                Download MemeSOL on iOS and start managing your Solana tokens
-                with a wallet built for clarity.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <Button size="lg">App Store</Button>
-            </div>
-          </div>
-        </div>
-
+    <footer className="relative border-t border-ink/5">
+      <div className="max-w-6xl mx-auto px-6 pt-12 pb-12">
         {/* Brand blurb and link columns */}
-        <div className="mt-16 grid md:grid-cols-[1.5fr_repeat(3,1fr)] gap-10">
+        <div className="grid md:grid-cols-[1.5fr_repeat(3,1fr)] gap-10">
           {/* Brand: logo, name and tagline */}
           <div>
             <div className="flex items-center gap-2">
-              <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-accent to-info" />
+              <img src="/favicon.svg" alt="MemeSOL" className="h-7 w-7" />
               <span className="font-bold tracking-tight">MemeSOL</span>
             </div>
             <p className="mt-4 text-sm text-ink/60 max-w-xs">
-              Manage every token with total confidence.
+              Launch your meme coin in seconds.
             </p>
           </div>
 
-          {/* One column per link group */}
-          {sections.map((section) => (
-            <div key={section.title}>
-              <p className="text-sm font-semibold text-ink">{section.title}</p>
-              <ul className="mt-4 space-y-2.5">
-                {section.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-sm text-ink/60 hover:text-ink transition-colors"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
         </div>
 
         {/* Bottom bar: copyright and legal links */}
-        <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-ink/50">
-          <p>© {new Date().getFullYear()} MemeSOL, Inc. All Rights Reserved.</p>
-          <div className="flex gap-6">        
-            <a href="#" className="hover:text-ink transition-colors">Privacy</a>
-            <a href="#" className="hover:text-ink transition-colors">Terms</a>
-            <a href="#" className="hover:text-ink transition-colors">Security</a>
-          </div>
+        <div className="mt-12 pt-8 border-t border-ink/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-ink/50">
+          <p>© {new Date().getFullYear()} MemeSOL, All Rights Reserved.</p>
         </div>
       </div>
     </footer>

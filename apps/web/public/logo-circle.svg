@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="sol" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9945FF" />
+      <stop offset="100%" stop-color="#14F195" />
+    </linearGradient>
+  </defs>
+
+  <circle cx="50" cy="50" r="50" fill="url(#sol)" />
+
+  <g transform="translate(0, -5)">
+    <!-- Outer Ears -->
+    <polygon points="25,28 40,45 20,50" fill="#FFFFFF" />
+    <polygon points="75,28 60,45 80,50" fill="#FFFFFF" />
+
+    <!-- Inner Ears -->
+    <polygon points="28,34 36,44 24,47" fill="#F0E6FF" />
+    <polygon points="72,34 64,44 76,47" fill="#F0E6FF" />
+
+    <!-- Main Face -->
+    <polygon points="20,50 40,45 60,45 80,50 68,75 50,85 32,75" fill="#FFFFFF" />
+
+    <!-- Eyes -->
+    <circle cx="36" cy="58" r="4.5" fill="#2D0066" />
+    <circle cx="64" cy="58" r="4.5" fill="#2D0066" />
+
+    <!-- Nose -->
+    <circle cx="50" cy="67" r="3.5" fill="#2D0066" />
+
+    <!-- Tongue -->
+    <path d="M 47 73.5 L 47 78 C 47 81.5, 53 81.5, 53 78 L 53 73.5 Z" fill="#FF6B6B" />
+
+    <!-- Mouth -->
+    <path d="M 44 71 Q 50 76 56 71" fill="none" stroke="#2D0066" stroke-width="3" stroke-linecap="round" />
+  </g>
+</svg>

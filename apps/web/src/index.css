@@ -10,6 +10,10 @@
   --color-info: #5d7cdb;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
