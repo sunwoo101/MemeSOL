@@ -74,7 +74,7 @@ function Footer() {
 
         {/* Bottom bar: copyright and legal links */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-ink/50">
-          <p>© 2026 MemeSOL, Inc. All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} MemeSOL, Inc. All Rights Reserved.</p>
           <div className="flex gap-6">        
             <a href="#" className="hover:text-ink transition-colors">Privacy</a>
             <a href="#" className="hover:text-ink transition-colors">Terms</a>
