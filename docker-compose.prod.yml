@@ -18,6 +18,15 @@ services:
     networks:
       - proxy
 
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: memesol-web
+    restart: unless-stopped
+    networks:
+      - proxy
+
 volumes:
   dp_keys:
 
