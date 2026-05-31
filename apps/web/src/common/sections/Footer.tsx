@@ -1,6 +1,8 @@
 import Button from "../components/Button";
 
+// Footer: bottom CTA card plus columns of site links.
 function Footer() {
+  // Link columns grouped by category.
   const sections = [
     {
       title: "Product",
@@ -19,6 +21,7 @@ function Footer() {
   return (
     <footer className="relative border-t border-white/5">
       <div className="max-w-6xl mx-auto px-6 pt-20 pb-12">
+        {/* Final call-to-action card */}
         <div className="relative rounded-3xl border border-white/10 bg-gradient-to-br from-accent/15 via-info/10 to-transparent p-10 sm:p-14 overflow-hidden">
           <div className="relative grid md:grid-cols-[1fr_auto] gap-8 items-center">
             <div>
@@ -36,7 +39,9 @@ function Footer() {
           </div>
         </div>
 
+        {/* Brand blurb and link columns */}
         <div className="mt-16 grid md:grid-cols-[1.5fr_repeat(3,1fr)] gap-10">
+          {/* Brand: logo, name and tagline */}
           <div>
             <div className="flex items-center gap-2">
               <span className="h-7 w-7 rounded-lg bg-gradient-to-br from-accent to-info" />
@@ -47,6 +52,7 @@ function Footer() {
             </p>
           </div>
 
+          {/* One column per link group */}
           {sections.map((section) => (
             <div key={section.title}>
               <p className="text-sm font-semibold text-ink">{section.title}</p>
@@ -66,6 +72,7 @@ function Footer() {
           ))}
         </div>
 
+        {/* Bottom bar: copyright and legal links */}
         <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-ink/50">
           <p>© 2026 MemeSOL, Inc. All Rights Reserved.</p>
           <div className="flex gap-6">        

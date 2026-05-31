@@ -1,10 +1,12 @@
+// Shape of a single feature card.
 type Item = {
   title: string;
   description: string;
-  accent: string;
+  accent: string; // Gradient colors for the icon badge
   icon: string;
 };
 
+// The list of features shown in the grid.
 const items: Item[] = [
   {
     title: "Secure authentication",
@@ -50,10 +52,12 @@ const items: Item[] = [
   },
 ];
 
+// Feature: section showing what the app can do as a grid of cards.
 function Feature() {
   return (
     <section id="features" className="relative py-28">
       <div className="max-w-6xl mx-auto px-6">
+        {/* Section heading */}
         <div className="max-w-2xl">
           <p className="text-sm font-semibold text-accent uppercase tracking-wider">
             Features
@@ -63,12 +67,15 @@ function Feature() {
           </h2>
         </div>
 
+        {/* Responsive grid: 1 / 2 / 3 columns as the screen grows */}
         <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* One card per feature */}
           {items.map((item) => (
             <div
               key={item.title}
               className="group relative rounded-2xl border border-white/10 bg-white/[0.03] p-6 hover:bg-white/[0.06] hover:border-white/20 transition-all"
             >
+              {/* Colored icon badge */}
               <div
                 className={`h-11 w-11 rounded-xl bg-gradient-to-br ${item.accent} flex items-center justify-center text-lg font-bold`}
               >
