@@ -1,23 +1,4 @@
-import Button from "../components/Button";
-
-// Footer: bottom CTA card plus columns of site links.
 function Footer() {
-  // Link columns grouped by category.
-  const sections = [
-    {
-      title: "Product",
-      links: ["Features", "Tokens", "Roadmap", "Changelog"],
-    },
-    {
-      title: "Developers",
-      links: ["Docs", "API", "GitHub", "Status"],
-    },
-    {
-      title: "Company",
-      links: ["About", "Blog", "Careers", "Contact"],
-    },
-  ];
-
   return (
     <footer className="relative border-t border-ink/5">
       <div className="max-w-6xl mx-auto px-6 pt-12 pb-12">
