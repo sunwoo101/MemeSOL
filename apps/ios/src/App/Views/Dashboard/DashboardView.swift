@@ -28,7 +28,7 @@ struct DashboardView: View {
             HStack {
                 Text(authSession.walletPublicKey)
                     .font(.caption2.monospaced())
-                    .foregroundColor(AppColors.secondaryTextColor)
+                    .foregroundColor(AppColors.secondaryText)
                     .lineLimit(1)
                     .truncationMode(.middle)
                 Spacer()
@@ -36,12 +36,12 @@ struct DashboardView: View {
                     authSession.logout()
                 }
                 .font(.caption.bold())
-                .foregroundColor(AppColors.goldColor)
+                .foregroundColor(AppColors.accent)
             }
             .padding(.horizontal, 16)
             .padding(.top, 12)
             .padding(.bottom, 8)
-            .background(AppColors.blackColor)
+            .background(AppColors.canvas)
 
             VStack(spacing: TransactionLayout.sectionSpacing) {
                 if activeTab == 0 {
@@ -56,7 +56,7 @@ struct DashboardView: View {
                         .padding(.bottom, SharedLayout.horizontalPadding)
                     }
                     .refreshable { await loadDashboard() }
-                    .background(AppColors.blackColor)
+                    .background(AppColors.canvas)
                 } else if activeTab == 1 {
                     AllTransactionsView(tokens: tokens)
                 } else {
@@ -73,7 +73,7 @@ struct DashboardView: View {
                             Text("Dashboard")
                                 .font(.caption2)
                         }
-                        .foregroundColor(activeTab == 0 ? AppColors.goldColor : .gray)
+                        .foregroundColor(activeTab == 0 ? AppColors.accent : AppColors.secondaryText)
                         .frame(maxWidth: .infinity)
                     }
 
@@ -86,7 +86,7 @@ struct DashboardView: View {
                             Text("Transactions")
                                 .font(.caption2)
                         }
-                        .foregroundColor(activeTab == 1 ? AppColors.goldColor : .gray)
+                        .foregroundColor(activeTab == 1 ? AppColors.accent : AppColors.secondaryText)
                         .frame(maxWidth: .infinity)
                     }
 
@@ -99,21 +99,21 @@ struct DashboardView: View {
                             Text("Coins")
                                 .font(.caption2)
                         }
-                        .foregroundColor(activeTab == 2 ? AppColors.goldColor : .gray)
+                        .foregroundColor(activeTab == 2 ? AppColors.accent : AppColors.secondaryText)
                         .frame(maxWidth: .infinity)
                     }
                     .accessibilityLabel("Show coins")
                 }
                 .padding(.vertical, TabBarLayout.verticalPadding)
                 .padding(.bottom, TabBarLayout.bottomPadding)
-                .background(AppColors.charcoalColor)
+                .background(AppColors.surface)
             }
-            .background(AppColors.blackColor.ignoresSafeArea())
+            .background(AppColors.canvas.ignoresSafeArea())
             .sheet(item: $selectedToken, onDismiss: { Task { await loadDashboard() } }) { token in
                 TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
             }
         }
-        .background(AppColors.blackColor.ignoresSafeArea())
+        .background(AppColors.canvas.ignoresSafeArea())
         .onAppear { Task { await loadDashboard() } }
     }
 
@@ -123,19 +123,19 @@ struct DashboardView: View {
         VStack(alignment: .center, spacing: BalanceLayout.stackSpacing) {
             Text("Total Balance")
                 .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
-                .foregroundColor(AppColors.goldColor)
+                .foregroundColor(AppColors.accent)
 
             if isLoading {
-                ProgressView().tint(.white)
+                ProgressView().tint(AppColors.ink)
                     .frame(height: BalanceLayout.fontSize)
             } else {
                 Text(formattedBalance)
                     .font(.system(size: BalanceLayout.fontSize, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.ink)
 
                 let isGain = totalGainLoss >= 0
                 let sign = isGain ? "+" : "-"
-                let gainLossColor: Color = isGain ? .green : .red
+                let gainLossColor: Color = isGain ? AppColors.success : AppColors.error
                 let formattedGainLoss = Self.currencyFormatter.string(from: NSNumber(value: abs(totalGainLoss))) ?? "$0.00"
                 Label {
                     Text(
@@ -185,13 +185,13 @@ struct DashboardView: View {
             sectionHeader("Tokens")
 
             if isLoading {
-                ProgressView().tint(.white)
+                ProgressView().tint(AppColors.ink)
                     .frame(maxWidth: .infinity)
                     .padding(.top, SharedLayout.sectionSpacing)
             } else if tokens.isEmpty {
                 Text("No tokens in wallet.")
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.secondaryText)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top, SharedLayout.sectionSpacing)
             } else {
@@ -213,7 +213,7 @@ struct DashboardView: View {
 
                         if index < tokens.count - 1 {
                             Divider()
-                                .background(Color.gray.opacity(SharedLayout.dividerOpacity))
+                                .background(AppColors.secondaryText.opacity(SharedLayout.dividerOpacity))
                                 .padding(.leading, SharedLayout.dividerLeadingPadding)
                         }
                     }
@@ -226,10 +226,10 @@ struct DashboardView: View {
         HStack(spacing: SharedLayout.sectionHeaderSpacing) {
             Text(title)
                 .font(.headline.bold())
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.ink)
             Image(systemName: "chevron.right")
                 .font(.caption.bold())
-                .foregroundColor(.gray)
+                .foregroundColor(AppColors.secondaryText)
         }
     }
 
@@ -282,7 +282,7 @@ private extension Token {
     }
 
     private static func color(for symbol: String) -> Color {
-        let palette: [Color] = [.blue, .orange, .purple, .cyan, .green, .red, .yellow, .pink, .indigo, .teal]
+        let palette: [Color] = [AppColors.accent, AppColors.info, AppColors.success, AppColors.warning, AppColors.error]
         let hash = symbol.unicodeScalars.reduce(0) { $0 + Int($1.value) }
         return palette[hash % palette.count]
     }

@@ -10,27 +10,27 @@ struct AllCoinsView: View {
             HStack {
                 Text("All Coins")
                     .font(.headline.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.ink)
             }
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, SharedLayout.horizontalPadding)
             .padding(.top, TransactionLayout.titleTopPadding)
             .padding(.bottom, TransactionLayout.navBarBottomPadding)
-            .background(AppColors.blackColor)
+            .background(AppColors.canvas)
 
             Group {
                 if isLoading {
                     ProgressView("Loading all coins...")
-                        .tint(.white)
-                        .foregroundStyle(.white)
+                        .tint(AppColors.ink)
+                        .foregroundStyle(AppColors.ink)
                 } else if !errorText.isEmpty {
                     VStack(spacing: 12) {
                         Text("Could not load coins")
                             .font(.headline)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(AppColors.ink)
                         Text(errorText)
                             .font(.footnote)
-                            .foregroundStyle(AppColors.secondaryTextColor)
+                            .foregroundStyle(AppColors.secondaryText)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 24)
                         Button("Try Again") {
@@ -45,7 +45,7 @@ struct AllCoinsView: View {
                         systemImage: "bitcoinsign.circle",
                         description: Text("Coins created on the platform will show here.")
                     )
-                    .foregroundStyle(.white)
+                    .foregroundStyle(AppColors.ink)
                 } else {
                     List(coins, id: \.id) { coin in
                         NavigationLink {
@@ -67,13 +67,13 @@ struct AllCoinsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(coin.name)
                                     .font(.headline)
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(AppColors.ink)
                                 Text(coin.symbol)
                                     .font(.caption)
-                                    .foregroundStyle(AppColors.secondaryTextColor)
+                                    .foregroundStyle(AppColors.secondaryText)
                                 Text(coin.mintAddress)
                                     .font(.caption2.monospaced())
-                                    .foregroundStyle(AppColors.secondaryTextColor)
+                                    .foregroundStyle(AppColors.secondaryText)
                                     .lineLimit(1)
                                     .truncationMode(.middle)
                             }
@@ -81,28 +81,28 @@ struct AllCoinsView: View {
                             VStack(alignment: .trailing, spacing: 2) {
                                 Text(String(format: "$%.4f", coin.price))
                                     .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(AppColors.ink)
                                 Text(String(format: "%.2f%%", coin.gainsPercent))
                                     .font(.caption)
-                                    .foregroundStyle(coin.gainsPercent >= 0 ? .green : .red)
+                                    .foregroundStyle(coin.gainsPercent >= 0 ? AppColors.success : AppColors.error)
                             }
                         }
                         .padding(.vertical, 4)
                     }
-                        .listRowBackground(AppColors.blackColor)
+                        .listRowBackground(AppColors.canvas)
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
-                    .background(AppColors.blackColor)
+                    .background(AppColors.canvas)
                     .refreshable {
                         await loadAllCoins(showLoadingUI: false)
                     }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(AppColors.blackColor)
+            .background(AppColors.canvas)
         }
-        .background(AppColors.blackColor.ignoresSafeArea())
+        .background(AppColors.canvas.ignoresSafeArea())
         .task {
             await loadAllCoins(showLoadingUI: true)
         }

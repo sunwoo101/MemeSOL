@@ -21,7 +21,7 @@ struct BuyTokenView: View {
     
     var body: some View {
         ZStack {
-            AppColors.blackColor.ignoresSafeArea()
+            AppColors.canvas.ignoresSafeArea()
             
             ScrollView {
                 VStack (spacing: 24) {
@@ -32,7 +32,7 @@ struct BuyTokenView: View {
                                 .resizable()
                                 .scaledToFill()
                         } placeholder : {
-                            Circle().fill(AppColors.charcoalColor)
+                            Circle().fill(AppColors.surface)
                         }
                         .frame(width: 120, height: 120)
                         .clipShape(Circle())
@@ -40,47 +40,47 @@ struct BuyTokenView: View {
                         VStack (spacing: 6) {
                             Text(token.name)
                                 .font(.title.bold())
-                                .foregroundColor(.white)
-                            
+                                .foregroundColor(AppColors.ink)
+
                             Text(token.symbol)
-                                .foregroundColor(AppColors.secondaryTextColor)
-                            
+                                .foregroundColor(AppColors.secondaryText)
+
                             Text("$\(token.price, specifier: "%.2f")")
                                 .font(.title3.bold())
-                                .foregroundColor(AppColors.goldColor)
-                            
+                                .foregroundColor(AppColors.accent)
+
                             Text(token.gainsPercent > 0 ? ("+\(token.gainsPercent, specifier: "%.2f")%") : ("\(token.gainsPercent, specifier: "%.2f")%"))
-                                .foregroundColor(token.gainsPercent > 0 ? .green : .red)
+                                .foregroundColor(token.gainsPercent > 0 ? AppColors.success : AppColors.error)
                         }
                         
                         VStack (spacing: 8) {
                             Text("Your Balance")
-                                .foregroundColor(AppColors.secondaryTextColor)
+                                .foregroundColor(AppColors.secondaryText)
                             
                             Text("\(viewModel.walletToken?.balance ?? 0, specifier: "%.2f") \(token.symbol)")
                                 .font(.title.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(AppColors.charcoalColor)
+                        .background(AppColors.surface)
                         .cornerRadius(20)
                         
                         
                         VStack (alignment: .leading) {
                             Text("Amount")
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                                 .font(.headline)
                             
                             HStack {
                                 TextField(
                                     "",
                                     text: $amount,
-                                    prompt: Text("0.00").foregroundColor(AppColors.secondaryTextColor)
+                                    prompt: Text("0.00").foregroundColor(AppColors.secondaryText)
                                 )
                                 .keyboardType(.decimalPad)
                                 .font(.system(size: 30, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                                 .onChange(of: amount) {
                                     let filtered = amount.filter { "0123456789.".contains($0)
                                     }
@@ -100,12 +100,12 @@ struct BuyTokenView: View {
                                 }
                                 
                                 Text(token.symbol)
-                                    .foregroundColor(AppColors.secondaryTextColor)
+                                    .foregroundColor(AppColors.secondaryText)
                                     .font(.headline)
                             }
                         }
                         .padding()
-                        .background(AppColors.charcoalColor)
+                        .background(AppColors.surface)
                         .cornerRadius(SharedLayout.cornerRadius)
                         
                         Button {
@@ -114,8 +114,8 @@ struct BuyTokenView: View {
                             Text("Buy \(token.symbol)")
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(amount.isEmpty ? AppColors.charcoalColor : AppColors.goldColor)
-                                .foregroundColor(amount.isEmpty ? AppColors.secondaryTextColor : .black)
+                                .background(amount.isEmpty ? AppColors.surface : AppColors.accent)
+                                .foregroundColor(amount.isEmpty ? AppColors.secondaryText : AppColors.ink)
                                 .cornerRadius(SharedLayout.cornerRadius)
                         }
                         .disabled(amount.isEmpty)
@@ -135,25 +135,25 @@ struct BuyTokenView: View {
 
                 Text("Confirm Purchase")
                     .font(.title2.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.ink)
 
                 VStack(alignment: .leading, spacing: 16) {
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Token")
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
 
                         Text("\(token.name) (\(token.symbol))")
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                     }
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Amount")
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
 
                         Text("\(amount) \(token.symbol)")
                             .font(.title3.bold())
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -167,8 +167,8 @@ struct BuyTokenView: View {
                         Text("Cancel")
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(AppColors.charcoalColor)
-                            .foregroundColor(.white)
+                            .background(AppColors.surface)
+                            .foregroundColor(AppColors.ink)
                             .cornerRadius(SharedLayout.cornerRadius)
                     }
 
@@ -193,13 +193,13 @@ struct BuyTokenView: View {
                             .padding()
                             .background(
                                 viewModel.isBuying
-                                ? AppColors.charcoalColor
-                                : AppColors.goldColor
+                                ? AppColors.surface
+                                : AppColors.accent
                             )
                             .foregroundColor(
                                 viewModel.isBuying
-                                ? AppColors.secondaryTextColor
-                                : .black
+                                ? AppColors.secondaryText
+                                : AppColors.ink
                             )
                             .cornerRadius(SharedLayout.cornerRadius)
                     }
@@ -208,13 +208,13 @@ struct BuyTokenView: View {
 
                 if !viewModel.errorMessage.isEmpty {
                     Text(viewModel.errorMessage)
-                        .foregroundColor(.red)
+                        .foregroundColor(AppColors.error)
                 }
             }
             .padding()
             .presentationDetents([.medium])
             .presentationDragIndicator(.visible)
-            .presentationBackground(AppColors.blackColor)
+            .presentationBackground(AppColors.canvas)
         }
             
         }

@@ -15,36 +15,36 @@ struct LoginView: View {
         VStack(spacing: 16) {
             Text("Welcome back")
                 .font(.largeTitle.bold())
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.ink)
 
             TextField(
                 "",
                 text: $email,
-                prompt: Text("Email").foregroundColor(AppColors.secondaryTextColor)
+                prompt: Text("Email").foregroundColor(AppColors.secondaryText)
             )
             .textContentType(.emailAddress)
             .keyboardType(.emailAddress)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
             .padding()
-            .background(AppColors.charcoalColor)
+            .background(AppColors.surface)
             .clipShape(RoundedRectangle(cornerRadius: 10))
-            .foregroundColor(.white)
+            .foregroundColor(AppColors.ink)
 
             SecureField(
                 "",
                 text: $password,
-                prompt: Text("Password").foregroundColor(AppColors.secondaryTextColor)
+                prompt: Text("Password").foregroundColor(AppColors.secondaryText)
             )
             .textContentType(.oneTimeCode)
             .padding()
-            .background(AppColors.charcoalColor)
+            .background(AppColors.surface)
             .clipShape(RoundedRectangle(cornerRadius: 10))
-            .foregroundColor(.white)
+            .foregroundColor(AppColors.ink)
 
             if !errorText.isEmpty {
                 Text(errorText)
-                    .foregroundColor(.red)
+                    .foregroundColor(AppColors.error)
                     .font(.footnote)
                     .multilineTextAlignment(.center)
             }
@@ -59,14 +59,14 @@ struct LoginView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
-            .tint(AppColors.goldColor)
+            .tint(AppColors.accent)
             .disabled(email.isEmpty || password.isEmpty || isLoading)
 
             Button("Create an account") {
                 showRegister = true
                 errorText = ""
             }
-            .foregroundColor(AppColors.goldColor)
+            .foregroundColor(AppColors.accent)
             .padding(.top, 8)
         }
         .padding()

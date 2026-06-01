@@ -18,21 +18,21 @@ struct AllTransactionsView: View {
         VStack(spacing: TransactionLayout.sectionSpacing) {
             Text("Transactions")
                 .font(.title2.bold())
-                .foregroundColor(AppColors.goldColor)
+                .foregroundColor(AppColors.accent)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.horizontal, SharedLayout.horizontalPadding)
                 .padding(.top, TokenLayout.detailTopPadding)
                 .padding(.bottom, SharedLayout.sectionSpacing)
-                .background(AppColors.blackColor)
+                .background(AppColors.canvas)
 
             if isLoading {
                 Spacer()
-                ProgressView().tint(.white)
+                ProgressView().tint(AppColors.ink)
                 Spacer()
             } else if !errorText.isEmpty {
                 Spacer()
                 Text(errorText)
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.secondaryText)
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .padding()
@@ -40,7 +40,7 @@ struct AllTransactionsView: View {
             } else if transactions.isEmpty {
                 Spacer()
                 Text("No transactions yet.")
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.secondaryText)
                     .font(.subheadline)
                 Spacer()
             } else {
@@ -49,14 +49,14 @@ struct AllTransactionsView: View {
                         ForEach(groupedTransactions, id: \.0) { dateStr, txs in
                             Text(dateStr)
                                 .font(.subheadline)
-                                .foregroundColor(.gray)
+                                .foregroundColor(AppColors.secondaryText)
                                 .padding(.horizontal, SharedLayout.horizontalPadding)
                                 .padding(.top, SharedLayout.sectionSpacing)
 
                             ForEach(txs, id: \.signature) { tx in
                                 AllTransactionRow(transaction: tx)
                                 Divider()
-                                    .background(Color.gray.opacity(SharedLayout.dividerOpacity))
+                                    .background(AppColors.secondaryText.opacity(SharedLayout.dividerOpacity))
                                     .padding(.leading, SharedLayout.dividerLeadingPadding + SharedLayout.horizontalPadding)
                             }
                         }
@@ -64,10 +64,10 @@ struct AllTransactionsView: View {
                     .padding(.top, TransactionLayout.listTopPadding)
                     .padding(.bottom, TransactionLayout.listBottomPadding)
                 }
-                .background(AppColors.blackColor)
+                .background(AppColors.canvas)
             }
         }
-        .background(AppColors.blackColor.ignoresSafeArea())
+        .background(AppColors.canvas.ignoresSafeArea())
         .task { await loadTransactions() }
     }
 
@@ -108,7 +108,7 @@ private struct AllTransactionRow: View {
                 case .success(let image):
                     image.resizable().scaledToFill()
                 default:
-                    Circle().fill(Color.gray.opacity(0.3))
+                    Circle().fill(AppColors.secondaryText.opacity(0.3))
                 }
             }
             .frame(width: TransactionLayout.iconSize, height: TransactionLayout.iconSize)
@@ -117,17 +117,17 @@ private struct AllTransactionRow: View {
             VStack(alignment: .leading, spacing: TransactionLayout.textSpacing) {
                 Text(transaction.transactionType?.capitalized ?? "Unknown")
                     .font(.subheadline)
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.ink)
                 Text(transaction.formattedTime)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.secondaryText)
             }
 
             Spacer()
 
             Text(transaction.amountText)
                 .font(.subheadline)
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.ink)
         }
         .padding(.horizontal, SharedLayout.horizontalPadding)
         .padding(.vertical, TransactionLayout.rowVerticalPadding)
