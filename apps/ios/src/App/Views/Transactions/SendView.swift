@@ -34,32 +34,32 @@ struct SendView: View {
     
     var body: some View {
         ZStack {
-            AppColors.blackColor.ignoresSafeArea()
+            AppColors.canvas.ignoresSafeArea()
             
             VStack (spacing: 20) {
                 Text("Send")
                     .font(.title2.bold())
-                    .foregroundColor(AppColors.goldColor)
+                    .foregroundColor(AppColors.accent)
                     .padding(.top, 10)
                 
                 //recipient address input & scanner
                 VStack (alignment: .leading, spacing: 20) {
                     Text("Recipient Address")
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.ink)
                         .font(.headline)
                     
                     HStack {
                         TextField("",
                                   text: $address,
-                                  prompt: Text("Enter or scan address").foregroundColor(AppColors.secondaryTextColor))
-                        .foregroundColor(.white)
+                                  prompt: Text("Enter or scan address").foregroundColor(AppColors.secondaryText))
+                        .foregroundColor(AppColors.ink)
                         .autocorrectionDisabled()
                     
                         Spacer()
                         
                         Divider()
                                 .frame(height: 45)
-                                .background(Color.white.opacity(0.9))
+                                .background(AppColors.ink.opacity(0.3))
                         
                         Button (action: {
                             showingScanner = true
@@ -69,18 +69,18 @@ struct SendView: View {
                                 Text("Scan")
                                     .font(.system(size:12))
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                             .padding(.horizontal, 5)
                         }
                     }
                     .padding()
-                    .background(AppColors.charcoalColor)
+                    .background(AppColors.surface)
                     .cornerRadius(SharedLayout.cornerRadius)
                     
                     //token selector
                     VStack (alignment: .leading, spacing: 10) {
                         Text("Token")
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                             .font(.headline)
                         
                         Menu {
@@ -94,15 +94,15 @@ struct SendView: View {
                         } label: {
                             HStack {
                                 Text(selectedToken?.symbol ?? "Select Token")
-                                    .foregroundColor(selectedToken == nil ? AppColors.secondaryTextColor : .white)
+                                    .foregroundColor(selectedToken == nil ? AppColors.secondaryText : .white)
                                 
                                 Spacer ()
                                 
                                 Image(systemName: "chevron.down")
-                                    .foregroundColor(.white.opacity(0.7))
+                                    .foregroundColor(AppColors.ink.opacity(0.7))
                             }
                             .padding()
-                            .background(AppColors.charcoalColor)
+                            .background(AppColors.surface)
                             .cornerRadius(SharedLayout.cornerRadius)
                         }
                     }
@@ -111,13 +111,13 @@ struct SendView: View {
                     VStack (alignment: .leading, spacing: 10) {
                         HStack {
                             Text("Amount")
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                                 .font(.headline)
                             
                             Spacer()
                             
                             Text("Balance: \(selectedToken?.balance ?? 0, specifier: "%.2f")")
-                                .foregroundColor(AppColors.secondaryTextColor)
+                                .foregroundColor(AppColors.secondaryText)
                                 .font(.subheadline)
                         }
                         
@@ -125,11 +125,11 @@ struct SendView: View {
                                 TextField(
                                     "",
                                     text: $amount,
-                                    prompt: Text("0.00").foregroundColor(AppColors.secondaryTextColor)
+                                    prompt: Text("0.00").foregroundColor(AppColors.secondaryText)
                                 )
                                 .keyboardType(.decimalPad)
                                 .font(.system(size: 30, weight: .semibold))
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                                 .onChange(of: amount) {
                                     let filtered = amount.filter { "0123456789.".contains($0)
                                     }
@@ -149,11 +149,11 @@ struct SendView: View {
                                 }
                             
                             Text(selectedToken?.symbol ?? "")
-                                    .foregroundColor(AppColors.secondaryTextColor)
+                                    .foregroundColor(AppColors.secondaryText)
                                     .font(.headline)
                             }
                             .padding()
-                            .background(AppColors.charcoalColor)
+                            .background(AppColors.surface)
                             .cornerRadius(SharedLayout.cornerRadius)
                     }
                     
@@ -167,8 +167,8 @@ struct SendView: View {
                     Text("Send")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isSendDisabled ? AppColors.charcoalColor : AppColors.goldColor)
-                        .foregroundColor(isSendDisabled ? AppColors.secondaryTextColor : .black)
+                        .background(isSendDisabled ? AppColors.surface : AppColors.accent)
+                        .foregroundColor(isSendDisabled ? AppColors.secondaryText : AppColors.ink)
                         .cornerRadius(SharedLayout.cornerRadius)
                 }
                 .disabled(isSendDisabled)
@@ -194,33 +194,33 @@ struct SendView: View {
                 VStack (spacing: 24) {
                     Text("Confirm Transaction")
                         .font(.title2.bold())
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.ink)
 
                     
                     VStack(alignment: .leading, spacing: 16) {
                         VStack (alignment: .leading, spacing: 4) {
                             Text("Recipient")
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                             
                             Text(address)
                                 .font(.system(.body, design: .monospaced))
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Token")
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                             Text(selectedToken?.symbol ?? "")
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                         }
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Amount")
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                             
                             Text("\(amount) \(selectedToken?.symbol ?? "")")
                                 .font(.title3.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -235,8 +235,8 @@ struct SendView: View {
                             Text("Cancel")
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(AppColors.charcoalColor)
-                                .foregroundColor(.white)
+                                .background(AppColors.surface)
+                                .foregroundColor(AppColors.ink)
                                 .cornerRadius(SharedLayout.cornerRadius)
                         }
                         
@@ -261,21 +261,21 @@ struct SendView: View {
                             Text(viewModel.isSending ? "Sending..." : "Send Now")
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(viewModel.isSending ? AppColors.charcoalColor : AppColors.goldColor)
-                                .foregroundColor(viewModel.isSending ? AppColors.secondaryTextColor : .black)
+                                .background(viewModel.isSending ? AppColors.surface : AppColors.accent)
+                                .foregroundColor(viewModel.isSending ? AppColors.secondaryText : AppColors.ink)
                                 .cornerRadius(SharedLayout.cornerRadius)
                         }
                         .disabled(viewModel.isSending)
                     }
                     if !viewModel.sendError.isEmpty {
                         Text(viewModel.sendError)
-                            .foregroundColor(.red)
+                            .foregroundColor(AppColors.error)
                     }
                 }
                 .padding()
                 .presentationDetents([.medium])
                 .presentationDragIndicator(.visible)
-                .presentationBackground(AppColors.blackColor)
+                .presentationBackground(AppColors.canvas)
                 .onDisappear {
                     viewModel.sendError = ""
                 }
@@ -284,12 +284,12 @@ struct SendView: View {
         //qr scanner sheet
         .sheet(isPresented: $showingScanner) {
             ZStack {
-                AppColors.blackColor.ignoresSafeArea()
+                AppColors.canvas.ignoresSafeArea()
                 
                 VStack(spacing: 20) {
                     Text("Scan QR Code")
                         .font(.title2.bold())
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.ink)
                     
                     CodeScannerView(codeTypes: [.qr], completion: { result in
                         if case let .success(code) = result {

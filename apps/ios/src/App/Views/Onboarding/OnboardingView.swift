@@ -5,7 +5,7 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            AppColors.blackColor.ignoresSafeArea()
+            AppColors.canvas.ignoresSafeArea()
             if showRegister {
                 RegisterView(showRegister: $showRegister)
             } else {

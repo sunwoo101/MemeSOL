@@ -37,12 +37,12 @@ struct CreateTokenView: View {
     
     var body: some View {
         ZStack {
-            AppColors.blackColor.ignoresSafeArea()
+            AppColors.canvas.ignoresSafeArea()
             
             VStack (spacing: 20) {
                 Text("Create Token")
                     .font(.title2.bold())
-                    .foregroundColor(AppColors.goldColor)
+                    .foregroundColor(AppColors.accent)
                     .padding(.top, 10)
                 
                 //upload image
@@ -57,62 +57,62 @@ struct CreateTokenView: View {
                         } else {
                             ZStack {
                                 Circle()
-                                    .fill(AppColors.charcoalColor)
+                                    .fill(AppColors.surface)
                                     .frame(width: 120, height: 120)
                                 Image(systemName: "photo")
                                     .font(.system(size: 35))
-                                    .foregroundColor(.white.opacity(0.75))
+                                    .foregroundColor(AppColors.ink.opacity(0.75))
                             }
                         }
                         Text("Upload Token Image")
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                     }
                 }
                 
                 //token name
                 VStack (alignment: .leading, spacing: 10) {
                     Text("Token Name")
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.ink)
                         .font(.headline)
                     HStack {
                         TextField("",
                                   text: $name,
-                                  prompt: Text("Enter token name").foregroundColor(AppColors.secondaryTextColor))
+                                  prompt: Text("Enter token name").foregroundColor(AppColors.secondaryText))
                         .padding()
                     }
-                    .foregroundColor(.white)
-                    .background(AppColors.charcoalColor)
+                    .foregroundColor(AppColors.ink)
+                    .background(AppColors.surface)
                     .cornerRadius(SharedLayout.cornerRadius)
                 }
                 
                 //token symbol
                 VStack (alignment: .leading, spacing: 10) {
                     Text("Token Symbol")
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.ink)
                         .font(.headline)
                     HStack {
                         TextField("",
                                   text: $symbol,
-                                  prompt: Text("Enter token symbol").foregroundColor(AppColors.secondaryTextColor))
+                                  prompt: Text("Enter token symbol").foregroundColor(AppColors.secondaryText))
                         .padding()
                         .onChange(of: symbol) {
                             symbol = symbol.uppercased()
                         }
                     }
-                    .foregroundColor(.white)
-                    .background(AppColors.charcoalColor)
+                    .foregroundColor(AppColors.ink)
+                    .background(AppColors.surface)
                     .cornerRadius(SharedLayout.cornerRadius)
                 }
                 
                 //token supply
                 VStack (alignment: .leading, spacing: 10) {
                     Text("Supply")
-                        .foregroundColor(.white)
+                        .foregroundColor(AppColors.ink)
                         .font(.headline)
                     HStack {
                         TextField("",
                                   text: $supply,
-                                  prompt: Text("Enter token supply").foregroundColor(AppColors.secondaryTextColor))
+                                  prompt: Text("Enter token supply").foregroundColor(AppColors.secondaryText))
                         .padding()
                         .keyboardType(.decimalPad)
                         .onChange(of: supply) {
@@ -121,8 +121,8 @@ struct CreateTokenView: View {
                         }
                     }
                     
-                    .foregroundColor(.white)
-                    .background(AppColors.charcoalColor)
+                    .foregroundColor(AppColors.ink)
+                    .background(AppColors.surface)
                     .cornerRadius(SharedLayout.cornerRadius)
                 }
                 .padding(.bottom, 15)
@@ -138,8 +138,8 @@ struct CreateTokenView: View {
                     Text(viewModel.isCreating ? "Creating..." : "Create Token")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(isCreateDisabled || viewModel.isCreating ? AppColors.charcoalColor : AppColors.goldColor)
-                        .foregroundColor(isCreateDisabled || viewModel.isCreating ? AppColors.secondaryTextColor : .black)
+                        .background(isCreateDisabled || viewModel.isCreating ? AppColors.surface : AppColors.accent)
+                        .foregroundColor(isCreateDisabled || viewModel.isCreating ? AppColors.secondaryText : AppColors.ink)
                         .cornerRadius(SharedLayout.cornerRadius)
                 }
                 .disabled(isCreateDisabled || viewModel.isCreating)

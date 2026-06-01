@@ -16,12 +16,12 @@ struct ReceiveView: View {
     
     var body: some View {
         ZStack {
-            AppColors.blackColor.ignoresSafeArea()
+            AppColors.canvas.ignoresSafeArea()
             
             VStack {
                 Text("Receive")
                     .font(.title2.bold())
-                    .foregroundColor(AppColors.goldColor)
+                    .foregroundColor(AppColors.accent)
                     .padding(.top, 10)
                 
                 GeometryReader { geometry in
@@ -39,12 +39,12 @@ struct ReceiveView: View {
                 
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Your Address")
-                        .foregroundStyle(.white)
+                        .foregroundStyle(AppColors.ink)
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     HStack {
                         Text(authSession.walletPublicKey)
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                             .font(.system(size: 14, design: .monospaced))
                             .lineLimit(1)
                             .truncationMode(.middle)
@@ -53,7 +53,7 @@ struct ReceiveView: View {
                         
                         Divider()
                                 .frame(height: 40)
-                                .background(Color.white.opacity(0.9))
+                                .background(AppColors.ink.opacity(0.3))
                         
                         Button (action: {
                             viewModel.copyAddress(authSession.walletPublicKey)
@@ -63,12 +63,12 @@ struct ReceiveView: View {
                                 Text(viewModel.copyButtonText)
                                     .font(.system(size:12))
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                             .padding(.horizontal, 5)
                         }
                     }
                     .padding()
-                    .background(AppColors.charcoalColor)
+                    .background(AppColors.surface)
                     .cornerRadius(SharedLayout.cornerRadius)
                     
                     Spacer()

@@ -36,10 +36,10 @@ struct TokenRow: View {
             VStack(alignment: .leading, spacing: TokenLayout.textStackSpacing) {
                 Text(name)
                     .font(.subheadline.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.ink)
                 Text(symbol)
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(AppColors.secondaryText)
             }
 
             Spacer()
@@ -47,14 +47,14 @@ struct TokenRow: View {
             VStack(alignment: .trailing, spacing: TokenLayout.textStackSpacing) {
                 Text(balance)
                     .font(.subheadline.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.ink)
                 HStack(spacing: TokenLayout.priceStackSpacing) {
                     Text(price)
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(AppColors.secondaryText)
                     Text(change)
                         .font(.caption)
-                        .foregroundColor(positive ? .green : .red)
+                        .foregroundColor(positive ? AppColors.success : AppColors.error)
                 }
             }
         }

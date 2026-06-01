@@ -15,16 +15,16 @@ struct ActionButton: View {
         VStack(spacing: ActionButtonLayout.contentSpacing) {
             Image(systemName: icon)
                 .font(.system(size: ActionButtonLayout.iconSize))
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.ink)
                 .frame(
                     width: ActionButtonLayout.circleSize,
                     height: ActionButtonLayout.circleSize
                 )
-                .background(AppColors.charcoalColor)
+                .background(AppColors.surface)
                 .clipShape(Circle())
             Text(label)
                 .font(.caption)
-                .foregroundColor(.white)
+                .foregroundColor(AppColors.ink)
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.vertical, ActionButtonLayout.verticalPadding)

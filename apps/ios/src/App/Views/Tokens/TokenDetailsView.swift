@@ -15,7 +15,7 @@ struct TokenDetailsView: View {
     
     var body: some View {
         ZStack {
-            AppColors.blackColor.ignoresSafeArea()
+            AppColors.canvas.ignoresSafeArea()
             
             ScrollView {
                 VStack (spacing: 24) {
@@ -27,7 +27,7 @@ struct TokenDetailsView: View {
                                 .resizable()
                                 .scaledToFill()
                         } placeholder : {
-                            Circle().fill(AppColors.charcoalColor)
+                            Circle().fill(AppColors.surface)
                         }
                         .frame(width: 120, height: 120)
                         .clipShape(Circle())
@@ -35,14 +35,14 @@ struct TokenDetailsView: View {
                         VStack (spacing: 6) {
                             Text(token.name)
                                 .font(.title.bold())
-                                .foregroundColor(.white)
+                                .foregroundColor(AppColors.ink)
                             
                             Text(token.symbol)
-                                .foregroundColor(AppColors.secondaryTextColor)
+                                .foregroundColor(AppColors.secondaryText)
                             
                             Text("$\(token.price, specifier: "%.2f")")
                                 .font(.title3.bold())
-                                .foregroundColor(AppColors.goldColor)
+                                .foregroundColor(AppColors.accent)
                             
                         }
                     }
@@ -50,15 +50,15 @@ struct TokenDetailsView: View {
                     //balance
                     VStack (spacing: 8) {
                         Text("Your Balance")
-                            .foregroundColor(AppColors.secondaryTextColor)
+                            .foregroundColor(AppColors.secondaryText)
                         
                         Text("\(viewModel.walletToken?.balance ?? 0, specifier: "%.2f") \(token.symbol)")
                             .font(.title.bold())
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(AppColors.charcoalColor)
+                    .background(AppColors.surface)
                     .cornerRadius(20)
                     
                     //add to wallet + favourite
@@ -77,8 +77,8 @@ struct TokenDetailsView: View {
                             Text(viewModel.isInWallet ? "Remove from Wallet" : "Add to Wallet")
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(viewModel.isInWallet ? .red : AppColors.goldColor)
-                                .foregroundColor(viewModel.isInWallet ? .white : .black)
+                                .background(viewModel.isInWallet ? AppColors.error : AppColors.accent)
+                                .foregroundColor(AppColors.ink)
                                 .cornerRadius(16)
                         }
                         
@@ -87,8 +87,8 @@ struct TokenDetailsView: View {
                         } label: {
                             Image(systemName: viewModel.isFavourite(token.mintAddress) ? "heart.fill" : "heart")
                                 .frame(width: 60, height: 55)
-                                .background(AppColors.charcoalColor)
-                                .foregroundColor(viewModel.isFavourite(token.mintAddress) ? .red : .white)
+                                .background(AppColors.surface)
+                                .foregroundColor(viewModel.isFavourite(token.mintAddress) ? AppColors.error : AppColors.ink)
                                 .cornerRadius(16)
                         }
                     }
@@ -97,11 +97,11 @@ struct TokenDetailsView: View {
                     VStack (alignment: .leading, spacing: 20) {
                         Text("Recent Transactions")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(AppColors.ink)
                         
                         if viewModel.transactions.isEmpty {
                             Text("No transactions yet.")
-                                .foregroundColor(AppColors.secondaryTextColor)
+                                .foregroundColor(AppColors.secondaryText)
                         }
                         
                         else {
@@ -116,14 +116,14 @@ struct TokenDetailsView: View {
                                                isIncoming: transaction.transactionType == "received")
                                 
                                 Divider()
-                                    .background(Color.white.opacity(0.2))
+                                    .background(AppColors.secondaryText.opacity(0.2))
                                 
                             }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
-                    .background(AppColors.charcoalColor)
+                    .background(AppColors.surface)
                     .cornerRadius(20)
                 }
                 .padding()
@@ -148,18 +148,18 @@ struct TokenDetailsView: View {
         HStack (spacing: 14) {
             VStack (alignment: .leading, spacing: 4) {
                 Text(type)
-                    .foregroundColor(.white)
+                    .foregroundColor(AppColors.ink)
                     .font(.headline)
                 
                 Text(date)
-                    .foregroundColor(AppColors.secondaryTextColor)
+                    .foregroundColor(AppColors.secondaryText)
                     .font(.caption)
             }
             
             Spacer()
             
             Text(amount)
-                .foregroundColor(isIncoming ? .green : .white)
+                .foregroundColor(isIncoming ? AppColors.success : AppColors.ink)
                 .font(.headline)
         }
     }
