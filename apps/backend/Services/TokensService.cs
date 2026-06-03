@@ -36,23 +36,34 @@ public class TokensService(AppDbContext db, SolanaService solanaService, IConfig
             var apiKey = configuration["GoogleApiKey"] ?? throw new InvalidOperationException("GoogleApiKey is not configured.");
             var client = new Client(apiKey: apiKey);
 
-            var response = await client.Models.GenerateImagesAsync(
-                model: "imagen-4.0-generate-001",
-                prompt: $"Generate a fun meme coin logo for a token called '{request.Name}' ({request.Symbol}). Make it vibrant and crypto-themed.",
-                config: new GenerateImagesConfig
-                {
-                    NumberOfImages = 1,
-                    AspectRatio = "1:1",
-                    OutputMimeType = "image/png",
-                }
-            );
+            try
+            {
+                var response = await client.Models.GenerateImagesAsync(
+                    model: "imagen-4.0-generate-001",
+                    prompt: $"Generate a fun meme coin logo for a token called '{request.Name}' ({request.Symbol}). Make it vibrant and crypto-themed.",
+                    config: new GenerateImagesConfig
+                    {
+                        NumberOfImages = 1,
+                        AspectRatio = "1:1",
+                        OutputMimeType = "image/png",
+                    }
+                );
 
-            var imageBytes = response.GeneratedImages?.FirstOrDefault()?.Image?.ImageBytes;
-            if (imageBytes is null or { Length: 0 })
-                throw new Exception("Image generation failed: no image data returned.");
+                var imageBytes = response.GeneratedImages?.FirstOrDefault()?.Image?.ImageBytes;
+                if (imageBytes is null or { Length: 0 })
+                    throw new InvalidOperationException("Image generation failed: no image data returned.");
 
-            await ms.WriteAsync(imageBytes);
-            imageContentType = "image/png";
+                await ms.WriteAsync(imageBytes);
+                imageContentType = "image/png";
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Image generation failed: {ex.Message}");
+            }
         }
         else
         {
