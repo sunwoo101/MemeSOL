@@ -14,7 +14,7 @@ enum KeychainHelper {
         SecItemDelete(query as CFDictionary)
         SecItemAdd(query as CFDictionary, nil)
     }
-
+    
     static func load(forKey key: String) -> String? {
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,
@@ -27,7 +27,7 @@ enum KeychainHelper {
               let data = result as? Data else { return nil }
         return String(data: data, encoding: .utf8)
     }
-
+    
     static func delete(forKey key: String) {
         let query: [CFString: Any] = [
             kSecClass: kSecClassGenericPassword,

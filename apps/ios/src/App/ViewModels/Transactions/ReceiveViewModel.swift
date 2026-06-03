@@ -1,6 +1,6 @@
 //
 //  ReceiveViewModel.swift
-//  
+//
 //
 //  Created by Gurpreet on 3/5/2026.
 //
@@ -34,7 +34,7 @@ class ReceiveViewModel: ObservableObject {
     }
     
     func copyAddress(_ address: String) {
-        UIPasteboard.general.string = address 
+        UIPasteboard.general.string = address
         copyButtonText = "Copied!"
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

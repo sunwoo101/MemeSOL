@@ -19,7 +19,7 @@ struct TokenDetailsView: View {
             
             ScrollView {
                 VStack (spacing: 24) {
-
+                    
                     //header
                     VStack (spacing: 16) {
                         AsyncImage(url: URL(string: token.imgUrl)) { image in
@@ -170,7 +170,7 @@ struct TokenDetailsView: View {
         guard let date = inputFormatter.date(from: timestamp) else {
             return timestamp
         }
-                
+        
         let outputFormatter = DateFormatter()
         outputFormatter.dateFormat = "MMM d - h:mm a"
         return outputFormatter.string(from: date)

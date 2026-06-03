@@ -9,7 +9,7 @@ import SwiftUI
 
 struct BuyMenuView: View {
     @StateObject private var viewModel = BuyViewModel()
-
+    
     
     var body: some View {
         ZStack {
@@ -47,7 +47,7 @@ struct BuyMenuView: View {
                                      color: AppColors.info
                             )
                         }
-                
+                        
                         Divider()
                             .background(AppColors.secondaryText.opacity(0.3))
                             .padding(.leading, 20)

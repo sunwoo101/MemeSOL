@@ -52,8 +52,8 @@ struct ReceiveView: View {
                         Spacer()
                         
                         Divider()
-                                .frame(height: 40)
-                                .background(AppColors.ink.opacity(0.3))
+                            .frame(height: 40)
+                            .background(AppColors.ink.opacity(0.3))
                         
                         Button (action: {
                             viewModel.copyAddress(authSession.walletPublicKey)

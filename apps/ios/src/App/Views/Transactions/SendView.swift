@@ -12,7 +12,7 @@ internal import AVFoundation
 struct SendView: View {
     /// When set (e.g. from token transaction history), selects this mint after wallet tokens load.
     var preselectedMintAddress: String? = nil
-
+    
     @State private var address = ""
     @State private var amount = ""
     @State private var selectedToken: WalletTokenResponse?
@@ -54,12 +54,12 @@ struct SendView: View {
                                   prompt: Text("Enter or scan address").foregroundColor(AppColors.secondaryText))
                         .foregroundColor(AppColors.ink)
                         .autocorrectionDisabled()
-                    
+                        
                         Spacer()
                         
                         Divider()
-                                .frame(height: 45)
-                                .background(AppColors.ink.opacity(0.3))
+                            .frame(height: 45)
+                            .background(AppColors.ink.opacity(0.3))
                         
                         Button (action: {
                             showingScanner = true
@@ -122,39 +122,39 @@ struct SendView: View {
                         }
                         
                         HStack {
-                                TextField(
-                                    "",
-                                    text: $amount,
-                                    prompt: Text("0.00").foregroundColor(AppColors.secondaryText)
-                                )
-                                .keyboardType(.decimalPad)
-                                .font(.system(size: 30, weight: .semibold))
-                                .foregroundColor(AppColors.ink)
-                                .onChange(of: amount) {
-                                    let filtered = amount.filter { "0123456789.".contains($0)
-                                    }
-                                    
-                                    let dotCount = filtered.filter { $0 == "."}.count
-                                    
-                                    if dotCount > 1 {
-                                        if let firstDot = filtered.firstIndex(of: ".") {
-                                            var cleaned = filtered
-                                            cleaned.remove(at: firstDot)
-                                            
-                                            amount = cleaned
-                                        }
-                                    } else {
-                                        amount = filtered
-                                    }
+                            TextField(
+                                "",
+                                text: $amount,
+                                prompt: Text("0.00").foregroundColor(AppColors.secondaryText)
+                            )
+                            .keyboardType(.decimalPad)
+                            .font(.system(size: 30, weight: .semibold))
+                            .foregroundColor(AppColors.ink)
+                            .onChange(of: amount) {
+                                let filtered = amount.filter { "0123456789.".contains($0)
                                 }
+                                
+                                let dotCount = filtered.filter { $0 == "."}.count
+                                
+                                if dotCount > 1 {
+                                    if let firstDot = filtered.firstIndex(of: ".") {
+                                        var cleaned = filtered
+                                        cleaned.remove(at: firstDot)
+                                        
+                                        amount = cleaned
+                                    }
+                                } else {
+                                    amount = filtered
+                                }
+                            }
                             
                             Text(selectedToken?.symbol ?? "")
-                                    .foregroundColor(AppColors.secondaryText)
-                                    .font(.headline)
-                            }
-                            .padding()
-                            .background(AppColors.surface)
-                            .cornerRadius(SharedLayout.cornerRadius)
+                                .foregroundColor(AppColors.secondaryText)
+                                .font(.headline)
+                        }
+                        .padding()
+                        .background(AppColors.surface)
+                        .cornerRadius(SharedLayout.cornerRadius)
                     }
                     
                 }
@@ -190,95 +190,95 @@ struct SendView: View {
         
         //confirm modal
         .sheet(isPresented: $showingConfirmModal) {
+            
+            VStack (spacing: 24) {
+                Text("Confirm Transaction")
+                    .font(.title2.bold())
+                    .foregroundColor(AppColors.ink)
                 
-                VStack (spacing: 24) {
-                    Text("Confirm Transaction")
-                        .font(.title2.bold())
-                        .foregroundColor(AppColors.ink)
-
-                    
-                    VStack(alignment: .leading, spacing: 16) {
-                        VStack (alignment: .leading, spacing: 4) {
-                            Text("Recipient")
-                                .foregroundColor(AppColors.ink)
-                            
-                            Text(address)
-                                .font(.system(.body, design: .monospaced))
-                                .foregroundColor(AppColors.ink)
-                        }
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack (alignment: .leading, spacing: 4) {
+                        Text("Recipient")
+                            .foregroundColor(AppColors.ink)
                         
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Token")
-                                .foregroundColor(AppColors.ink)
-                            Text(selectedToken?.symbol ?? "")
-                                .foregroundColor(AppColors.ink)
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Amount")
-                                .foregroundColor(AppColors.ink)
-                            
-                            Text("\(amount) \(selectedToken?.symbol ?? "")")
-                                .font(.title3.bold())
-                                .foregroundColor(AppColors.ink)
-                        }
+                        Text(address)
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundColor(AppColors.ink)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
-                    .cornerRadius(20)
                     
-                    HStack(spacing: 16) {
-                        
-                        Button {
-                            showingConfirmModal = false
-                        } label: {
-                            Text("Cancel")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(AppColors.surface)
-                                .foregroundColor(AppColors.ink)
-                                .cornerRadius(SharedLayout.cornerRadius)
-                        }
-                        
-                        Button {
-                            guard let token = selectedToken,
-                                  let decimalAmount = Decimal(string: amount)
-                            else { return }
-                            
-                            Task {
-                                await viewModel.sendToken(mintAddress: token.mintAddress, recipientAddress: address, amount: decimalAmount)
-                                
-                                if viewModel.sendError.isEmpty {
-                                    amount = ""
-                                    address = ""
-                                    selectedToken = nil
-                                    showingConfirmModal = false
-                                }
-                                
-                            }
-        
-                        } label: {
-                            Text(viewModel.isSending ? "Sending..." : "Send Now")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(viewModel.isSending ? AppColors.surface : AppColors.accent)
-                                .foregroundColor(viewModel.isSending ? AppColors.secondaryText : AppColors.ink)
-                                .cornerRadius(SharedLayout.cornerRadius)
-                        }
-                        .disabled(viewModel.isSending)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Token")
+                            .foregroundColor(AppColors.ink)
+                        Text(selectedToken?.symbol ?? "")
+                            .foregroundColor(AppColors.ink)
                     }
-                    if !viewModel.sendError.isEmpty {
-                        Text(viewModel.sendError)
-                            .foregroundColor(AppColors.error)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Amount")
+                            .foregroundColor(AppColors.ink)
+                        
+                        Text("\(amount) \(selectedToken?.symbol ?? "")")
+                            .font(.title3.bold())
+                            .foregroundColor(AppColors.ink)
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
-                .presentationDetents([.medium])
-                .presentationDragIndicator(.visible)
-                .presentationBackground(AppColors.canvas)
-                .onDisappear {
-                    viewModel.sendError = ""
+                .cornerRadius(20)
+                
+                HStack(spacing: 16) {
+                    
+                    Button {
+                        showingConfirmModal = false
+                    } label: {
+                        Text("Cancel")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(AppColors.surface)
+                            .foregroundColor(AppColors.ink)
+                            .cornerRadius(SharedLayout.cornerRadius)
+                    }
+                    
+                    Button {
+                        guard let token = selectedToken,
+                              let decimalAmount = Decimal(string: amount)
+                        else { return }
+                        
+                        Task {
+                            await viewModel.sendToken(mintAddress: token.mintAddress, recipientAddress: address, amount: decimalAmount)
+                            
+                            if viewModel.sendError.isEmpty {
+                                amount = ""
+                                address = ""
+                                selectedToken = nil
+                                showingConfirmModal = false
+                            }
+                            
+                        }
+                        
+                    } label: {
+                        Text(viewModel.isSending ? "Sending..." : "Send Now")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(viewModel.isSending ? AppColors.surface : AppColors.accent)
+                            .foregroundColor(viewModel.isSending ? AppColors.secondaryText : AppColors.ink)
+                            .cornerRadius(SharedLayout.cornerRadius)
+                    }
+                    .disabled(viewModel.isSending)
                 }
+                if !viewModel.sendError.isEmpty {
+                    Text(viewModel.sendError)
+                        .foregroundColor(AppColors.error)
+                }
+            }
+            .padding()
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(AppColors.canvas)
+            .onDisappear {
+                viewModel.sendError = ""
+            }
         }
         
         //qr scanner sheet

@@ -5,19 +5,19 @@ import SwiftUI
 struct RegisterView: View {
     @Environment(AuthSession.self) private var authSession
     @Binding var showRegister: Bool
-
+    
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var isLoading = false
     @State private var errorText = ""
-
+    
     var body: some View {
         VStack(spacing: 16) {
             Text("Create account")
                 .font(.largeTitle.bold())
                 .foregroundColor(AppColors.ink)
-
+            
             TextField(
                 "",
                 text: $email,
@@ -31,7 +31,7 @@ struct RegisterView: View {
             .background(AppColors.surface)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .foregroundColor(AppColors.ink)
-
+            
             SecureField(
                 "",
                 text: $password,
@@ -44,7 +44,7 @@ struct RegisterView: View {
             .foregroundColor(AppColors.ink)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
-
+            
             SecureField(
                 "",
                 text: $confirmPassword,
@@ -57,14 +57,14 @@ struct RegisterView: View {
             .foregroundColor(AppColors.ink)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
-
+            
             if !errorText.isEmpty {
                 Text(errorText)
                     .foregroundColor(AppColors.error)
                     .font(.footnote)
                     .multilineTextAlignment(.center)
             }
-
+            
             Button { submit() } label: {
                 if isLoading {
                     ProgressView()
@@ -77,7 +77,7 @@ struct RegisterView: View {
             .buttonStyle(.borderedProminent)
             .tint(AppColors.accent)
             .disabled(email.isEmpty || password.isEmpty || confirmPassword.isEmpty || isLoading)
-
+            
             Button("Already have an account? Login") {
                 showRegister = false
                 errorText = ""
@@ -87,9 +87,9 @@ struct RegisterView: View {
         }
         .padding()
     }
-
+    
     // MARK: - Private
-
+    
     @MainActor
     private func submit() {
         errorText = ""

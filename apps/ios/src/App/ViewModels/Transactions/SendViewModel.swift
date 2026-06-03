@@ -27,7 +27,6 @@ class SendViewModel: ObservableObject {
         }
     }
     
-    //send token to recipient
     func sendToken(mintAddress: String, recipientAddress: String, amount: Decimal) async {
         isSending = true
         sendError = ""
@@ -37,7 +36,6 @@ class SendViewModel: ObservableObject {
                                                      recipientAddress: recipientAddress,
                                                      amount: amount)
             await loadTokens()
-            
             sendSuccess = true
         } catch {
             sendError = error.localizedDescription

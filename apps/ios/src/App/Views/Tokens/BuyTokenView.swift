@@ -41,14 +41,14 @@ struct BuyTokenView: View {
                             Text(token.name)
                                 .font(.title.bold())
                                 .foregroundColor(AppColors.ink)
-
+                            
                             Text(token.symbol)
                                 .foregroundColor(AppColors.secondaryText)
-
+                            
                             Text("$\(token.price, specifier: "%.2f")")
                                 .font(.title3.bold())
                                 .foregroundColor(AppColors.accent)
-
+                            
                             Text(token.gainsPercent > 0 ? ("+\(token.gainsPercent, specifier: "%.2f")%") : ("\(token.gainsPercent, specifier: "%.2f")%"))
                                 .foregroundColor(token.gainsPercent > 0 ? AppColors.success : AppColors.error)
                         }
@@ -122,9 +122,7 @@ struct BuyTokenView: View {
                     }
                 }
                 .padding()
-                
             }
-            
         }
         .task {
             await viewModel.loadWalletData(mintAddress: token.mintAddress)
@@ -132,25 +130,25 @@ struct BuyTokenView: View {
         
         .sheet(isPresented: $showingConfirmModal) {
             VStack(spacing: 24) {
-
+                
                 Text("Confirm Purchase")
                     .font(.title2.bold())
                     .foregroundColor(AppColors.ink)
-
+                
                 VStack(alignment: .leading, spacing: 16) {
-
+                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Token")
                             .foregroundColor(AppColors.ink)
-
+                        
                         Text("\(token.name) (\(token.symbol))")
                             .foregroundColor(AppColors.ink)
                     }
-
+                    
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Amount")
                             .foregroundColor(AppColors.ink)
-
+                        
                         Text("\(amount) \(token.symbol)")
                             .font(.title3.bold())
                             .foregroundColor(AppColors.ink)
@@ -158,9 +156,9 @@ struct BuyTokenView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
-
+                
                 HStack(spacing: 16) {
-
+                    
                     Button {
                         showingConfirmModal = false
                     } label: {
@@ -171,7 +169,7 @@ struct BuyTokenView: View {
                             .foregroundColor(AppColors.ink)
                             .cornerRadius(SharedLayout.cornerRadius)
                     }
-
+                    
                     Button {
                         guard let decimalAmount = Decimal(string: amount)
                         else { return }
@@ -205,7 +203,7 @@ struct BuyTokenView: View {
                     }
                     .disabled(viewModel.isBuying)
                 }
-
+                
                 if !viewModel.errorMessage.isEmpty {
                     Text(viewModel.errorMessage)
                         .foregroundColor(AppColors.error)
@@ -216,10 +214,9 @@ struct BuyTokenView: View {
             .presentationDragIndicator(.visible)
             .presentationBackground(AppColors.canvas)
         }
-            
-        }
-    
     }
+    
+}
 
 
 

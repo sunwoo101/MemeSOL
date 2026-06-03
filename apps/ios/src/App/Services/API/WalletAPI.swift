@@ -43,7 +43,7 @@ extension APIClient {
         }
         return try await get("\(walletBase)/tokens")
     }
-
+    
     // Mints tokens to the user's wallet. Amount is in token units (not $).
     func buyToken(mintAddress: String, amount: Decimal) async throws -> SendTokenResponse {
         guard accessToken != nil else {
@@ -55,7 +55,7 @@ extension APIClient {
         struct Body: Encodable { let amount: Decimal }
         return try await post("\(walletBase)/tokens/\(mintAddress)/buy", body: Body(amount: amount))
     }
-
+    
     // Adds a token to the user's wallet by mint address.
     func addWalletToken(mintAddress: String) async throws {
         guard accessToken != nil else {
@@ -63,7 +63,7 @@ extension APIClient {
         }
         try await post("\(walletBase)/tokens/\(mintAddress)")
     }
-
+    
     // Removes a token from the user's wallet by mint address.
     func removeWalletToken(mintAddress: String) async throws {
         guard accessToken != nil else {
@@ -71,7 +71,7 @@ extension APIClient {
         }
         try await delete("\(walletBase)/tokens/\(mintAddress)")
     }
-
+    
     // Returns transactions across all tokens in the user's wallet, sorted by timestamp.
     func getAllTransactions() async throws -> [TransactionHistoryResponse] {
         guard accessToken != nil else {
@@ -79,7 +79,7 @@ extension APIClient {
         }
         return try await get("\(walletBase)/transactions")
     }
-
+    
     // Returns the transaction history for the authenticated user's wallet and a specific token mint.
     func getTransactions(mintAddress: String) async throws -> [TransactionHistoryResponse] {
         guard accessToken != nil else {
@@ -87,7 +87,7 @@ extension APIClient {
         }
         return try await get("\(walletBase)/\(mintAddress)/transactions")
     }
-
+    
     // Returns the total portfolio value of all tokens in the user's wallet.
     func getWalletBalance() async throws -> WalletBalancesResponse {
         guard accessToken != nil else {

@@ -6,7 +6,7 @@ enum APIError: LocalizedError {
     case serverError(String)
     case invalidResponse
     case decodingFailed
-
+    
     var errorDescription: String? {
         switch self {
         case .serverError(let message): message
@@ -26,9 +26,9 @@ private struct APIErrorBody: Decodable {
 
 private actor RefreshCoordinator {
     private var task: Task<AuthResponse, Error>?
-
+    
     func refresh(using perform: @escaping () async throws -> AuthResponse) async throws
-        -> AuthResponse
+    -> AuthResponse
     {
         if let existing = task {
             return try await existing.value
@@ -50,23 +50,23 @@ private actor RefreshCoordinator {
 
 final class APIClient {
     static let shared = APIClient()
-
+    
     var accessToken: String?
     var refreshToken: String?
-
+    
     private let baseURL: URL
     private let session: URLSession
     private let refreshCoordinator = RefreshCoordinator()
     let encoder = JSONEncoder()
     let decoder = JSONDecoder()
-
+    
     private init() {
         baseURL = URL(string: "https://ios-assignment.sunwookim.dev/api")!
         session = .shared
         accessToken = KeychainHelper.load(forKey: "accessToken")
         refreshToken = KeychainHelper.load(forKey: "refreshToken")
     }
-
+    
     func get<R: Decodable>(_ path: String) async throws -> R {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse
@@ -77,21 +77,21 @@ final class APIClient {
         setBearerToken(&request)
         return try await send(request)
     }
-
+    
     func post<B: Encodable, R: Decodable>(_ path: String, body: B) async throws -> R {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         setBearerToken(&request)
         request.httpBody = try encoder.encode(body)
-
+        
         return try await send(request)
     }
-
+    
     func post(_ path: String) async throws {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse
@@ -101,7 +101,7 @@ final class APIClient {
         setBearerToken(&request)
         try await sendVoid(request)
     }
-
+    
     func delete(_ path: String) async throws {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse
@@ -111,65 +111,65 @@ final class APIClient {
         setBearerToken(&request)
         try await sendVoid(request)
     }
-
+    
     func multipart<R: Decodable>(
         _ path: String, fields: [String: String], imageData: Data, imageMimeType: String
     ) async throws -> R {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse
         }
-
+        
         let boundary = UUID().uuidString
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(
             "multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         setBearerToken(&request)
-
+        
         var body = Data()
         for (key, value) in fields {
             body +=
-                "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\"\r\n\r\n\(value)\r\n"
+            "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\"\r\n\r\n\(value)\r\n"
         }
         body +=
-            "--\(boundary)\r\nContent-Disposition: form-data; name=\"image\"; filename=\"image\"\r\nContent-Type: \(imageMimeType)\r\n\r\n"
+        "--\(boundary)\r\nContent-Disposition: form-data; name=\"image\"; filename=\"image\"\r\nContent-Type: \(imageMimeType)\r\n\r\n"
         body.append(imageData)
         body += "\r\n--\(boundary)--\r\n"
-
+        
         request.httpBody = body
         return try await send(request)
     }
-
+    
     // MARK: - Private
-
+    
     private func setBearerToken(_ request: inout URLRequest) {
         if let token = accessToken {
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
     }
-
+    
     func persistTokens(accessToken: String, refreshToken: String) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken
         KeychainHelper.save(accessToken, forKey: "accessToken")
         KeychainHelper.save(refreshToken, forKey: "refreshToken")
     }
-
+    
     func clearTokens() {
         accessToken = nil
         refreshToken = nil
         KeychainHelper.delete(forKey: "accessToken")
         KeychainHelper.delete(forKey: "refreshToken")
     }
-
+    
     func send<R: Decodable>(_ request: URLRequest, retryOnUnauthorized: Bool = true) async throws
-        -> R
+    -> R
     {
         let (data, statusCode) = try await execute(
             request, retryOnUnauthorized: retryOnUnauthorized)
         guard (200...299).contains(statusCode) else {
             let msg =
-                (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
+            (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
             throw APIError.serverError(msg)
         }
         do {
@@ -178,17 +178,17 @@ final class APIClient {
             throw APIError.decodingFailed
         }
     }
-
+    
     func sendVoid(_ request: URLRequest, retryOnUnauthorized: Bool = true) async throws {
         let (data, statusCode) = try await execute(
             request, retryOnUnauthorized: retryOnUnauthorized)
         guard (200...299).contains(statusCode) else {
             let msg =
-                (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
+            (try? decoder.decode(APIErrorBody.self, from: data))?.message ?? "Unknown error."
             throw APIError.serverError(msg)
         }
     }
-
+    
     private func execute(_ request: URLRequest, retryOnUnauthorized: Bool) async throws -> (
         Data, Int
     ) {
@@ -196,7 +196,7 @@ final class APIClient {
         guard let http = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
-
+        
         if http.statusCode == 401, retryOnUnauthorized, let rt = refreshToken {
             let refreshed: AuthResponse
             do {
@@ -214,10 +214,10 @@ final class APIClient {
             retried.setValue("Bearer \(refreshed.accessToken)", forHTTPHeaderField: "Authorization")
             return try await execute(retried, retryOnUnauthorized: false)
         }
-
+        
         return (data, http.statusCode)
     }
-
+    
     private func performRefresh(_ refreshToken: String) async throws -> AuthResponse {
         struct Body: Encodable { let refreshToken: String }
         guard let url = URL(string: baseURL.absoluteString + "/auth/refresh") else {

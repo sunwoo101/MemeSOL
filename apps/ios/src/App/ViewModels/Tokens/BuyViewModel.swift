@@ -14,7 +14,7 @@ class BuyViewModel : ObservableObject {
     
     @Published var isBuying = false
     @Published var isInWallet = false
-
+    
     @Published var errorMessage = ""
     
     @Published var searchText = ""
@@ -23,7 +23,7 @@ class BuyViewModel : ObservableObject {
         if searchText.isEmpty {
             return tokens
         }
-
+        
         return tokens.filter {
             $0.name.localizedCaseInsensitiveContains(searchText)
             ||

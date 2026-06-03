@@ -38,7 +38,7 @@ extension APIClient {
         }
         return try await get(tokensBase)
     }
-
+    
     // Transfers tokens to a recipient address. Amount is the amount of the token (not $).
     func sendToken(mintAddress: String, recipientAddress: String, amount: Decimal) async throws -> SendTokenResponse {
         guard accessToken != nil else {
@@ -50,7 +50,7 @@ extension APIClient {
         struct Body: Encodable { let recipientAddress: String; let amount: Decimal }
         return try await post("\(tokensBase)/\(mintAddress)/send", body: Body(recipientAddress: recipientAddress, amount: amount))
     }
-
+    
     // Creates a new token and adds it to the wallet.
     func createToken(name: String, symbol: String, supply: UInt64, imageData: Data) async throws -> TokenResponse {
         guard accessToken != nil else {
