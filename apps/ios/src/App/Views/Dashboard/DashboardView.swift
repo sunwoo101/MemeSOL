@@ -18,6 +18,7 @@ struct DashboardView: View {
     @State private var tokens: [Token] = []
     @State private var isLoading = false
     @State private var isReceiveSheetPresented = false
+    @State private var isCreateTokenPresented = false
 
     private var formattedBalance: String {
         Self.currencyFormatter.string(from: NSNumber(value: totalBalance)) ?? "A$0.00"
@@ -172,10 +173,11 @@ struct DashboardView: View {
                 ActionButton(icon: "arrow.down.left", label: "Receive")
             }
 
-            NavigationLink {
-                CreateTokenView()
-            } label: {
+            Button { isCreateTokenPresented = true } label: {
                 ActionButton(icon: "pencil", label: "Create")
+            }
+            .navigationDestination(isPresented: $isCreateTokenPresented) {
+                CreateTokenView(onDone: { isCreateTokenPresented = false })
             }
         }
     }
