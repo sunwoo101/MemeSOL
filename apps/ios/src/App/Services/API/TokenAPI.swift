@@ -52,15 +52,15 @@ extension APIClient {
     }
 
     // Creates a new token and adds it to the wallet.
-    func createToken(name: String, symbol: String, supply: UInt64, imageData: Data) async throws -> TokenResponse {
+    func createToken(name: String, symbol: String, supply: UInt64, imageData: Data? = nil, imFeelingLucky: Bool = false) async throws -> TokenResponse {
         guard accessToken != nil else {
             throw APIError.serverError("You must be logged in to create a token.")
         }
         return try await multipart(
             tokensBase,
-            fields: ["name": name, "symbol": symbol, "supply": String(supply)],
+            fields: ["name": name, "symbol": symbol, "supply": String(supply), "imFeelingLucky": String(imFeelingLucky)],
             imageData: imageData,
-            imageMimeType: "image/jpeg"
+            imageMimeType: imageData != nil ? "image/jpeg" : nil
         )
     }
 }
