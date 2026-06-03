@@ -77,6 +77,4 @@ class TokenDetailsViewModel : ObservableObject {
         let saved = UserDefaults.standard.stringArray(forKey: key) ?? []
         favourites = Set(saved)
     }
-    
-    
 }

@@ -15,7 +15,6 @@ struct AllCoinsView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.horizontal, SharedLayout.horizontalPadding)
             .padding(.top, TransactionLayout.titleTopPadding)
-            .padding(.bottom, TransactionLayout.navBarBottomPadding)
             .background(AppColors.canvas)
             
             Group {

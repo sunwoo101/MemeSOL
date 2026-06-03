@@ -3,7 +3,7 @@
 //  Assignment3
 //
 //  Created by Daniel Liu on 05/5/2026.
-//
+//xx
 
 import SwiftUI
 
@@ -197,8 +197,8 @@ struct DashboardView: View {
             } else {
                 VStack(spacing: TokenLayout.listSpacing) {
                     ForEach(Array(tokens.enumerated()), id: \.element.id) { index, token in
-                        Button {
-                            selectedToken = token
+                        NavigationLink {
+                            TransactionListView(token: token)
                         } label: {
                             TokenRow(
                                 name: token.name, symbol: token.symbol,

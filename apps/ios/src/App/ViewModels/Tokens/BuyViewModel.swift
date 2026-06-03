@@ -76,5 +76,4 @@ class BuyViewModel : ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
-    
 }

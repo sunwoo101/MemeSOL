@@ -25,5 +25,4 @@ class CreateTokenViewModel : ObservableObject {
         }
         isCreating = false
     }
-    
 }

@@ -69,27 +69,16 @@ struct TransactionListView: View {
     }
     
     private var navHeader: some View {
-        HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundColor(AppColors.ink)
-                    .font(.body.weight(.semibold))
-            }
-            Spacer()
-            VStack(spacing: 2) {
-                Text(token.name)
-                    .font(.headline.bold())
-                    .foregroundColor(AppColors.ink)
-                Text("Transactions")
-                    .font(.caption)
-                    .foregroundColor(AppColors.secondaryText)
-            }
-            Spacer()
-            Color.clear.frame(width: TransactionLayout.navBarSpacerWidth, height: TransactionLayout.navBarSpacerHeight)
+        VStack {
+            Text(token.name)
+                .font(.headline.bold())
+                .foregroundColor(AppColors.ink)
+            Text("Transactions")
+                .font(.caption)
+                .foregroundColor(AppColors.secondaryText)
         }
-        .padding(.horizontal, SharedLayout.horizontalPadding)
         .padding(.top, TransactionLayout.titleTopPadding)
-        .padding(.bottom, TransactionLayout.navBarBottomPadding)
+        .padding(.bottom, TransactionLayout.titleBottonPadding)
         .background(AppColors.canvas)
     }
     
@@ -104,7 +93,6 @@ struct TransactionListView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, SharedLayout.horizontalPadding)
         .padding(.bottom, 12)
         .background(AppColors.canvas)
     }

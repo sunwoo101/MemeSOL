@@ -40,7 +40,6 @@ class SendViewModel: ObservableObject {
         } catch {
             sendError = error.localizedDescription
         }
-        
         isSending = false
     }
     

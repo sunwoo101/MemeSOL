@@ -214,7 +214,6 @@ final class APIClient {
             retried.setValue("Bearer \(refreshed.accessToken)", forHTTPHeaderField: "Authorization")
             return try await execute(retried, retryOnUnauthorized: false)
         }
-        
         return (data, http.statusCode)
     }
     

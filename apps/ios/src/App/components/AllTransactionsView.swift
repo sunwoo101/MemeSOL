@@ -9,11 +9,11 @@ import SwiftUI
 
 struct AllTransactionsView: View {
     let tokens: [Token]
-    
+
     @State private var transactions: [TransactionHistoryResponse] = []
     @State private var isLoading = false
     @State private var errorText = ""
-    
+
     var body: some View {
         VStack(spacing: TransactionLayout.sectionSpacing) {
             Text("Transactions")
@@ -24,7 +24,7 @@ struct AllTransactionsView: View {
                 .padding(.top, TokenLayout.detailTopPadding)
                 .padding(.bottom, SharedLayout.sectionSpacing)
                 .background(AppColors.canvas)
-            
+
             if isLoading {
                 Spacer()
                 ProgressView().tint(AppColors.ink)
@@ -52,7 +52,7 @@ struct AllTransactionsView: View {
                                 .foregroundColor(AppColors.secondaryText)
                                 .padding(.horizontal, SharedLayout.horizontalPadding)
                                 .padding(.top, SharedLayout.sectionSpacing)
-                            
+
                             ForEach(txs, id: \.signature) { tx in
                                 AllTransactionRow(transaction: tx)
                                 Divider()
@@ -70,7 +70,7 @@ struct AllTransactionsView: View {
         .background(AppColors.canvas.ignoresSafeArea())
         .task { await loadTransactions() }
     }
-    
+
     private var groupedTransactions: [(String, [TransactionHistoryResponse])] {
         var groups: [(String, [TransactionHistoryResponse])] = []
         var index: [String: Int] = [:]
@@ -85,7 +85,7 @@ struct AllTransactionsView: View {
         }
         return groups
     }
-    
+
     @MainActor
     private func loadTransactions() async {
         isLoading = true
@@ -100,7 +100,7 @@ struct AllTransactionsView: View {
 
 private struct AllTransactionRow: View {
     let transaction: TransactionHistoryResponse
-    
+
     var body: some View {
         HStack(spacing: TransactionLayout.rowSpacing) {
             AsyncImage(url: URL(string: transaction.imgUrl)) { phase in
@@ -113,7 +113,7 @@ private struct AllTransactionRow: View {
             }
             .frame(width: TransactionLayout.iconSize, height: TransactionLayout.iconSize)
             .clipShape(Circle())
-            
+
             VStack(alignment: .leading, spacing: TransactionLayout.textSpacing) {
                 Text(transaction.transactionType?.capitalized ?? "Unknown")
                     .font(.subheadline)
@@ -122,9 +122,9 @@ private struct AllTransactionRow: View {
                     .font(.caption)
                     .foregroundColor(AppColors.secondaryText)
             }
-            
+
             Spacer()
-            
+
             Text(transaction.amountText)
                 .font(.subheadline)
                 .foregroundColor(AppColors.ink)

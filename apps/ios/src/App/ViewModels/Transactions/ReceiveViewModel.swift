@@ -40,7 +40,6 @@ class ReceiveViewModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.copyButtonText = "Copy"
         }
-        
     }
 }
 
