@@ -13,6 +13,7 @@ services:
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
       - Solana__ServerMnemonic=${SOLANA_SERVER_MNEMONIC}
+      - GoogleApiKey=${GOOGLE_API_KEY}
     volumes:
       - dp_keys:/root/.aspnet/DataProtection-Keys
     networks:
