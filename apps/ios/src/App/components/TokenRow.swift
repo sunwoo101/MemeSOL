@@ -15,7 +15,7 @@ struct TokenRow: View {
     let positive: Bool
     let iconUrl: String
     let color: Color
-
+    
     var body: some View {
         HStack(spacing: TokenLayout.rowIconSpacing) {
             AsyncImage(url: URL(string: iconUrl)) { phase in
@@ -32,7 +32,7 @@ struct TokenRow: View {
                 }
             }
             .frame(width: TokenLayout.iconSize, height: TokenLayout.iconSize)
-
+            
             VStack(alignment: .leading, spacing: TokenLayout.textStackSpacing) {
                 Text(name)
                     .font(.subheadline.bold())
@@ -41,9 +41,9 @@ struct TokenRow: View {
                     .font(.caption)
                     .foregroundColor(AppColors.secondaryText)
             }
-
+            
             Spacer()
-
+            
             VStack(alignment: .trailing, spacing: TokenLayout.textStackSpacing) {
                 Text(balance)
                     .font(.subheadline.bold())

@@ -3,13 +3,13 @@
 //  Assignment3
 //
 //  Created by Daniel Liu on 05/5/2026.
-//
+//xx
 
 import SwiftUI
 
 struct DashboardView: View {
     @Environment(AuthSession.self) private var authSession
-
+    
     @State private var totalBalance: Double = 0
     @State private var totalGainLoss: Double = 0
     @State private var totalGainLossPercent: Double = 0
@@ -23,29 +23,11 @@ struct DashboardView: View {
     private var formattedBalance: String {
         Self.currencyFormatter.string(from: NSNumber(value: totalBalance)) ?? "A$0.00"
     }
-
+    
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text(authSession.walletPublicKey)
-                    .font(.caption2.monospaced())
-                    .foregroundColor(AppColors.secondaryText)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                Spacer()
-                Button("Logout") {
-                    authSession.logout()
-                }
-                .font(.caption.bold())
-                .foregroundColor(AppColors.accent)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
-            .background(AppColors.canvas)
-
-            VStack(spacing: TransactionLayout.sectionSpacing) {
-                if activeTab == 0 {
+        TabView(selection: $activeTab) {
+            Tab("Dashboard", systemImage: "house.fill", value: 0) {
+                NavigationStack {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: SharedLayout.sectionSpacing) {
                             totalBalanceView
@@ -58,74 +40,44 @@ struct DashboardView: View {
                     }
                     .refreshable { await loadDashboard() }
                     .background(AppColors.canvas)
-                } else if activeTab == 1 {
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Logout") {
+                                authSession.logout()
+                            }
+                            .foregroundColor(AppColors.accent)
+                        }
+                    }
+                }
+            }
+
+            Tab("Transactions", systemImage: "list.bullet", value: 1) {
+                NavigationStack {
                     AllTransactionsView(tokens: tokens)
-                } else {
+                }
+            }
+
+            Tab("Coins", systemImage: "bitcoinsign.circle.fill", value: 2) {
+                NavigationStack {
                     AllCoinsView()
                 }
-
-                HStack {
-                    Button {
-                        activeTab = 0
-                    } label: {
-                        VStack(spacing: TabBarLayout.itemSpacing) {
-                            Image(systemName: "house.fill")
-                                .font(.system(size: TabBarLayout.iconSize))
-                            Text("Dashboard")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(activeTab == 0 ? AppColors.accent : AppColors.secondaryText)
-                        .frame(maxWidth: .infinity)
-                    }
-
-                    Button {
-                        activeTab = 1
-                    } label: {
-                        VStack(spacing: TabBarLayout.itemSpacing) {
-                            Image(systemName: "list.bullet")
-                                .font(.system(size: TabBarLayout.iconSize))
-                            Text("Transactions")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(activeTab == 1 ? AppColors.accent : AppColors.secondaryText)
-                        .frame(maxWidth: .infinity)
-                    }
-
-                    Button {
-                        activeTab = 2
-                    } label: {
-                        VStack(spacing: TabBarLayout.itemSpacing) {
-                            Image(systemName: "bitcoinsign.circle.fill")
-                                .font(.system(size: TabBarLayout.iconSize))
-                            Text("Coins")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(activeTab == 2 ? AppColors.accent : AppColors.secondaryText)
-                        .frame(maxWidth: .infinity)
-                    }
-                    .accessibilityLabel("Show coins")
-                }
-                .padding(.vertical, TabBarLayout.verticalPadding)
-                .padding(.bottom, TabBarLayout.bottomPadding)
-                .background(AppColors.surface)
-            }
-            .background(AppColors.canvas.ignoresSafeArea())
-            .sheet(item: $selectedToken, onDismiss: { Task { await loadDashboard() } }) { token in
-                TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
             }
         }
-        .background(AppColors.canvas.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .sheet(item: $selectedToken, onDismiss: { Task { await loadDashboard() } }) { token in
+            TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
+        }
         .onAppear { Task { await loadDashboard() } }
     }
-
+    
     // MARK: - Subviews
-
+    
     private var totalBalanceView: some View {
         VStack(alignment: .center, spacing: BalanceLayout.stackSpacing) {
             Text("Total Balance")
                 .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
                 .foregroundColor(AppColors.accent)
-
+            
             if isLoading {
                 ProgressView().tint(AppColors.ink)
                     .frame(height: BalanceLayout.fontSize)
@@ -133,7 +85,7 @@ struct DashboardView: View {
                 Text(formattedBalance)
                     .font(.system(size: BalanceLayout.fontSize, weight: .bold))
                     .foregroundColor(AppColors.ink)
-
+                
                 let isGain = totalGainLoss >= 0
                 let sign = isGain ? "+" : "-"
                 let gainLossColor: Color = isGain ? AppColors.success : AppColors.error
@@ -152,7 +104,7 @@ struct DashboardView: View {
             }
         }
     }
-
+    
     private var actionButtonsRow: some View {
         HStack(spacing: ActionButtonLayout.rowSpacing) {
             NavigationLink {
@@ -160,19 +112,18 @@ struct DashboardView: View {
             } label: {
                 ActionButton(icon: "cart.fill", label: "Buy")
             }
-
+            
             NavigationLink {
                 SendView()
             } label: {
                 ActionButton(icon: "arrow.right", label: "Send")
             }
-
+            
             NavigationLink {
                 ReceiveView()
             } label: {
                 ActionButton(icon: "arrow.down.left", label: "Receive")
             }
-
             Button { isCreateTokenPresented = true } label: {
                 ActionButton(icon: "pencil", label: "Create")
             }
@@ -181,11 +132,11 @@ struct DashboardView: View {
             }
         }
     }
-
+    
     private var tokensSection: some View {
         VStack(alignment: .leading, spacing: TokenLayout.rowSpacing) {
             sectionHeader("Tokens")
-
+            
             if isLoading {
                 ProgressView().tint(AppColors.ink)
                     .frame(maxWidth: .infinity)
@@ -199,8 +150,8 @@ struct DashboardView: View {
             } else {
                 VStack(spacing: TokenLayout.listSpacing) {
                     ForEach(Array(tokens.enumerated()), id: \.element.id) { index, token in
-                        Button {
-                            selectedToken = token
+                        NavigationLink {
+                            TransactionListView(token: token)
                         } label: {
                             TokenRow(
                                 name: token.name, symbol: token.symbol,
@@ -212,7 +163,7 @@ struct DashboardView: View {
                             )
                         }
                         .buttonStyle(.plain)
-
+                        
                         if index < tokens.count - 1 {
                             Divider()
                                 .background(AppColors.secondaryText.opacity(SharedLayout.dividerOpacity))
@@ -223,7 +174,7 @@ struct DashboardView: View {
             }
         }
     }
-
+    
     private func sectionHeader(_ title: String) -> some View {
         HStack(spacing: SharedLayout.sectionHeaderSpacing) {
             Text(title)
@@ -234,9 +185,9 @@ struct DashboardView: View {
                 .foregroundColor(AppColors.secondaryText)
         }
     }
-
+    
     // MARK: - Data loading
-
+    
     @MainActor
     private func loadDashboard() async {
         if tokens.isEmpty { isLoading = true }
@@ -252,9 +203,9 @@ struct DashboardView: View {
             totalGainLossPercent = walletBalance.gainLossPercent
         }
     }
-
+    
     // MARK: - Helpers
-
+    
     static let currencyFormatter: NumberFormatter = {
         let f = NumberFormatter()
         f.numberStyle = .currency
@@ -282,7 +233,7 @@ private extension Token {
             mintAddress: w.mintAddress
         )
     }
-
+    
     private static func color(for symbol: String) -> Color {
         let palette: [Color] = [AppColors.accent, AppColors.info, AppColors.success, AppColors.warning, AppColors.error]
         let hash = symbol.unicodeScalars.reduce(0) { $0 + Int($1.value) }

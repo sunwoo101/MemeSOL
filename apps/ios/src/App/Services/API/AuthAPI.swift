@@ -20,7 +20,7 @@ extension APIClient {
         persistTokens(accessToken: response.accessToken, refreshToken: response.refreshToken)
         return response
     }
-
+    
     // Logs in a user then returns accessToken, walletPublicKey, and refreshToken. Tokens are persisted to Keychain.
     func login(email: String, password: String) async throws -> AuthResponse {
         struct Body: Encodable { let email: String; let password: String }

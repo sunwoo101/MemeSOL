@@ -15,16 +15,12 @@ struct AllTransactionsView: View {
     @State private var errorText = ""
 
     var body: some View {
-        VStack(spacing: TransactionLayout.sectionSpacing) {
+        VStack(spacing: SharedLayout.sectionSpacing) {
             Text("Transactions")
-                .font(.title2.bold())
+                .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
                 .foregroundColor(AppColors.accent)
                 .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.horizontal, SharedLayout.horizontalPadding)
-                .padding(.top, TokenLayout.detailTopPadding)
-                .padding(.bottom, SharedLayout.sectionSpacing)
-                .background(AppColors.canvas)
-
+                .padding(.top, SharedLayout.horizontalPadding)
             if isLoading {
                 Spacer()
                 ProgressView().tint(AppColors.ink)
@@ -67,6 +63,7 @@ struct AllTransactionsView: View {
                 .background(AppColors.canvas)
             }
         }
+        .frame(maxWidth: .infinity)
         .background(AppColors.canvas.ignoresSafeArea())
         .task { await loadTransactions() }
     }

@@ -5,18 +5,18 @@ import SwiftUI
 struct LoginView: View {
     @Environment(AuthSession.self) private var authSession
     @Binding var showRegister: Bool
-
+    
     @State private var email = ""
     @State private var password = ""
     @State private var isLoading = false
     @State private var errorText = ""
-
+    
     var body: some View {
         VStack(spacing: 16) {
             Text("Welcome back")
                 .font(.largeTitle.bold())
                 .foregroundColor(AppColors.ink)
-
+            
             TextField(
                 "",
                 text: $email,
@@ -28,9 +28,9 @@ struct LoginView: View {
             .autocorrectionDisabled()
             .padding()
             .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: SharedLayout.cornerRadius))
             .foregroundColor(AppColors.ink)
-
+            
             SecureField(
                 "",
                 text: $password,
@@ -39,29 +39,21 @@ struct LoginView: View {
             .textContentType(.oneTimeCode)
             .padding()
             .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: SharedLayout.cornerRadius))
             .foregroundColor(AppColors.ink)
-
+            
             if !errorText.isEmpty {
                 Text(errorText)
                     .foregroundColor(AppColors.error)
                     .font(.footnote)
                     .multilineTextAlignment(.center)
             }
-
-            Button { submit() } label: {
-                if isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                } else {
-                    Text("Login")
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(AppColors.accent)
-            .disabled(email.isEmpty || password.isEmpty || isLoading)
-
+            
+            PrimaryButton(
+                label: isLoading ? "Logging in..." : "Login",
+                disabled: email.isEmpty || password.isEmpty || isLoading
+            ) { submit() }
+            
             Button("Create an account") {
                 showRegister = true
                 errorText = ""
@@ -71,9 +63,9 @@ struct LoginView: View {
         }
         .padding()
     }
-
+    
     // MARK: - Private
-
+    
     @MainActor
     private func submit() {
         errorText = ""

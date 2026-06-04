@@ -2,7 +2,7 @@ import SwiftUI
 
 struct OnboardingView: View {
     @State private var showRegister = false
-
+    
     var body: some View {
         ZStack {
             AppColors.canvas.ignoresSafeArea()

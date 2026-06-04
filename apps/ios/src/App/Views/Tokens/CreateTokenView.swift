@@ -92,6 +92,7 @@ struct CreateTokenView: View {
                     }
                 }
                 .padding(.horizontal)
+                .padding(.bottom, SharedLayout.horizontalPadding)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
 
@@ -186,7 +187,7 @@ struct CreateTokenView: View {
                         onDone()
                     }
                     .padding(.horizontal)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, SharedLayout.horizontalPadding)
                 }
                 .transition(.opacity)
             }
@@ -302,13 +303,8 @@ struct CreateTokenView: View {
                             }
                         }
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .padding()
                 .background(AppColors.surface)
-                .overlay(
-                    RoundedRectangle(cornerRadius: SharedLayout.cornerRadius)
-                        .strokeBorder(AppColors.ink.opacity(0.08), lineWidth: 1)
-                )
                 .cornerRadius(SharedLayout.cornerRadius)
             }
 
