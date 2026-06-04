@@ -12,18 +12,20 @@ class TokenDetailsViewModel : ObservableObject {
     @Published var walletToken : WalletTokenResponse?
     @Published var transactions: [TransactionHistoryResponse] = []
     
-    @Published private(set) var favourites: Set<String> = []
-    
-    let key = "favourite_tokens"
-    
     @Published var isInWallet: Bool = false
-    
+    @Published var isLoading: Bool = false
+
     @Published var errorMessage = ""
     
-    init() {
-        loadFavourites()
+    @MainActor
+    func loadAll(mintAddress: String) async {
+        isLoading = true
+        defer { isLoading = false }
+        await loadWalletData(mintAddress: mintAddress)
+        await loadTransactionData(mintAddress: mintAddress)
+        await checkIfInWallet(mintAddress: mintAddress)
     }
-    
+
     func loadWalletData (mintAddress: String) async {
         do {
             let walletTokens = try await APIClient.shared.listWalletTokens()
@@ -56,25 +58,4 @@ class TokenDetailsViewModel : ObservableObject {
         }
     }
     
-    func isFavourite(_ mintAddress: String) -> Bool {
-        favourites.contains(mintAddress)
-    }
-    
-    func toggleFavourite(_ mintAddress: String) {
-        if favourites.contains(mintAddress) {
-            favourites.remove(mintAddress)
-        } else {
-            favourites.insert(mintAddress)
-        }
-        saveFavourites()
-    }
-    
-    private func saveFavourites() {
-        UserDefaults.standard.set(Array(favourites), forKey: key)
-    }
-    
-    private func loadFavourites() {
-        let saved = UserDefaults.standard.stringArray(forKey: key) ?? []
-        favourites = Set(saved)
-    }
 }

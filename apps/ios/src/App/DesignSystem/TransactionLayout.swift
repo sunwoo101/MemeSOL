@@ -12,10 +12,7 @@ enum TransactionLayout {
     static let rowVerticalPadding: CGFloat = 12
     static let iconSize: CGFloat = 36
     static let titleTopPadding: CGFloat = 24
-    static let titleBottonPadding: CGFloat = 24
-    
-    static let navBarSpacerWidth: CGFloat = 20
-    static let navBarSpacerHeight: CGFloat = 10
+    static let titleBottomPadding: CGFloat = 24
 
     static let listTopPadding: CGFloat = 10
     static let listBottomPadding: CGFloat = 10
@@ -27,6 +24,5 @@ enum TransactionLayout {
     static let actionButtonSpacing: CGFloat = 40
     static let actionButtonSize: CGFloat = 52
 
-    static let sectionSpacing: CGFloat = 0
     static let iconPlaceholderOpacity: Double = 0.3
 }

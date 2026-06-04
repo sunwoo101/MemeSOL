@@ -15,16 +15,16 @@ struct TransactionListView: View {
     @State private var showingReceive = false
     @State private var showingBuy = false
     @State private var transactions: [TransactionHistoryResponse] = []
+    @State private var tokenAmount: String = ""
     @State private var liveBalance: String = ""
     @State private var isLoading = false
     @State private var errorText = ""
     
     var body: some View {
         VStack(spacing: 0) {
-            navHeader
             tokenBalanceSection
             actionButtons
-            
+
             if isLoading {
                 Spacer()
                 ProgressView().tint(AppColors.ink)
@@ -48,38 +48,29 @@ struct TransactionListView: View {
             }
         }
         .background(AppColors.canvas.ignoresSafeArea())
-        .toolbar(.hidden, for: .navigationBar)
+        .navigationTitle(token.name)
+        .navigationBarTitleDisplayMode(.inline)
         .onAppear { Task { await loadTransactions() } }
         .sheet(isPresented: $showingSend, onDismiss: { Task { await loadTransactions() } }) {
-            SendView(preselectedMintAddress: token.mintAddress)
+            NavigationStack {
+                SendView(preselectedMintAddress: token.mintAddress)
+            }
         }
         .sheet(isPresented: $showingBuy, onDismiss: { Task { await loadTransactions() } }) {
             let cleanedPrice = token.pricePerToken
                 .replacingOccurrences(of: "$", with: "")
                 .replacingOccurrences(of: ",", with: "")
-            
             let cleanedPercent = token.percentChange
                 .replacingOccurrences(of: "%", with: "")
-            
-            BuyTokenView(token: TokenListResponse(id: token.id.uuidString, mintAddress: token.mintAddress, name: token.name, symbol: token.symbol, imgUrl: token.iconUrl, price: Double(cleanedPrice) ?? 0, gainsPercent: Double(cleanedPercent) ?? 0))
+            NavigationStack {
+                BuyTokenView(token: TokenListResponse(id: token.id.uuidString, mintAddress: token.mintAddress, name: token.name, symbol: token.symbol, imgUrl: token.iconUrl, price: Double(cleanedPrice) ?? 0, gainsPercent: Double(cleanedPercent) ?? 0))
+            }
         }
         .sheet(isPresented: $showingReceive, onDismiss: { Task { await loadTransactions() } }) {
-            ReceiveView()
+            NavigationStack {
+                ReceiveView()
+            }
         }
-    }
-    
-    private var navHeader: some View {
-        VStack {
-            Text(token.name)
-                .font(.headline.bold())
-                .foregroundColor(AppColors.ink)
-            Text("Transactions")
-                .font(.caption)
-                .foregroundColor(AppColors.secondaryText)
-        }
-        .padding(.top, TransactionLayout.titleTopPadding)
-        .padding(.bottom, TransactionLayout.titleBottonPadding)
-        .background(AppColors.canvas)
     }
     
     private var tokenBalanceSection: some View {
@@ -87,10 +78,15 @@ struct TransactionListView: View {
             Text("Balance")
                 .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
                 .foregroundColor(AppColors.accent)
-            Text(liveBalance.isEmpty ? token.balance : liveBalance)
+            Text(tokenAmount.isEmpty ? token.symbol : tokenAmount)
                 .font(.system(size: 32, weight: .bold))
                 .foregroundColor(AppColors.ink)
                 .multilineTextAlignment(.center)
+            if !liveBalance.isEmpty {
+                Text(liveBalance)
+                    .font(.system(size: TypographyLayout.labelFontSize, weight: .medium))
+                    .foregroundColor(AppColors.secondaryText)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.bottom, 12)
@@ -162,6 +158,7 @@ struct TransactionListView: View {
             transactions = txs
             if let match = walletTokens.first(where: { $0.mintAddress == token.mintAddress }) {
                 let audValue = match.balance * match.price
+                tokenAmount = "\(String(format: "%g", match.balance)) \(match.symbol)"
                 liveBalance = DashboardView.currencyFormatter.string(from: NSNumber(value: audValue)) ?? token.balance
             }
         } catch {

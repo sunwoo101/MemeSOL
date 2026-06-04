@@ -12,9 +12,7 @@ struct ContentView: View {
     
     var body: some View {
         if authSession.isAuthenticated {
-            NavigationStack {
-                DashboardView()
-            }
+            DashboardView()
         } else {
             OnboardingView()
         }

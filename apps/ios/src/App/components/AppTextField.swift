@@ -21,15 +21,10 @@ struct AppTextField: View {
 
             TextField("", text: $text,
                       prompt: Text(placeholder).foregroundColor(AppColors.secondaryText))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .padding()
                 .foregroundColor(AppColors.ink)
                 .keyboardType(keyboardType)
                 .background(AppColors.surface)
-                .overlay(
-                    RoundedRectangle(cornerRadius: SharedLayout.cornerRadius)
-                        .strokeBorder(AppColors.ink.opacity(0.08), lineWidth: 1)
-                )
                 .cornerRadius(SharedLayout.cornerRadius)
         }
     }

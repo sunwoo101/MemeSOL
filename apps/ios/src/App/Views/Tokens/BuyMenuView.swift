@@ -17,10 +17,6 @@ struct BuyMenuView: View {
             
             ScrollView {
                 VStack {
-                    Text("Buy Tokens")
-                        .foregroundColor(AppColors.accent)
-                        .font(.title2.bold())
-                    
                     HStack {
                         TextField("",
                                   text: $viewModel.searchText,
@@ -28,8 +24,7 @@ struct BuyMenuView: View {
                         .foregroundColor(AppColors.ink)
                         .autocorrectionDisabled()
                     }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 15)
+                    .padding()
                     .background(AppColors.surface)
                     .cornerRadius(SharedLayout.cornerRadius)
                     
@@ -56,6 +51,7 @@ struct BuyMenuView: View {
                 .padding()
             }
         }
+        .navigationTitle("Buy")
         .task {
             await viewModel.loadTokens()
         }

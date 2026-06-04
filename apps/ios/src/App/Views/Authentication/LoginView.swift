@@ -28,7 +28,7 @@ struct LoginView: View {
             .autocorrectionDisabled()
             .padding()
             .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: SharedLayout.cornerRadius))
             .foregroundColor(AppColors.ink)
             
             SecureField(
@@ -39,7 +39,7 @@ struct LoginView: View {
             .textContentType(.oneTimeCode)
             .padding()
             .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: SharedLayout.cornerRadius))
             .foregroundColor(AppColors.ink)
             
             if !errorText.isEmpty {
@@ -49,18 +49,10 @@ struct LoginView: View {
                     .multilineTextAlignment(.center)
             }
             
-            Button { submit() } label: {
-                if isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                } else {
-                    Text("Login")
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(AppColors.accent)
-            .disabled(email.isEmpty || password.isEmpty || isLoading)
+            PrimaryButton(
+                label: isLoading ? "Logging in..." : "Login",
+                disabled: email.isEmpty || password.isEmpty || isLoading
+            ) { submit() }
             
             Button("Create an account") {
                 showRegister = true

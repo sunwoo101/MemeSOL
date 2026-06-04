@@ -25,27 +25,9 @@ struct DashboardView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text(authSession.walletPublicKey)
-                    .font(.caption2.monospaced())
-                    .foregroundColor(AppColors.secondaryText)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                Spacer()
-                Button("Logout") {
-                    authSession.logout()
-                }
-                .font(.caption.bold())
-                .foregroundColor(AppColors.accent)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
-            .background(AppColors.canvas)
-            
-            VStack(spacing: TransactionLayout.sectionSpacing) {
-                if activeTab == 0 {
+        TabView(selection: $activeTab) {
+            Tab("Dashboard", systemImage: "house.fill", value: 0) {
+                NavigationStack {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: SharedLayout.sectionSpacing) {
                             totalBalanceView
@@ -58,63 +40,33 @@ struct DashboardView: View {
                     }
                     .refreshable { await loadDashboard() }
                     .background(AppColors.canvas)
-                } else if activeTab == 1 {
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Logout") {
+                                authSession.logout()
+                            }
+                            .foregroundColor(AppColors.accent)
+                        }
+                    }
+                }
+            }
+
+            Tab("Transactions", systemImage: "list.bullet", value: 1) {
+                NavigationStack {
                     AllTransactionsView(tokens: tokens)
-                } else {
+                }
+            }
+
+            Tab("Coins", systemImage: "bitcoinsign.circle.fill", value: 2) {
+                NavigationStack {
                     AllCoinsView()
                 }
-                
-                HStack {
-                    Button {
-                        activeTab = 0
-                    } label: {
-                        VStack(spacing: TabBarLayout.itemSpacing) {
-                            Image(systemName: "house.fill")
-                                .font(.system(size: TabBarLayout.iconSize))
-                            Text("Dashboard")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(activeTab == 0 ? AppColors.accent : AppColors.secondaryText)
-                        .frame(maxWidth: .infinity)
-                    }
-                    
-                    Button {
-                        activeTab = 1
-                    } label: {
-                        VStack(spacing: TabBarLayout.itemSpacing) {
-                            Image(systemName: "list.bullet")
-                                .font(.system(size: TabBarLayout.iconSize))
-                            Text("Transactions")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(activeTab == 1 ? AppColors.accent : AppColors.secondaryText)
-                        .frame(maxWidth: .infinity)
-                    }
-                    
-                    Button {
-                        activeTab = 2
-                    } label: {
-                        VStack(spacing: TabBarLayout.itemSpacing) {
-                            Image(systemName: "bitcoinsign.circle.fill")
-                                .font(.system(size: TabBarLayout.iconSize))
-                            Text("Coins")
-                                .font(.caption2)
-                        }
-                        .foregroundColor(activeTab == 2 ? AppColors.accent : AppColors.secondaryText)
-                        .frame(maxWidth: .infinity)
-                    }
-                    .accessibilityLabel("Show coins")
-                }
-                .padding(.vertical, TabBarLayout.verticalPadding)
-                .padding(.bottom, TabBarLayout.bottomPadding)
-                .background(AppColors.surface)
-            }
-            .background(AppColors.canvas.ignoresSafeArea())
-            .sheet(item: $selectedToken, onDismiss: { Task { await loadDashboard() } }) { token in
-                TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
             }
         }
-        .background(AppColors.canvas.ignoresSafeArea())
+        .preferredColorScheme(.dark)
+        .sheet(item: $selectedToken, onDismiss: { Task { await loadDashboard() } }) { token in
+            TransactionListView(token: token, GoBackToDashboard: { selectedToken = nil })
+        }
         .onAppear { Task { await loadDashboard() } }
     }
     

@@ -29,7 +29,7 @@ struct RegisterView: View {
             .autocorrectionDisabled()
             .padding()
             .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: SharedLayout.cornerRadius))
             .foregroundColor(AppColors.ink)
             
             SecureField(
@@ -40,7 +40,7 @@ struct RegisterView: View {
             .textContentType(.oneTimeCode)
             .padding()
             .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: SharedLayout.cornerRadius))
             .foregroundColor(AppColors.ink)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
@@ -53,7 +53,7 @@ struct RegisterView: View {
             .textContentType(.oneTimeCode)
             .padding()
             .background(AppColors.surface)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: SharedLayout.cornerRadius))
             .foregroundColor(AppColors.ink)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
@@ -65,18 +65,10 @@ struct RegisterView: View {
                     .multilineTextAlignment(.center)
             }
             
-            Button { submit() } label: {
-                if isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                } else {
-                    Text("Register")
-                        .frame(maxWidth: .infinity)
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(AppColors.accent)
-            .disabled(email.isEmpty || password.isEmpty || confirmPassword.isEmpty || isLoading)
+            PrimaryButton(
+                label: isLoading ? "Creating account..." : "Register",
+                disabled: email.isEmpty || password.isEmpty || confirmPassword.isEmpty || isLoading
+            ) { submit() }
             
             Button("Already have an account? Login") {
                 showRegister = false
