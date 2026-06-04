@@ -13,12 +13,12 @@ class CreateTokenViewModel : ObservableObject {
     @Published var errorMessage = ""
     @Published var creationSuccess = false
     
-    func createToken(name: String, symbol: String, supply: UInt64, image: Data) async {
+    func createToken(name: String, symbol: String, supply: UInt64, image: Data?, imFeelingLucky: Bool) async {
         isCreating = true
         errorMessage = ""
-        
+
         do {
-            _ = try await APIClient.shared.createToken(name: name, symbol: symbol, supply: supply, imageData: image)
+            _ = try await APIClient.shared.createToken(name: name, symbol: symbol, supply: supply, imageData: image, imFeelingLucky: imFeelingLucky)
             creationSuccess = true
         } catch {
             errorMessage = error.localizedDescription

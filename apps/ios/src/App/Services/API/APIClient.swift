@@ -113,7 +113,7 @@ final class APIClient {
     }
     
     func multipart<R: Decodable>(
-        _ path: String, fields: [String: String], imageData: Data, imageMimeType: String
+        _ path: String, fields: [String: String], imageData: Data? = nil, imageMimeType: String? = nil
     ) async throws -> R {
         guard let url = URL(string: baseURL.absoluteString + path) else {
             throw APIError.invalidResponse
@@ -122,6 +122,7 @@ final class APIClient {
         let boundary = UUID().uuidString
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.timeoutInterval = 180
         request.setValue(
             "multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         setBearerToken(&request)
@@ -131,11 +132,14 @@ final class APIClient {
             body +=
             "--\(boundary)\r\nContent-Disposition: form-data; name=\"\(key)\"\r\n\r\n\(value)\r\n"
         }
-        body +=
-        "--\(boundary)\r\nContent-Disposition: form-data; name=\"image\"; filename=\"image\"\r\nContent-Type: \(imageMimeType)\r\n\r\n"
-        body.append(imageData)
-        body += "\r\n--\(boundary)--\r\n"
-        
+        if let imageData, let imageMimeType {
+            body +=
+                "--\(boundary)\r\nContent-Disposition: form-data; name=\"image\"; filename=\"image\"\r\nContent-Type: \(imageMimeType)\r\n\r\n"
+            body.append(imageData)
+            body += "\r\n"
+        }
+        body += "--\(boundary)--\r\n"
+
         request.httpBody = body
         return try await send(request)
     }

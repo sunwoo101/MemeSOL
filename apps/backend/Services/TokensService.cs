@@ -2,6 +2,8 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Google.GenAI;
+using Google.GenAI.Types;
 
 namespace Backend.Services;
 
@@ -10,7 +12,7 @@ namespace Backend.Services;
 /// </summary>
 /// <param name="db">Injected database context.</param>
 /// <param name="solanaService">Injected Solana service.</param>
-public class TokensService(AppDbContext db, SolanaService solanaService)
+public class TokensService(AppDbContext db, SolanaService solanaService, IConfiguration configuration)
 {
     /// <summary>
     /// Creates a new token on Solana devnet and saves it to the database.
@@ -22,11 +24,56 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
 
     public async Task<TokenResponse> CreateTokenAsync(CreateTokenRequest request, Guid userId)
     {
-        if (request.Image.Length > MaxImageBytes)
-            throw new InvalidOperationException($"Image must be under {MaxImageBytes / 1024 / 1024} MB.");
-
         using var ms = new MemoryStream();
-        await request.Image.CopyToAsync(ms);
+
+        if (!request.ImFeelingLucky && request.Image is null)
+            throw new InvalidOperationException("Image is required unless 'I'm Feeling Lucky' is selected.");
+
+        string imageContentType;
+
+        if (request.Image is null)
+        {
+            var apiKey = configuration["GoogleApiKey"] ?? throw new InvalidOperationException("GoogleApiKey is not configured.");
+            var client = new Client(apiKey: apiKey);
+
+            try
+            {
+                var response = await client.Models.GenerateImagesAsync(
+                    model: "imagen-4.0-generate-001",
+                    prompt: $"Generate a fun meme coin logo for a token called '{request.Name}' ({request.Symbol}). Make it vibrant and crypto-themed.",
+                    config: new GenerateImagesConfig
+                    {
+                        NumberOfImages = 1,
+                        AspectRatio = "1:1",
+                        OutputMimeType = "image/png",
+                    }
+                );
+
+                var imageBytes = response.GeneratedImages?.FirstOrDefault()?.Image?.ImageBytes;
+                if (imageBytes is null or { Length: 0 })
+                    throw new InvalidOperationException("Image generation failed: no image data returned.");
+
+                await ms.WriteAsync(imageBytes);
+                imageContentType = "image/png";
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Image generation failed: {ex.Message}");
+            }
+        }
+        else
+        {
+            if (request.Image.Length > MaxImageBytes)
+                throw new InvalidOperationException($"Image must be under {MaxImageBytes / 1024 / 1024} MB.");
+
+            await request.Image.CopyToAsync(ms);
+            imageContentType = request.Image.ContentType;
+        }
+
         var imageData = ms.ToArray();
 
         var token = new Token
@@ -37,7 +84,7 @@ public class TokensService(AppDbContext db, SolanaService solanaService)
             Symbol = request.Symbol,
             Supply = request.Supply,
             ImageData = imageData,
-            ImageContentType = request.Image.ContentType,
+            ImageContentType = imageContentType,
             CreatedByUserId = userId,
             Status = TokenStatus.Pending,
         };
