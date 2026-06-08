@@ -15,3 +15,8 @@ enum SharedLayout {
     static let dividerLeadingPadding: CGFloat = 56
     static let dividerOpacity: Double = 0.2
 }
+
+enum AppBehavior {
+    // Artificial delay so users can feel the refresh even on fast/cached responses.
+    static let artificialRefreshDuration: Duration = .seconds(0.5)
+}

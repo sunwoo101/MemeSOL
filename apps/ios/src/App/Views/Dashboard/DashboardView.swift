@@ -192,6 +192,8 @@ struct DashboardView: View {
     private func loadDashboard() async {
         if tokens.isEmpty { isLoading = true }
         defer { isLoading = false }
+        // Artificial delay so users can feel the refresh even on fast/cached responses.
+        try? await Task.sleep(for: AppBehavior.artificialRefreshDuration)
         async let tokensFetch = APIClient.shared.listWalletTokens()
         async let balanceFetch = APIClient.shared.getWalletBalance()
         if let walletTokens = try? await tokensFetch {

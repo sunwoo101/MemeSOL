@@ -21,32 +21,35 @@ struct TransactionListView: View {
     @State private var errorText = ""
     
     var body: some View {
-        VStack(spacing: 0) {
-            tokenBalanceSection
-            actionButtons
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 0) {
+                tokenBalanceSection
+                actionButtons
 
-            if isLoading {
-                Spacer()
-                ProgressView().tint(AppColors.ink)
-                Spacer()
-            } else if !errorText.isEmpty {
-                Spacer()
-                Text(errorText)
-                    .foregroundColor(AppColors.secondaryText)
-                    .font(.subheadline)
-                    .multilineTextAlignment(.center)
-                    .padding()
-                Spacer()
-            } else if transactions.isEmpty {
-                Spacer()
-                Text("No transactions yet.")
-                    .foregroundColor(AppColors.secondaryText)
-                    .font(.subheadline)
-                Spacer()
-            } else {
-                transactionList
+                if isLoading {
+                    ProgressView().tint(AppColors.ink)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 40)
+                } else if !errorText.isEmpty {
+                    Text(errorText)
+                        .foregroundColor(AppColors.secondaryText)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                        .padding(.top, 20)
+                } else if transactions.isEmpty {
+                    ContentUnavailableView(
+                        "No Transactions Yet",
+                        systemImage: "list.bullet.rectangle",
+                        description: Text("Your transactions for this token will show here.")
+                    )
+                    .foregroundStyle(AppColors.ink)
+                } else {
+                    transactionList
+                }
             }
         }
+        .refreshable { await loadTransactions() }
         .background(AppColors.canvas.ignoresSafeArea())
         .navigationTitle(token.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -105,27 +108,23 @@ struct TransactionListView: View {
     }
     
     private var transactionList: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: TransactionLayout.listSpacing) {
-                ForEach(groupedTransactions, id: \.0) { dateStr, txs in
-                    Text(dateStr)
-                        .font(.subheadline)
-                        .foregroundColor(AppColors.secondaryText)
+        VStack(alignment: .leading, spacing: TransactionLayout.listSpacing) {
+            ForEach(groupedTransactions, id: \.0) { dateStr, txs in
+                Text(dateStr)
+                    .font(.subheadline)
+                    .foregroundColor(AppColors.secondaryText)
+                    .padding(.horizontal, SharedLayout.horizontalPadding)
+                    .padding(.vertical, TransactionLayout.dateVerticalPadding)
+                ForEach(txs, id: \.signature) { tx in
+                    TransactionRow(transaction: tx)
+                    Divider()
+                        .background(AppColors.secondaryText.opacity(SharedLayout.dividerOpacity))
                         .padding(.horizontal, SharedLayout.horizontalPadding)
-                        .padding(.vertical, TransactionLayout.dateVerticalPadding)
-                    ForEach(txs, id: \.signature) { tx in
-                        TransactionRow(transaction: tx)
-                        Divider()
-                            .background(AppColors.secondaryText.opacity(SharedLayout.dividerOpacity))
-                            .padding(.horizontal, SharedLayout.horizontalPadding)
-                    }
                 }
             }
-            .padding(.top, TransactionLayout.listTopPadding)
-            .padding(.bottom, TransactionLayout.listBottomPadding)
         }
-        .refreshable { await loadTransactions() }
-        .background(AppColors.canvas)
+        .padding(.top, TransactionLayout.listTopPadding)
+        .padding(.bottom, TransactionLayout.listBottomPadding)
     }
     
     private var groupedTransactions: [(String, [TransactionHistoryResponse])] {
@@ -149,9 +148,12 @@ struct TransactionListView: View {
             errorText = "No mint address for this token."
             return
         }
-        isLoading = true
+        if transactions.isEmpty { isLoading = true }
+        errorText = ""
         defer { isLoading = false }
         do {
+            // Artificial delay so users can feel the refresh even on fast/cached responses.
+            try? await Task.sleep(for: AppBehavior.artificialRefreshDuration)
             async let txFetch = APIClient.shared.getTransactions(mintAddress: token.mintAddress)
             async let walletFetch = APIClient.shared.listWalletTokens()
             let (txs, walletTokens) = try await (txFetch, walletFetch)
@@ -161,6 +163,8 @@ struct TransactionListView: View {
                 tokenAmount = "\(String(format: "%g", match.balance)) \(match.symbol)"
                 liveBalance = DashboardView.currencyFormatter.string(from: NSNumber(value: audValue)) ?? token.balance
             }
+        } catch is CancellationError {
+        } catch let e as URLError where e.code == .cancelled {
         } catch {
             errorText = error.localizedDescription
         }
