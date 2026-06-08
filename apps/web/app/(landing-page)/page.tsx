@@ -2,13 +2,11 @@ import Feature from "../common/sections/Feature";
 import Festival from "../common/sections/Festival";
 import Footer from "../common/sections/Footer";
 import Hero from "./sections/Hero";
-import {
-  ImageScreen,
-  LaunchScreen,
-  NameSymbolScreen,
-} from "./screens/TokenScreens";
+import ImageScreen from "./components/ImageScreen";
+import LaunchScreen from "./components/LaunchScreen";
+import NameSymbolScreen from "./components/NameSymbolScreen";
 
-function Home() {
+export default function Home() {
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <main>
@@ -40,5 +38,3 @@ function Home() {
     </div>
   );
 }
-
-export default Home;
