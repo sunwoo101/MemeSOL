@@ -19,7 +19,7 @@ function Footer() {
 
         {/* Bottom bar: copyright and legal links */}
         <div className="mt-12 pt-8 border-t border-ink/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-ink/50">
-          <p>© {new Date().getFullYear()} MemeSOL, All Rights Reserved.</p>
+          <p>© {new Date().getFullYear()} MemeSOL Team</p>
         </div>
       </div>
     </footer>

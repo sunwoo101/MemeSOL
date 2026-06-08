@@ -14,12 +14,12 @@ function Hero() {
         <div>
           {/* Headline */}
           <h1 className="text-6xl sm:text-7xl lg:text-[5.5rem] font-bold tracking-tight leading-[0.95]">
-            Launch a<br />
+            Launch your<br />
             <span className="bg-gradient-to-r from-accent via-info to-accent bg-clip-text text-transparent">
               meme coin
             </span>
             <br />
-            in one tap.
+            in <span className="bg-gradient-to-r from-success via-info to-success bg-clip-text text-transparent">seconds.</span>
           </h1>
 
           <p className="mt-8 text-base text-ink/55 max-w-sm leading-relaxed">
