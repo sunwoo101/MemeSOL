@@ -1,4 +1,4 @@
-import Button from "../../common/components/Button";
+import ScrollButton from "../../common/components/ScrollButton";
 
 function Hero() {
   return (
@@ -14,24 +14,28 @@ function Hero() {
         <div>
           {/* Headline */}
           <h1 className="text-6xl sm:text-7xl lg:text-[5.5rem] font-bold tracking-tight leading-[0.95]">
-            Launch your<br />
+            Launch your
+            <br />
             <span className="bg-gradient-to-r from-accent via-info to-accent bg-clip-text text-transparent">
               meme coin
             </span>
             <br />
-            in <span className="bg-gradient-to-r from-success via-info to-success bg-clip-text text-transparent">seconds.</span>
+            in{" "}
+            <span className="bg-gradient-to-r from-success via-info to-success bg-clip-text text-transparent">
+              seconds.
+            </span>
           </h1>
 
           <p className="mt-8 text-base text-ink/55 max-w-sm leading-relaxed">
-            MemeSOL lets you create, launch, and trade meme coins
-            straight from your iPhone. No coding required.
+            MemeSOL lets you create, launch, and trade meme coins straight from
+            your iPhone. No coding required.
           </p>
 
           {/* CTAs */}
           <div className="mt-10">
-            <a href="#steps">
-              <Button size="lg">How it works</Button>
-            </a>
+            <ScrollButton targetId="how-to-launch" size="lg">
+              How to launch
+            </ScrollButton>
           </div>
         </div>
 
@@ -51,15 +55,27 @@ function Hero() {
             {/* Screen content */}
             <div className="flex flex-col items-center justify-center px-5 h-full">
               {/* Logo circle */}
-              <img src="/logo-circle.svg" alt="MemeSOL" className="h-16 w-16 rounded-full" />
-              <p className="mt-2 text-sm font-semibold text-ink tracking-tight">MemeSOL</p>
+              <img
+                src="/logo-circle.svg"
+                alt="MemeSOL"
+                className="h-16 w-16 rounded-full"
+              />
+              <p className="mt-2 text-sm font-semibold text-ink tracking-tight">
+                MemeSOL
+              </p>
 
               {/* Balance card */}
               <div className="mt-6 w-full rounded-2xl bg-ink/[0.07] border border-ink/10 px-4 py-4 flex flex-col items-center">
-                <p className="text-[10px] text-ink/40 uppercase tracking-widest">Your Balance</p>
+                <p className="text-[10px] text-ink/40 uppercase tracking-widest">
+                  Your Balance
+                </p>
                 <div className="mt-1 flex items-baseline gap-1.5">
-                  <p className="text-2xl font-bold tracking-tight text-ink">1,000,000</p>
-                  <p className="text-2xl font-bold tracking-tight text-ink">MSOL</p>
+                  <p className="text-2xl font-bold tracking-tight text-ink">
+                    1,000,000
+                  </p>
+                  <p className="text-2xl font-bold tracking-tight text-ink">
+                    MSOL
+                  </p>
                 </div>
               </div>
 

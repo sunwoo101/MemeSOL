@@ -24,7 +24,9 @@ function Pad({ value, label }: { value: number; label: string }) {
       <span className="text-4xl sm:text-5xl font-bold tracking-tight tabular-nums">
         {String(value).padStart(2, "0")}
       </span>
-      <span className="text-[10px] text-ink/40 uppercase tracking-widest">{label}</span>
+      <span className="text-[10px] text-ink/40 uppercase tracking-widest">
+        {label}
+      </span>
     </div>
   );
 }
@@ -42,10 +44,10 @@ function Festival() {
   if (isOver) return null;
 
   return (
-    <section id="steps" className="border-t border-ink/5 py-16">
+    <section className="border-t border-ink/5 py-16">
       <div className="max-w-6xl mx-auto px-6 flex flex-col items-center text-center gap-6">
         <p className="text-sm font-semibold text-accent uppercase tracking-wider">
-          UTS Tech Festival
+          See us at the UTS Tech Festival
         </p>
 
         {timeLeft ? (
@@ -57,7 +59,7 @@ function Festival() {
               <Pad value={timeLeft.seconds} label="Seconds" />
             </div>
             <p className="text-ink/50 text-sm">
-              Come see the MemeSOL beta at{" "}
+              Come see the MemeSOL Alpha at{" "}
               <span className="text-ink">Building 11, Level 4</span> — 22 June,{" "}
               <span className="text-ink">4pm to 7:30pm</span>
             </p>
