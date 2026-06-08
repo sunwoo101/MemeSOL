@@ -2,6 +2,7 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Backend.Services;
 
@@ -10,7 +11,8 @@ namespace Backend.Services;
 /// </summary>
 /// <param name="db">Injected database context.</param>
 /// <param name="solanaService">Injected Solana service.</param>
-public class WalletService(AppDbContext db, SolanaService solanaService)
+/// <param name="cache">Injected memory cache.</param>
+public class WalletService(AppDbContext db, SolanaService solanaService, IMemoryCache cache)
 {
     public async Task<List<WalletTokenResponse>> GetWalletTokensAsync(Guid userId, string baseUrl)
     {
@@ -90,12 +92,16 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             mintAddress, request.RecipientAddress,
             rawAmount);
 
+        cache.Remove($"txs:{user.WalletPublicKey}:{mintAddress}");
+
         var recipientUser = await db.Users
             .Where(u => u.WalletPublicKey == request.RecipientAddress)
             .FirstOrDefaultAsync();
 
         if (recipientUser != null)
         {
+            cache.Remove($"txs:{recipientUser.WalletPublicKey}:{mintAddress}");
+
             var tokenId = await db.Tokens
                 .Where(t => t.MintAddress == mintAddress && t.Status == TokenStatus.Completed)
                 .Select(t => t.Id)
@@ -127,7 +133,7 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             .FirstOrDefaultAsync()
             ?? throw new KeyNotFoundException("Token not found.");
 
-        var raw = await solanaService.GetTokenTransactionsAsync(user.WalletPublicKey, mintAddress);
+        var raw = await GetCachedTransactionsAsync(user.WalletPublicKey, mintAddress);
 
         return raw.Select(r => new TransactionHistoryResponse
         {
@@ -154,7 +160,7 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             .ToListAsync();
 
         var txLists = await Task.WhenAll(
-            tokens.Select(t => solanaService.GetTokenTransactionsAsync(user.WalletPublicKey, t.MintAddress!))
+            tokens.Select(t => GetCachedTransactionsAsync(user.WalletPublicKey, t.MintAddress!))
         );
 
         return tokens
@@ -204,6 +210,8 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
         }
 
         var signature = await solanaService.MintTokensAsync(user.WalletPublicKey, mintAddress, (ulong)scaledAmount);
+
+        cache.Remove($"txs:{user.WalletPublicKey}:{mintAddress}");
 
         return new SendTokenResponse { Signature = signature };
     }
@@ -281,6 +289,17 @@ public class WalletService(AppDbContext db, SolanaService solanaService)
             GainLoss = Math.Round(gainLoss, 2),
             GainLossPercent = Math.Round(gainLossPercent, 2),
         };
+    }
+
+    private Task<List<(string Signature, DateTime Timestamp, bool Success, decimal? Amount, string? TransactionType)>> GetCachedTransactionsAsync(
+        string walletPublicKey, string mintAddress)
+    {
+        var key = $"txs:{walletPublicKey}:{mintAddress}";
+        return cache.GetOrCreateAsync(key, entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+            return solanaService.GetTokenTransactionsAsync(walletPublicKey, mintAddress);
+        })!;
     }
 
     private static (decimal Price, decimal PriceOpenDay, DateTime PriceUpdatedAt, bool Changed) ComputeNewPrice(
