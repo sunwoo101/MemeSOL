@@ -86,9 +86,11 @@ struct AllTransactionsView: View {
     @MainActor
     private func loadTransactions() async {
         isLoading = true
+        errorText = ""
         defer { isLoading = false }
         do {
             transactions = try await APIClient.shared.getAllTransactions()
+        } catch is CancellationError {
         } catch {
             errorText = error.localizedDescription
         }

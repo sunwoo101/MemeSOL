@@ -47,6 +47,7 @@ struct CachedAsyncImage<Content: View>: View {
             } else {
                 phase = .failure(URLError(.cannotDecodeContentData))
             }
+        } catch is CancellationError {
         } catch {
             phase = .failure(error)
         }
