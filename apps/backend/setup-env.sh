@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ENV_FILE=".env"
-POSTGRES_USER="postgres"
-POSTGRES_DB="ios_db"
+POSTGRES_USER="memesol_user"
+POSTGRES_DB="memesol_db"
 JWT_ISSUER="backend"
 JWT_AUDIENCE="ios-app"
 APPLE_BUNDLE_ID="ios.Assignment3"
