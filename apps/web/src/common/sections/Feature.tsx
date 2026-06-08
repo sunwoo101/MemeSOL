@@ -27,11 +27,19 @@ function IPhoneMockup({ children }: { children?: ReactNode }) {
   );
 }
 
-function Feature({ title, description, step, reverse = false, screen }: FeatureProps) {
+function Feature({
+  title,
+  description,
+  step,
+  reverse = false,
+  screen,
+}: FeatureProps) {
   return (
     <section className="relative py-24 border-t border-ink/5">
       <div className="max-w-6xl mx-auto px-6">
-        <div className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-16`}>
+        <div
+          className={`flex flex-col ${reverse ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-16`}
+        >
           {/* Text */}
           <div className="flex-1 max-w-lg">
             {step !== undefined && (

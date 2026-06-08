@@ -4,10 +4,20 @@ function ScreenHeader({ title }: { title: string }) {
   );
 }
 
-function ScreenInput({ label, placeholder, short }: { label: string; placeholder: string; short?: boolean }) {
+function ScreenInput({
+  label,
+  placeholder,
+  short,
+}: {
+  label: string;
+  placeholder: string;
+  short?: boolean;
+}) {
   return (
     <div className={short ? "w-1/2" : "w-full"}>
-      <p className="text-[9px] text-ink/40 uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-[9px] text-ink/40 uppercase tracking-wider mb-1">
+        {label}
+      </p>
       <div className="rounded-xl bg-ink/[0.06] border border-ink/[0.08] px-3 py-2 text-xs text-ink/30">
         {placeholder}
       </div>
@@ -17,7 +27,9 @@ function ScreenInput({ label, placeholder, short }: { label: string; placeholder
 
 function ScreenButton({ label, muted }: { label: string; muted?: boolean }) {
   return (
-    <div className={`w-full rounded-xl py-2.5 flex items-center justify-center text-xs font-semibold ${muted ? "bg-ink/[0.06] text-ink/50" : "bg-accent text-ink"}`}>
+    <div
+      className={`w-full rounded-xl py-2.5 flex items-center justify-center text-xs font-semibold ${muted ? "bg-ink/[0.06] text-ink/50" : "bg-accent text-ink"}`}
+    >
       {label}
     </div>
   );
@@ -45,8 +57,18 @@ export function ImageScreen() {
         {/* Upload area */}
         <div className="w-full aspect-square rounded-2xl border border-dashed border-ink/20 flex flex-col items-center justify-center gap-2">
           <div className="h-8 w-8 rounded-full bg-ink/[0.06] flex items-center justify-center">
-            <svg className="h-4 w-4 text-ink/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            <svg
+              className="h-4 w-4 text-ink/30"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+              />
             </svg>
           </div>
           <p className="text-[9px] text-ink/30">Tap to upload</p>
@@ -55,7 +77,9 @@ export function ImageScreen() {
         {/* I'm feeling lucky toggle */}
         <div className="flex items-center justify-between rounded-xl bg-ink/[0.06] border border-ink/[0.08] px-3 py-2">
           <div>
-            <p className="text-[10px] font-medium text-ink/80">I'm feeling lucky</p>
+            <p className="text-[10px] font-medium text-ink/80">
+              I'm feeling lucky
+            </p>
             <p className="text-[8px] text-ink/35">AI generate an image</p>
           </div>
           {/* Toggle (on state) */}
@@ -79,7 +103,8 @@ export function SupplyScreen() {
       <div className="flex flex-col gap-3 flex-1">
         <ScreenInput label="Total Supply" placeholder="e.g. 1,000,000,000" />
         <p className="text-[8px] text-ink/25 leading-relaxed">
-          The total number of tokens that will ever exist. This cannot be changed after launch.
+          The total number of tokens that will ever exist. This cannot be
+          changed after launch.
         </p>
       </div>
       <ScreenButton label="Next" />

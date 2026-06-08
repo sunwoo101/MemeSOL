@@ -1,16 +1,20 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'MemeSOL - Launch meme coins in one tap',
-  description: 'Launch your meme coin in seconds.',
-  icons: { icon: '/favicon.svg' },
-}
+  title: "MemeSOL - Launch meme coins in one tap",
+  description: "Launch your meme coin in seconds.",
+  icons: { icon: "/favicon.svg" },
+};
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>{children}</body>
     </html>
-  )
+  );
 }

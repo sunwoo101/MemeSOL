@@ -14,7 +14,6 @@ function Footer() {
               Launch your meme coin in seconds.
             </p>
           </div>
-
         </div>
 
         {/* Bottom bar: copyright and legal links */}

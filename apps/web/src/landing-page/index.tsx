@@ -2,15 +2,18 @@ import Feature from "../common/sections/Feature";
 import Festival from "../common/sections/Festival";
 import Footer from "../common/sections/Footer";
 import Hero from "./sections/Hero";
-import { ImageScreen, LaunchScreen, NameSymbolScreen } from "./screens/TokenScreens";
+import {
+  ImageScreen,
+  LaunchScreen,
+  NameSymbolScreen,
+} from "./screens/TokenScreens";
 
 function Home() {
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <main>
         <Hero />
-        <Festival />
-        <div>
+        <div id="how-to-launch">
           <Feature
             step={1}
             title="Pick a name and symbol."
@@ -32,6 +35,7 @@ function Home() {
           />
         </div>
       </main>
+      <Festival />
       <Footer />
     </div>
   );
