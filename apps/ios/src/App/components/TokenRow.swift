@@ -18,7 +18,7 @@ struct TokenRow: View {
     
     var body: some View {
         HStack(spacing: TokenLayout.rowIconSpacing) {
-            AsyncImage(url: URL(string: iconUrl)) { phase in
+            CachedAsyncImage(url: URL(string: iconUrl)) { phase in
                 switch phase {
                 case .success(let image):
                     image
