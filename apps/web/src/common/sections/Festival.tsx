@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 
 // 22 June 2026 4:00pm AEST (UTC+10)
