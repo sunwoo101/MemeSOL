@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MemeSOL - Launch meme coins in one tap",
+  title: "MemeSOL - Launch meme coins in seconds",
   description: "Launch your meme coin in seconds.",
   icons: { icon: "/favicon.svg" },
 };
