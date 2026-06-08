@@ -174,7 +174,7 @@ private struct TransactionRow: View {
     
     var body: some View {
         HStack(spacing: TransactionLayout.rowSpacing) {
-            AsyncImage(url: URL(string: transaction.imgUrl)) { phase in
+            CachedAsyncImage(url: URL(string: transaction.imgUrl)) { phase in
                 switch phase {
                 case .success(let image):
                     image.resizable().scaledToFill()

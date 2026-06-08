@@ -5,10 +5,12 @@ struct TokenHeaderView: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            AsyncImage(url: URL(string: token.imgUrl)) { image in
-                image.resizable().scaledToFill()
-            } placeholder: {
-                Circle().fill(AppColors.surface)
+            CachedAsyncImage(url: URL(string: token.imgUrl)) { phase in
+                if case .success(let image) = phase {
+                    image.resizable().scaledToFill()
+                } else {
+                    Circle().fill(AppColors.surface)
+                }
             }
             .frame(width: 120, height: 120)
             .clipShape(Circle())

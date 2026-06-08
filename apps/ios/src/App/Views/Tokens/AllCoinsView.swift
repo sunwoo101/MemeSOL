@@ -48,7 +48,7 @@ struct AllCoinsView: View {
                         } label: {
                             
                             HStack(spacing: 12) {
-                                AsyncImage(url: URL(string: coin.imgUrl)) { phase in
+                                CachedAsyncImage(url: URL(string: coin.imgUrl)) { phase in
                                     switch phase {
                                     case .success(let image):
                                         image.resizable().scaledToFill()
