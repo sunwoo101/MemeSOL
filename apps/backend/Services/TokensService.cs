@@ -26,6 +26,12 @@ public class TokensService(AppDbContext db, SolanaService solanaService, IConfig
     {
         using var ms = new MemoryStream();
 
+        if (db.Tokens.Any(t => t.Name == request.Name))
+            throw new InvalidOperationException("A token with this name already exists.");
+
+        if (db.Tokens.Any(t => t.Symbol == request.Symbol))
+            throw new InvalidOperationException("A token with this symbol already exists.");
+
         if (!request.ImFeelingLucky && request.Image is null)
             throw new InvalidOperationException("Image is required unless 'I'm Feeling Lucky' is selected.");
 
