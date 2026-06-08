@@ -78,7 +78,7 @@ function Festival() {
               We're here today.
             </h2>
             <p className="text-ink/60 text-base">
-              Come see the MemeSOL beta at{" "}
+              Come see the MemeSOL Alpha at{" "}
               <span className="text-ink">Building 11, Level 4</span> — today,{" "}
               <span className="text-ink">4pm to 7:30pm</span>.
             </p>
