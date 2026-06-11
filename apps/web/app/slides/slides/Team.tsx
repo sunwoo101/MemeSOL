@@ -54,7 +54,8 @@ const TEAM: {
     name: "Gurpreet Kaur",
     initials: "GK",
     tech: ["Swift"],
-    email: "gurpreet.kaur-3@student.uts.edu.au",
+    email: "g.kaur8@hotmail.com",
+    site: "github.com/02preet"
   },
 ];
 
