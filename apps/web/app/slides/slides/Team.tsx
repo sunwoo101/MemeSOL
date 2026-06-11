@@ -47,7 +47,8 @@ const TEAM: {
     name: "Ineshka De Mel",
     initials: "ID",
     tech: ["Swift"],
-    email: "VidanalageIneshkaRansini.DeMel@student.uts.edu.au",
+    email: "ineshkadml@gmail.com",
+    site: "ineshka-portfolio-ux.webflow.io"
   },
   {
     name: "Gurpreet Kaur",
