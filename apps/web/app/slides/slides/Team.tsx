@@ -40,7 +40,7 @@ const TEAM: {
     name: "Daniel Liu",
     initials: "DL",
     tech: ["Swift", "React"],
-    email: "DL56386994@gmail.com",
+    email: "ziyangliu2.work@gmail.com",
     site: "daniel-liu.dev",
   },
   {
