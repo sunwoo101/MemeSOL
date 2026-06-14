@@ -1,7 +1,9 @@
+"use client";
+
 import { SiDotnet, SiReact, SiSwift } from "@icons-pack/react-simple-icons";
-import { Globe, Mail, QrCode } from "lucide-react";
+import { Globe, Mail } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Slide from "../components/Slide";
 
 const TECH = {
@@ -22,12 +24,56 @@ function TechChip({ name }: { name: TechName }) {
   );
 }
 
+function RoundedQR({ value, color }: { value: string; color: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    let cancelled = false;
+
+    import("qr-code-styling").then(({ default: QRCodeStyling }) => {
+      if (cancelled || !ref.current) return;
+      ref.current.innerHTML = "";
+
+      const qr = new QRCodeStyling({
+        width: 300,
+        height: 300,
+        data: value,
+        type: "svg",
+        dotsOptions: { type: "extra-rounded", color },
+        cornersSquareOptions: { type: "extra-rounded", color },
+        cornersDotOptions: { type: "dot", color },
+        backgroundOptions: { color: "transparent" },
+        margin: 0,
+      });
+      qr.append(ref.current);
+
+      // Make the library's wrapper div and SVG fill the container
+      const wrapper = ref.current.firstElementChild as HTMLElement | null;
+      if (wrapper) {
+        wrapper.style.width = "100%";
+        wrapper.style.height = "100%";
+      }
+      const svg = ref.current.querySelector("svg");
+      if (svg) {
+        svg.style.width = "100%";
+        svg.style.height = "100%";
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [value, color]);
+
+  return <div ref={ref} className="w-full h-full overflow-hidden" />;
+}
+
 const TEAM: {
   name: string;
   initials: string;
   tech: TechName[];
   email: string;
   site?: string;
+  card: string;
 }[] = [
   {
     name: "Sun Woo Kim",
@@ -35,6 +81,7 @@ const TEAM: {
     tech: [".NET", "Swift", "React"],
     email: "sun.kim101@outlook.com",
     site: "sunwookim.dev",
+    card: "https://cards.tiaga.tech/cards/sun",
   },
   {
     name: "Daniel Liu",
@@ -42,20 +89,23 @@ const TEAM: {
     tech: ["Swift", "React"],
     email: "ziyangliu2.work@gmail.com",
     site: "daniel-liu.dev",
+    card: "https://cards.tiaga.tech/cards/daniel-liu",
   },
   {
     name: "Ineshka De Mel",
     initials: "ID",
     tech: ["Swift"],
     email: "ineshkadml@gmail.com",
-    site: "ineshka-portfolio-ux.webflow.io"
+    site: "www.linkedin.com/in/ineshka-de-mel/",
+    card: "https://cards.tiaga.tech/cards/ineshka",
   },
   {
     name: "Gurpreet Kaur",
     initials: "GK",
     tech: ["Swift"],
     email: "g.kaur8@hotmail.com",
-    site: "github.com/02preet"
+    site: "github.com/02preet",
+    card: "https://cards.tiaga.tech/cards/gurpreet-kaur",
   },
 ];
 
@@ -99,14 +149,14 @@ export default function Team() {
             </div>
           ))}
 
-          {/* Row 2: placeholder QR — links to the member's digital business card */}
+          {/* Row 2: QR codes — links to the member's digital business card */}
           {TEAM.map((member) => (
             <div
               key={member.name + "-qr"}
               className="border-x border-info/30 bg-info/10 px-5 min-h-0 flex flex-col items-center gap-2 py-1"
             >
-              <div className="flex-1 min-h-0 aspect-square">
-                <QrCode size="100%" className="text-ink/70" />
+              <div className="flex-1 min-h-0 aspect-square p-2 rounded-2xl">
+                <RoundedQR value={member.card} color="#e8e9e9" />
               </div>
               <span className="inline-flex items-center gap-1 text-[10px] text-ink/40 shrink-0">
                 Powered by
