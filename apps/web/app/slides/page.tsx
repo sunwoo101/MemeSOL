@@ -10,7 +10,7 @@ import WhatIsMemeSOL from "./slides/WhatIsMemeSOL";
 export const dynamic = "force-dynamic";
 
 // 22 June 2026 4:00pm AEST (UTC+10)
-const EVENT_DATE = new Date("2026-06-22T06:00:00Z");
+const EVENT_DATE = new Date("2026-05-22T06:00:00Z");
 
 export default function SlidesPage() {
   if (new Date() < EVENT_DATE) {
