@@ -1,152 +1,101 @@
 # MemeSOL 
 
-A crypto wallet app that lets users manage tokens, send and receive transfers and track transaction history.
+A crypto wallet app that lets anyone launch a meme coin within seconds.
 
-Link: https://github.com/sunwoo101/MemeSOL
+Landing Page: https://memesol.sunwookim.dev
+
+Mirror: https://memesol.daniel-liu.dev
 
 ## Features
-### Authentication
 
-- Email and password registration with strong password validation (minimum 8 characters, at least one uppercase letter, one digit, one special character)
-- Login with persistent session via Keychain
-- Auto login on app relaunch using securely stored credentials
-
-### Dashboard
-
-- Portfolio balance display with gain/loss indicators
-- Percentage change tracking
-- Quick-action buttons for Send, Receive and Buy flows
-- Token list with live data from the backend
-
-### Tokens
-
-- Browse all available tokens (AllCoinsView)
-- View detailed token information including price, percent change and mint address (TokenDetailsView)
-- Create new tokens (CreateTokenView)
-- Purchase tokens via an in-app buy flow (BuyMenuView, BuyTokenView)
-
-### Transactions
-
-- Send tokens to any wallet address (SendView)
-- Receive tokens via auto-generated QR code (ReceiveView)
-- Scan QR codes to auto-fill recipient addresses (powered by CodeScanner)
-- Full transaction history with status indicators (TransactionHistoryView)
-
-### Onboarding
-
-- First-launch onboarding flow introducing the app's core features
+- Simple interface.
+- Launch a meme coin within seconds.
+- AI generate an image for your meme coin.
+- Find and add other meme coins created by MemeSOL users.
+- Send/receive tokens with a QR code.
+- View live portfolio balance and transaction history.
 
 ## Tech Stack
 
-- **SwiftUI** (iOS 17+)
-: UI framework
+- **Swift**
+: iOS app
 
-- **Observation framework** (`@Observable`, `@Bindable`)
-: State management
-
-- **async/await**
-: Networking and concurrency
-
-- **Keychain Services**
-: Secure credential storage
-
-- **CodeScanner 2.5.2**
-: QR code scanning (Swift Package)
+- **Next.js**
+: Web
 
 - **ASP.NET**
-: Backend framework
+: Backend
 
-## Architecture
+- **PostgreSQL**
+: Database
 
-This project follows the **MVVM** (Model–View–ViewModel) pattern.
+- **Docker**
+: Containerization
 
-- **Models** are pure data types, such as `Token`. They have no logic, no dependencies and no SwiftUI imports — just `Codable` structs that map to API responses.
+- **Linux**
+: Deployment Server
 
-- **Views** are SwiftUI views grouped by feature. They contain only UI code: layout, styling and bindings to their view model. Views never make network calls or hold business logic.
+## System Architecture
 
-- **ViewModels** are `@Observable` classes that hold state and business logic. There is one view model per screen. They expose inputs (bound to the UI), outputs (read by the UI) and intent methods (`login()`, `loadTokens()`, etc.) that the view calls.
-
-- **Services** form the network and persistence layer. This includes API clients (`AuthAPI`, `TokenAPI`, `WalletAPI`), the session manager (`AuthSession`) and Keychain helpers. View models depend on services, never the other way around.
-
-- **DesignSystem** holds shared layout constants, colors and typography. Anything visual that could be reused across screens lives here.
-
-- The dependency flow is one-directional: `View → ViewModel → Service → Model`. Views never reach past their view model. This keeps every screen previewable, swappable and testable in isolation.
-
-## Folder Structure 
-```
-App/
-├── Main.swift              App entry point
-│
-├── Components/             Reusable UI building blocks
-│   ├── ActionButton
-│   ├── AllTransactionsView
-│   └── TokenRow
-│
-├── DesignSystem/           Colors, typography, layout constants
-│   ├── AppColors
-│   ├── TypographyLayout
-│   ├── BalanceLayout
-│   ├── GainLossLayout
-│   ├── OnboardingLayout
-│   ├── SharedLayout
-│   ├── TabBarLayout
-│   ├── TokenLayout
-│   ├── TransactionLayout
-│   └── ActionButtonLayout
-│
-├── Models/                 Data types
-│   └── Token
-│
-├── Resources/              Assets and app icon
-│
-├── Services/
-│   ├── API/                Network clients
-│   │   ├── APIClient
-│   │   ├── AuthAPI
-│   │   ├── TokenAPI
-│   │   └── WalletAPI
-│   └── Auth/               Session and credential management
-│       ├── AuthSession
-│       └── KeychainHelper
-│
-├── ViewModels/             Grouped by feature
-│   ├── Authentication/     (LoginViewModel, RegisterViewModel)
-│   ├── Dashboard/          (DashboardViewModel)
-│   ├── Tokens/             (BuyViewModel, CreateTokenViewModel, TokenDetailsViewModel)
-│   └── Transactions/       (SendViewModel, ReceiveViewModel)
-│
-├── Views/                  Grouped by feature
-│   ├── Authentication/     (LoginView, RegisterView)
-│   ├── Dashboard/          (ContentView, DashboardView)
-│   ├── Onboarding/         (OnboardingView)
-│   ├── Tokens/             (AllCoinsView, BuyMenuView, BuyTokenView,
-│   │                        CreateTokenView, TokenDetailsView)
-│   └── Transactions/       (SendView, ReceiveView, TransactionHistoryView)
-│
-└── TestViews/              Dev-only testing screens
+```mermaid
+flowchart LR
+    iOS["Swift iOS App"] -- "HTTP/REST" --> Backend["ASP.NET Backend"]
+    Backend --> DB[("PostgreSQL Database")]
 ```
 
-## Getting Started
+### iOS App Architecture
+
+This iOS Swift source follows the **MVVM** (Model–View–ViewModel) pattern for the iOS app.
+
+```mermaid
+flowchart LR
+    View["View\n(SwiftUI)"] --> ViewModel["ViewModel\n(@Observable)"]
+    ViewModel --> Services["Services\n(API, Session)"]
+    Services -.-> Models["Models\n(Codable)"]
+```
+
+### ASP.NET Backend Architecture
+
+The ASP.NET backend is structured in a layered architecture with the following components:
+
+```mermaid
+flowchart LR
+    Controllers["Controllers\n(API Endpoints)"] --> Services["Services\n(Business Logic)"]
+    Services --> Data["Data\n(Entity Framework)"]
+    Data --> DB[("PostgreSQL Database")]
+    
+    Models["Models\n(Entities & DTOs)"]
+    
+    Controllers -.-> Models
+    Services -.-> Models
+    Data -.-> Models
+```
+
+## Running Locally
 Requirements
 
 - macOS with Xcode 16 or later iOS 17+ deployment target Swift 5.9+
+- ASP.NET 10+
 
-Setup
-
-1. Clone the repository:
+Backend
 ```bash
-git clone https://github.com/sunwoo101/MemeSOL.git
-cd MemeSOL/apps/ios
+cd MemeSOL/apps/backend
+./setup-env.sh # Enter a valid Solana mnemonic
+./start-db.sh
+dotnet ef database update
+dotnet run
 ```
-Then in Xcode:
 
-2. Open `App.xcodeproj`.
-3. Wait for Swift Package Manager to resolve dependencies (CodeScanner).
-4. Select an iOS 17+ simulator. Tested on iPhone 17 Pro; iPhone 15 and later should also work.
-5. Press **⌘R** to build and run.
+iOS App
+```
+Replace baseURL in MemeSOL/apps/ios/src/App/Services/API/APIClient.swift with your backend URL (e.g., http://localhost:5000)
+Open MemeSOL/apps/ios/src/App.xcodeproj in Xcode and run on a simulator or device.
+```
 
-## Backend 
+## Future Improvements
+These features could not be implemented within the timeframe of the assignment due to the need of a valid Apple Developer account.
 
-- Developed using ASP.NET
-- Deployed on a VPS
-- Docs: https://ios-assignment.sunwookim.dev/scalar
+- Authentication with Apple Sign-In
+- Buying tokens using Apple Pay
+- Push notifications for transactions and price alerts
+- Pricing data based on supply and demand (currently simulating by changing the price by +-5% every midnight)
