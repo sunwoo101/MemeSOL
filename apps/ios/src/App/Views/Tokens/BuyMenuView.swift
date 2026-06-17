@@ -35,7 +35,7 @@ struct BuyMenuView: View {
                             TokenRow(name: token.name,
                                      symbol: token.symbol,
                                      price: "",
-                                     balance: String(format: "$%.2f", token.price),
+                                     balance: String(format: "$%.9f", token.price),
                                      change: String(format: "%.2f%%", token.gainsPercent),
                                      positive: token.gainsPercent >= 0,
                                      iconUrl: token.imgUrl,
