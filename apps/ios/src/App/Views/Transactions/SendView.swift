@@ -100,7 +100,7 @@ struct SendView: View {
                                 .font(.headline)
                                 .foregroundColor(AppColors.ink)
                             Spacer()
-                            Text("Balance: \(selectedToken?.balance ?? 0, specifier: "%.2f")")
+                            Text("Balance: \(selectedToken?.balance ?? 0, specifier: "%.9f")")
                                 .font(.subheadline)
                                 .foregroundColor(AppColors.secondaryText)
                         }

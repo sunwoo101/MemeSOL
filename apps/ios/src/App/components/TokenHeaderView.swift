@@ -22,7 +22,7 @@ struct TokenHeaderView: View {
                 Text(token.symbol)
                     .font(.subheadline)
                     .foregroundColor(AppColors.secondaryText)
-                Text("$\(token.price, specifier: "%.2f")")
+                Text("$\(token.price, specifier: "%.9f")")
                     .font(.title3.bold())
                     .foregroundColor(AppColors.accent)
                 Text(token.gainsPercent >= 0

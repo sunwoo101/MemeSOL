@@ -27,7 +27,7 @@ struct BuyTokenView: View {
                         Text("Your Balance")
                             .font(.subheadline)
                             .foregroundColor(AppColors.secondaryText)
-                        Text("\(viewModel.walletToken?.balance ?? 0, specifier: "%.2f") \(token.symbol)")
+                        Text("\(viewModel.walletToken?.balance ?? 0, specifier: "%.9f") \(token.symbol)")
                             .font(.title.bold())
                             .foregroundColor(AppColors.ink)
                     }

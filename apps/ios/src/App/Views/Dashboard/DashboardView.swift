@@ -212,6 +212,8 @@ struct DashboardView: View {
         let f = NumberFormatter()
         f.numberStyle = .currency
         f.currencyCode = "AUD"
+        f.minimumFractionDigits = 9
+        f.maximumFractionDigits = 9
         return f
     }()
 }

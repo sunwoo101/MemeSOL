@@ -70,7 +70,7 @@ struct AllCoinsView: View {
                                     }
                                     Spacer()
                                     VStack(alignment: .trailing, spacing: 2) {
-                                        Text(String(format: "$%.2f", coin.price))
+                                        Text(String(format: "$%.9f", coin.price))
                                             .font(.subheadline.weight(.semibold))
                                             .foregroundStyle(AppColors.ink)
                                         Text(String(format: "%.2f%%", coin.gainsPercent))
