@@ -11,8 +11,8 @@ Mirror: https://memesol.daniel-liu.dev
 - Simple interface.
 - Launch a meme coin within seconds.
 - AI generate an image for your meme coin.
-- Find and add other meme coins created by MemeSOL users.
-- Send/receive tokens with a QR code.
+- Find and add other meme coins created by other MemeSOL users.
+- Send/receive meme coins with a QR code.
 - View live portfolio balance and transaction history.
 
 ## Tech Stack
@@ -80,7 +80,7 @@ Requirements
 Backend
 ```bash
 cd MemeSOL/apps/backend
-./setup-env.sh # Enter a valid Solana mnemonic
+./setup-env.sh # Enter a valid wallet mnemonic
 ./start-db.sh
 dotnet ef database update
 dotnet run
